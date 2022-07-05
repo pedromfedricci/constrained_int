@@ -135,8 +135,8 @@ macro_rules! constrained_int_impl {
             #[must_use = "this returns the result of the operation, without modifying the original"]
             #[inline]
             pub const fn try_add(self, rhs: $SigInt) -> Result<Self, $Err<MIN, MAX>> {
-                match self.0.checked_add(rhs) {
-                    Some(value) => Self::new_unguarded(value),
+                match self.checked_add(rhs) {
+                    Some(this) => Ok(this),
                     None if rhs.is_positive() => Err($Err::greater()),
                     None => Err($Err::lower()),
                 }
@@ -163,8 +163,8 @@ macro_rules! constrained_int_impl {
             #[must_use = "this returns the result of the operation, without modifying the original"]
             #[inline]
             pub const fn try_sub(self, rhs: $SigInt) -> Result<Self, $Err<MIN, MAX>> {
-                match self.0.checked_sub(rhs) {
-                    Some(value) => Self::new_unguarded(value),
+                match self.checked_sub(rhs) {
+                    Some(this) => Ok(this),
                     None if rhs.is_positive() => Err($Err::lower()),
                     None => Err($Err::greater()),
                 }
