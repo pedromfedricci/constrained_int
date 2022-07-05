@@ -17,7 +17,7 @@ and `checked` arithmetics for the range boundaries. See each desired type
 documentation for more information.
 
 The `constrained_int` crate relies on the [const_guards] crate to define compile
-time constrained_int, which itself uses the incomplete [generic_const_exprs]
+time constraints, which itself uses the incomplete [generic_const_exprs]
 feature. Therefore, this crate can only be compile with nightly, and, more
 importantly, must be considered as an **experimental** crate only.
 
