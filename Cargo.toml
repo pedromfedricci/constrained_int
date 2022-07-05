@@ -1,0 +1,32 @@
+[package]
+name = "constrained_int"
+description = "Integers that are constrained within inclusive ranges."
+version = "0.1.0"
+edition = "2021"
+
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+documentation = "https://docs.rs/constrained_int"
+repository = "https://github.com/pedromfedricci/constrained_int"
+homepage = "https://github.com/pedromfedricci/constrained_int"
+authors = ["Pedro de Matos Fedricci <pedromfedricci@gmail.com>"]
+
+categories = ["no-std", "mathematics", "science"]
+keywords = ["no_std", "numerics"]
+
+exclude = [".github"]
+
+[features]
+# This will import the std as a dependency.
+std = ["dep:thiserror"]
+
+[dependencies]
+const_guards = { version = "0.1" }
+thiserror = { version = "1", optional = true }
+
+[dev-dependencies]
+static_assertions = { version = "1.1.0" }
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
