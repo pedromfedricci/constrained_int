@@ -1,0 +1,7 @@
+# Lastest nightly toolchain that compiled the
+# project with no issues. This is not frequently
+# updated, and newer version are very likely to
+# compile it just fine. If you have issues, try
+# this pinned version.
+[toolchain]
+channel = "nightly-2022-07-01"
