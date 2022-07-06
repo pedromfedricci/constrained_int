@@ -128,4 +128,10 @@ jobs:
           args: >
             --all-features
             --ignore-tests
-            --out Json
+            --out Xml
+
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v3
+        with:
+          directory: ./target/tarpaulin/
+          files: ./constrained_int-coverage.xml
