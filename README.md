@@ -4,6 +4,7 @@
 [![Documentation][doc-image]]([doc-link])
 [![Crate][crate-image]]([crate-link])
 [![CI][ci-image]]([ci-link])
+[![codecov][codecov-image]]([codecov-link])
 ![Safety][safety-image]
 ![No std][no_std-image]
 ![Maintenance][experimental-image]
@@ -11,9 +12,9 @@
 `Constrained` types are represented simply as primitive integers, but their
 values will **always** be contained by inclusive range bounds. The range is
 defined at compile time, by assigning values to appropriate const generic
-parameters. `Constrained` types provide fallible APIs for construction and
-value assignment, they also implement `wrapping`, `saturating`, `overflowing`
-and `checked` arithmetics for the range boundaries. See each desired type
+parameters. Constrained types provide fallible APIs for construction and
+value assignment, they also implement wrapping, saturating, overflowing
+and checked arithmetics for the range boundaries. See each desired type
 documentation for more information.
 
 The `constrained_int` crate relies on the [const_guards] crate to define compile
@@ -106,6 +107,7 @@ each of your dependencies, including this one.
 [cargo-crev]: https://github.com/crev-dev/cargo-crev
 [doc-link]: https://docs.rs/constrained_int
 [crate-link]: https://crates.io/crates/constrained_int
+[codecov-link]: https://codecov.io/gh/pedromfedricci/constrained_int
 [ci-link]: https://github.com/pedromfedricci/constrained_int/actions/workflows/ci.yaml
 
 [//]: # (badges)
@@ -115,5 +117,6 @@ each of your dependencies, including this one.
 [ci-image]: https://github.com/pedromfedricci/constrained_int/actions/workflows/ci.yaml/badge.svg
 [doc-image]: https://docs.rs/constrained_int/badge.svg
 [crate-image]: https://img.shields.io/crates/v/constrained_int.svg
+[codecov-image]: https://codecov.io/gh/pedromfedricci/constrained_int/branch/main/graph/badge.svg?token=5ZBKPBGE4P
 [experimental-image]: https://img.shields.io/badge/maintenance-experimental-blue.svg
 [no_std-image]: https://img.shields.io/badge/no__std-compatible-success.svg
