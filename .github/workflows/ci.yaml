@@ -1,0 +1,131 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  format:
+    name: Code format
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install nightly toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          override: true
+          toolchain: stable
+          components: rustfmt
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Run cargo fmt
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check
+
+  linter:
+    name: Code linter
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install nightly toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+          components: clippy
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Check build cache
+        uses: Swatinem/rust-cache@v1
+
+      - name: Run cargo clippy
+        uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-features -- -D warnings
+
+  docs:
+    name: Code documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install nightly toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+          components: rust-docs
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Check build cache
+        uses: Swatinem/rust-cache@v1
+
+      - name: Run cargo doc
+        uses: actions-rs/cargo@v1
+        with:
+          command: doc
+          args: --all-features
+
+  tests:
+    name: Code tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Check build cache
+        uses: Swatinem/rust-cache@v1
+
+      - name: Run cargo test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --all-features
+
+  coverage:
+    name: Code coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+
+      - name: Chechout repository
+        uses: actions/checkout@v2
+
+      - name: Check build cache
+        uses: Swatinem/rust-cache@v1
+
+      - name: Run cargo tarpaulin
+        uses: actions-rs/tarpaulin@v0.1
+        with:
+          args: >
+            --all-features
+            --ignore-tests
+            --out Json
