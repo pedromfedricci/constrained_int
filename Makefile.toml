@@ -1,0 +1,51 @@
+# Run the full ci checks locally.
+# `default` runs: cargo fmt, cargo build and cargo test.
+[tasks.ci]
+dependencies = ["default", "docs", "clippy", "audit"]
+
+# Run all `uX` related tests.
+[tasks.tuint]
+command = "cargo"
+args = ["test", "--all-features", "--lib", "tests_uint", "--", "--nocapture"]
+
+# Run all `iX` related tests.
+[tasks.tint]
+command = "cargo"
+args = ["test", "--all-features", "--lib", "tests_int", "--", "--nocapture"]
+
+# Run all `common impl` tests.
+[tasks.tcom]
+command = "cargo"
+args = ["test", "--all-features", "--lib", "common", "--", "--nocapture"]
+
+# Run all `uX` related doc examples.
+[tasks.tduint]
+command = "cargo"
+args = [
+    "test",
+    "--all-features",
+    "--doc",
+    "--",
+    "u8",
+    "u16",
+    "u32",
+    "u64",
+    "u128",
+    "usize",
+]
+
+# Run all `iX` related doc examples.
+[tasks.tdint]
+command = "cargo"
+args = [
+    "test",
+    "--all-features",
+    "--doc",
+    "--",
+    "i8",
+    "i16",
+    "i32",
+    "i64",
+    "i128",
+    "isize",
+]
