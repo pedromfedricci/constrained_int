@@ -3,7 +3,10 @@ on:
   push:
     paths:
       - "**/Cargo.toml"
-      - "**/Cargo.lock"
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "**/Cargo.toml"
   workflow_dispatch:
 
 jobs:
