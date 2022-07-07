@@ -3,9 +3,9 @@
 //! `Constrained` types are represented simply as primitive integers, but their
 //! values will **always** be contained by inclusive range bounds. The range is
 //! defined at compile time, by assigning values to appropriate const generic
-//! parameters. `Constrained` types provide fallible APIs for construction and
-//! value assignment, they also implement `wrapping`, `saturating`, `overflowing`
-//! and `checked` arithmetics for the range boundaries. See each desired type
+//! parameters. Constrained types provide fallible APIs for construction and
+//! value assignment, they also implement wrapping, saturating, overflowing
+//! and checked arithmetics for the range boundaries. See each desired type
 //! documentation for more information.
 //!
 //! The `constrained_int` crate relies on the [`const_guards`] crate to define

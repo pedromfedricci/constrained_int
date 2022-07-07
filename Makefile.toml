@@ -1,7 +1,7 @@
 # Run the full ci checks locally.
 # `default` runs: cargo fmt, cargo build and cargo test.
 [tasks.ci]
-dependencies = ["default", "docs", "clippy", "audit"]
+dependencies = ["default", "docs", "clippy", "audit", "coverage-tarpaulin"]
 
 # Run all `uX` related tests.
 [tasks.tuint]

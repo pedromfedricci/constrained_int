@@ -191,7 +191,7 @@ macro_rules! constrained_int_impl {
             /// assert_eq!(constrained.get(), Constrained::MAX);
             /// ```
             #[must_use = "this returns the result of the operation, without modifyind the original"]
-            pub const fn wrapping_add(mut self, mut rhs: $SigInt) -> $Ty<MIN, MAX, DEF> {
+            pub const fn wrapping_add(mut self, mut rhs: $SigInt) -> Self {
                 (self, rhs) = match self.0.overflowing_add(rhs) {
                     (value, false) if value >= MIN && value <= MAX => return Self(value),
                     (value, false) if value > MAX => return Self::wrap_around_max(value),
@@ -223,7 +223,7 @@ macro_rules! constrained_int_impl {
             /// assert_eq!(constrained.get(), Constrained::MIN);
             /// ```
             #[must_use = "this returns the result of the operation, without modifyind the original"]
-            pub const fn wrapping_sub(mut self, mut rhs: $SigInt) -> $Ty<MIN, MAX, DEF> {
+            pub const fn wrapping_sub(mut self, mut rhs: $SigInt) -> Self {
                 (self, rhs) = match self.0.overflowing_sub(rhs) {
                     (value, false) if value >= MIN && value <= MAX => return Self(value),
                     (value, false) if value < MIN => return Self::wrap_around_min(value),
@@ -261,7 +261,7 @@ macro_rules! constrained_int_impl {
             /// assert_eq!(wrapped, false);
             /// ```
             #[must_use = "this returns the result of the operation, without modifyind the original"]
-            pub const fn overflowing_add(mut self, mut rhs: $SigInt) -> ($Ty<MIN, MAX, DEF>, bool) {
+            pub const fn overflowing_add(mut self, mut rhs: $SigInt) -> (Self, bool) {
                 match self.0.overflowing_add(rhs) {
                     (value, false) if value >= MIN && value <= MAX => (Self(value), false),
                     (value, false) if value > MAX => (Self::wrap_around_max(value), true),
@@ -300,7 +300,7 @@ macro_rules! constrained_int_impl {
             /// assert_eq!(wrapped, false);
             /// ```
             #[must_use = "this returns the result of the operation, without modifyind the original"]
-            pub const fn overflowing_sub(mut self, mut rhs: $SigInt) -> ($Ty<MIN, MAX, DEF>, bool) {
+            pub const fn overflowing_sub(mut self, mut rhs: $SigInt) -> (Self, bool) {
                 match self.0.overflowing_sub(rhs) {
                     (value, false) if value >= MIN && value <= MAX => (Self(value), false),
                     (value, false) if value < MIN => (Self::wrap_around_min(value), true),
@@ -506,7 +506,8 @@ macro_rules! constrained_int_impl {
             #[inline(always)]
             const fn range_size() -> $UnsInt {
                 // Can't overflow since construction is guarded against `MAX ==
-                // <$SigInt>::MAX` AND `MIN == <$SigInt>::MIN` at the same time.
+                // <$SigInt>::MAX` AND `MIN == <$SigInt>::MIN` at the same time,
+                // and `MIN` can't be greater than `MAX`.
                 debug_assert!(guard_arithmetics::<MIN, MAX>(), "invalid range");
                 <$SigInt>::abs_diff(MIN, MAX) + 1
             }

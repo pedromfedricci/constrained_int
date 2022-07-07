@@ -28,7 +28,6 @@ macro_rules! constrained_def_impl {
             DEF >= MIN && DEF <= MAX
         }
 
-
         // This const function is used to enforce constraints for wrapping arithmetics.
         // Relevant const generics are: `MIN`, `MAX`.
         // The constraints are:
@@ -36,11 +35,12 @@ macro_rules! constrained_def_impl {
         //     - `MIN` must be greater than the type's `MIN`, **OR**
         //       `MAX` must be lower than the type's `MAX`.
         // This ensures that we can always represent the range's size using
-        // a integer with the same length as the contained one.
+        // a integer with the same length as the contained one, and also ensures the
+        // range definition constraints of `guard_range`.
         #[must_use]
         #[inline(always)]
         const fn guard_arithmetics<const MIN: $Int, const MAX: $Int>() -> bool {
-            guard_range::<MIN, MAX>() && MIN > <$Int>::MIN || MAX < <$Int>::MAX
+            ( MIN > <$Int>::MIN || MAX < <$Int>::MAX ) && guard_range::<MIN, MAX>()
         }
 
         // This const function is used to enforce constraints for the containers construction.
@@ -618,22 +618,116 @@ macro_rules! tests_common {
     ($Int:ty, $ty_path:path, $Ty:ident, $Err:ident, $MinErr:ident, $MaxErr:ident) => {
         use $ty_path::*;
 
+        type CnstTest = $Ty<{ <$Int>::MIN + 1 }, { <$Int>::MAX - 1 }>;
+        const GREATER_MAX: $Int = <$Int>::MAX;
+        const LOWER_MIN: $Int = <$Int>::MIN;
+
+        #[test]
+        fn new_bounded() {
+            let mut constrained: CnstTest;
+
+            constrained = CnstTest::new(CnstTest::MIN).expect("in range value");
+            assert_eq!(constrained.get(), CnstTest::MIN);
+
+            constrained = CnstTest::new(CnstTest::MAX).expect("in range value");
+            assert_eq!(constrained.get(), CnstTest::MAX);
+        }
+
+        #[test]
+        fn new_unbounded() {
+            match CnstTest::new(LOWER_MIN) {
+                Ok(_) => panic!("expected value lower than `MIN`"),
+                Err(err) => assert_eq!(err, $Err::lower()),
+            }
+
+            match CnstTest::new(GREATER_MAX) {
+                Ok(_) => panic!("expected value greater than `MAX`"),
+                Err(err) => assert_eq!(err, $Err::greater()),
+            }
+        }
+
+        #[test]
+        fn saturating_new_bounded() {
+            let mut constrained: CnstTest;
+
+            constrained = CnstTest::saturating_new(CnstTest::MIN);
+            assert_eq!(constrained.get(), CnstTest::MIN);
+
+            constrained = CnstTest::saturating_new(CnstTest::MAX);
+            assert_eq!(constrained.get(), CnstTest::MAX);
+        }
+
+        #[test]
+        fn saturating_new_unbounded() {
+            let mut constrained: CnstTest;
+
+            constrained = CnstTest::saturating_new(LOWER_MIN);
+            assert_eq!(constrained.get(), CnstTest::MIN);
+
+            constrained = CnstTest::saturating_new(GREATER_MAX);
+            assert_eq!(constrained.get(), CnstTest::MAX);
+        }
+
+        #[test]
+        fn checked_new_bounded() {
+            let mut constrained: CnstTest;
+
+            constrained = CnstTest::checked_new(CnstTest::MIN).expect("in range value");
+            assert_eq!(constrained.get(), CnstTest::MIN);
+
+            constrained = CnstTest::checked_new(CnstTest::MAX).expect("in range value");
+            assert_eq!(constrained.get(), CnstTest::MAX);
+        }
+
+        #[test]
+        fn checked_new_unbounded() {
+            match CnstTest::checked_new(LOWER_MIN) {
+                Some(_) => panic!("expected value lower than `MIN`"),
+                None => (),
+            }
+
+            match CnstTest::checked_new(GREATER_MAX) {
+                Some(_) => panic!("expected value greater than `MAX`"),
+                None => (),
+            }
+        }
+
+        #[test]
+        fn constrained_set_bounded() {
+            let mut constrained = CnstTest::default();
+
+            constrained.set(CnstTest::MIN).expect("in range value");
+            assert_eq!(constrained.get(), CnstTest::MIN);
+
+            constrained.set(CnstTest::MAX).expect("in range value");
+            assert_eq!(constrained.get(), CnstTest::MAX);
+        }
+
+        #[test]
+        fn constrained_set_unbounded() {
+            let mut constrained = CnstTest::default();
+
+            match constrained.set(LOWER_MIN) {
+                Ok(_) => panic!("expected value lower than `MIN`"),
+                Err(err) => assert_eq!(err, $Err::lower()),
+            }
+
+            match constrained.set(GREATER_MAX) {
+                Ok(_) => panic!("expected value greater than `MAX`"),
+                Err(err) => assert_eq!(err, $Err::greater()),
+            }
+        }
+
         #[test]
         fn constrained_default() {
-            type Constrained = $Ty<{ <$Int>::MIN }, { <$Int>::MAX - 1 }, { 0 }>;
-            assert_eq!(Constrained::default().get(), 0);
+            assert_eq!($Ty::<1, 3, 2>::default().get(), 2);
+            assert_eq!(CnstTest::default().get(), CnstTest::MIN);
         }
 
         #[test]
-        fn constrained_new_min() {
-            type Constrained = $Ty<{ <$Int>::MIN }, { <$Int>::MAX - 1 }, { 0 }>;
-            assert_eq!(Constrained::new_min().get(), <$Int>::MIN);
-        }
-
-        #[test]
-        fn constrained_new_max() {
-            type Constrained = $Ty<{ <$Int>::MIN }, { <$Int>::MAX - 1 }, { 0 }>;
-            assert_eq!(Constrained::new_max().get(), <$Int>::MAX - 1);
+        fn constrained_new_min_and_max() {
+            assert_eq!(CnstTest::new_min().get(), CnstTest::MIN);
+            assert_eq!(CnstTest::new_max().get(), CnstTest::MAX);
         }
 
         #[test]
@@ -642,6 +736,44 @@ macro_rules! tests_common {
             assert_eq!(Constrained::MIN, <$Int>::MIN);
             assert_eq!(Constrained::MAX, <$Int>::MAX - 1);
             assert_eq!(Constrained::DEF, 0);
+        }
+
+        #[test]
+        fn constrained_range_bounds() {
+            use ::core::ops::{Bound, RangeBounds};
+            let constrained = CnstTest::default();
+
+            let start_bound = constrained.start_bound();
+            assert_eq!(start_bound, Bound::Included(&CnstTest::MIN));
+
+            let end_bound = constrained.end_bound();
+            assert_eq!(end_bound, Bound::Included(&CnstTest::MAX));
+        }
+
+        #[test]
+        fn constrained_try_from_bounded() {
+            match CnstTest::try_from(CnstTest::MIN) {
+                Ok(this) => assert_eq!(this.get(), CnstTest::MIN),
+                Err(_) => panic!("expected in range value"),
+            }
+
+            match CnstTest::try_from(CnstTest::MAX) {
+                Ok(this) => assert_eq!(this.get(), CnstTest::MAX),
+                Err(_) => panic!("expected in range value"),
+            }
+        }
+
+        #[test]
+        fn constrained_try_from_unbounded() {
+            match CnstTest::try_from(LOWER_MIN) {
+                Ok(_) => panic!("expected value lower than `MIN`"),
+                Err(err) => assert_eq!(err, $Err::lower()),
+            }
+
+            match CnstTest::try_from(GREATER_MAX) {
+                Ok(_) => panic!("expected value greater than `MAX`"),
+                Err(err) => assert_eq!(err, $Err::greater()),
+            }
         }
 
         #[test]

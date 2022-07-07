@@ -160,7 +160,7 @@ macro_rules! constrained_uint_impl {
             /// assert_eq!(constrained.get(), Constrained::MIN);
             /// ```
             #[must_use = "this returns the result of the operation, without modifyind the original"]
-            pub const fn wrapping_add(mut self, mut rhs: $UnsInt) -> $Ty<MIN, MAX, DEF> {
+            pub const fn wrapping_add(mut self, mut rhs: $UnsInt) -> Self {
                 (self, rhs) = match self.0.overflowing_add(rhs) {
                     (value, false) if value <= MAX => return Self(value),
                     (value, false) => return Self::wrap_around_max(value),
@@ -186,7 +186,7 @@ macro_rules! constrained_uint_impl {
             /// assert_eq!(constrained.get(), Constrained::MAX);
             /// ```
             #[must_use = "this returns the result of the operation, without modifyind the original"]
-            pub const fn wrapping_sub(mut self, mut rhs: $UnsInt) -> $Ty<MIN, MAX, DEF> {
+            pub const fn wrapping_sub(mut self, mut rhs: $UnsInt) -> Self {
                 (self, rhs) = match self.0.overflowing_sub(rhs) {
                     (value, false) if value >= MIN => return Self(value),
                     (value, false) => return Self::wrap_around_min(value),
@@ -218,7 +218,7 @@ macro_rules! constrained_uint_impl {
             /// assert_eq!(wrapped, true);
             /// ```
             #[must_use = "this returns the result of the operation, without modifyind the original"]
-            pub const fn overflowing_add(mut self, mut rhs: $UnsInt) -> ($Ty<MIN, MAX, DEF>, bool) {
+            pub const fn overflowing_add(mut self, mut rhs: $UnsInt) -> (Self, bool) {
                 match self.0.overflowing_add(rhs) {
                     (value, false) if value <= MAX => (Self(value), false),
                     (value, false) => (Self::wrap_around_max(value), true),
@@ -252,7 +252,7 @@ macro_rules! constrained_uint_impl {
             /// assert_eq!(wrapped, true);
             /// ```
             #[must_use = "this returns the result of the operation, without modifyind the original"]
-            pub const fn overflowing_sub(mut self, mut rhs: $UnsInt) -> ($Ty<MIN, MAX, DEF>, bool) {
+            pub const fn overflowing_sub(mut self, mut rhs: $UnsInt) -> (Self, bool) {
                 match self.0.overflowing_sub(rhs) {
                     (value, false) if value >= MIN => (Self(value), false),
                     (value, false) => (Self::wrap_around_min(value), true),
