@@ -70,6 +70,10 @@ fn main() -> Result<(), ConstrainedError> {
 }
 ```
 
+## Documentation
+
+This project documentation is hosted at [docs.rs][doc-link].
+
 ## Feature flags
 
 This crate does not link against the standard library by default, so it is
