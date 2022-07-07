@@ -1,10 +1,10 @@
 # Integers that are constrained within inclusive ranges
 
 [![License][license-image]](./LICENSE-APACHE)
-[![Documentation][doc-image]]([doc-link])
-[![Crate][crate-image]]([crate-link])
-[![CI][ci-image]]([ci-link])
-[![codecov][codecov-image]]([codecov-link])
+[![Documentation][doc-image]][doc-link]
+[![Crate][crate-image]][crate-link]
+[![CI][ci-image]][ci-link]
+[![codecov][codecov-image]][codecov-link]
 ![Safety][safety-image]
 ![No std][no_std-image]
 ![Maintenance][experimental-image]
@@ -24,7 +24,7 @@ importantly, must be considered as an **experimental** crate only.
 
 This crate is `no_std` by default. See features section for more information.
 
-## Import
+## Install
 
 ```toml
 // Cargo.toml
