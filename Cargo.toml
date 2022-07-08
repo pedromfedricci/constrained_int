@@ -27,6 +27,9 @@ thiserror = { version = "1", optional = true }
 [dev-dependencies]
 static_assertions = { version = "1.1.0" }
 
+[patch.crates-io]
+const_guards = { git = "https://github.com/pedromfedricci/const_guards", tag = "v0.1.2-no_std" }
+
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]

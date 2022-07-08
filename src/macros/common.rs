@@ -613,6 +613,7 @@ macro_rules! constrained_fmt_impl {
     )+};
 }
 
+// Implements tests that are common to both signed and unsigned.
 #[cfg(test)]
 macro_rules! tests_common {
     ($Int:ty, $ty_path:path, $Ty:ident, $Err:ident, $MinErr:ident, $MaxErr:ident) => {

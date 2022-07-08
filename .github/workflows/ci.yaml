@@ -133,3 +133,28 @@ jobs:
 
       - name: Upload coverage report
         uses: codecov/codecov-action@v3
+
+  no_std:
+    name: Support for no_std
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+          target: thumbv7m-none-eabi
+          override: true
+
+      - name: Chechout repository
+        uses: actions/checkout@v2
+
+      - name: Check build cache
+        uses: Swatinem/rust-cache@v1
+
+      - name: Run cargo build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --target thumbv7m-none-eabi
