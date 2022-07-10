@@ -640,7 +640,7 @@ macro_rules! constrained_def_impl {
 macro_rules! constrained_fmt_impl {
     ($($Trait:ident),+ for $Ty:ident($Int:ty)) => {$(
         impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> ::core::fmt::$Trait for $Ty<MIN, MAX, DEF> {
-            #[inline]
+            #[inline(always)]
             fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
                 self.get().fmt(f)
             }
@@ -671,15 +671,11 @@ macro_rules! tests_common {
 
         #[test]
         fn new_unbounded() {
-            match CnstTest::new(LOWER_MIN) {
-                Ok(_) => panic!("expected value lower than `MIN`"),
-                Err(err) => assert_eq!(err, $Err::lower()),
-            }
+            let err = CnstTest::new(LOWER_MIN).expect_err("expected value lower than `MIN`");
+            assert_eq!(err, $Err::lower());
 
-            match CnstTest::new(GREATER_MAX) {
-                Ok(_) => panic!("expected value greater than `MAX`"),
-                Err(err) => assert_eq!(err, $Err::greater()),
-            }
+            let err = CnstTest::new(GREATER_MAX).expect_err("expected value greater than `MAX`");
+            assert_eq!(err, $Err::greater());
         }
 
         #[test]
@@ -717,15 +713,9 @@ macro_rules! tests_common {
 
         #[test]
         fn checked_new_unbounded() {
-            match CnstTest::checked_new(LOWER_MIN) {
-                Some(_) => panic!("expected value lower than `MIN`"),
-                None => (),
-            }
+            assert_eq!(CnstTest::checked_new(LOWER_MIN), None);
 
-            match CnstTest::checked_new(GREATER_MAX) {
-                Some(_) => panic!("expected value greater than `MAX`"),
-                None => (),
-            }
+            assert_eq!(CnstTest::checked_new(GREATER_MAX), None);
         }
 
         #[test]
@@ -743,15 +733,11 @@ macro_rules! tests_common {
         fn constrained_set_unbounded() {
             let mut constrained = CnstTest::default();
 
-            match constrained.set(LOWER_MIN) {
-                Ok(_) => panic!("expected value lower than `MIN`"),
-                Err(err) => assert_eq!(err, $Err::lower()),
-            }
+            let err = constrained.set(LOWER_MIN).expect_err("expected value lower than `MIN`");
+            assert_eq!(err, $Err::lower());
 
-            match constrained.set(GREATER_MAX) {
-                Ok(_) => panic!("expected value greater than `MAX`"),
-                Err(err) => assert_eq!(err, $Err::greater()),
-            }
+            let err = constrained.set(GREATER_MAX).expect_err("expected value greater than `MAX`");
+            assert_eq!(err, $Err::greater())
         }
 
         #[test]
@@ -788,28 +774,38 @@ macro_rules! tests_common {
 
         #[test]
         fn constrained_try_from_bounded() {
-            match CnstTest::try_from(CnstTest::MIN) {
-                Ok(this) => assert_eq!(this.get(), CnstTest::MIN),
-                Err(_) => panic!("expected in range value"),
-            }
+            let cnst = CnstTest::try_from(CnstTest::MIN).expect("expected in range value");
+            assert_eq!(cnst.get(), CnstTest::MIN);
 
-            match CnstTest::try_from(CnstTest::MAX) {
-                Ok(this) => assert_eq!(this.get(), CnstTest::MAX),
-                Err(_) => panic!("expected in range value"),
-            }
+            let cnst = CnstTest::try_from(CnstTest::MAX).expect("expected in range value");
+            assert_eq!(cnst.get(), CnstTest::MAX);
         }
 
         #[test]
         fn constrained_try_from_unbounded() {
-            match CnstTest::try_from(LOWER_MIN) {
-                Ok(_) => panic!("expected value lower than `MIN`"),
-                Err(err) => assert_eq!(err, $Err::lower()),
-            }
+            let err = CnstTest::try_from(LOWER_MIN).expect_err("expected value lower than `MIN`");
+            assert_eq!(err, $Err::lower());
 
-            match CnstTest::try_from(GREATER_MAX) {
-                Ok(_) => panic!("expected value greater than `MAX`"),
-                Err(err) => assert_eq!(err, $Err::greater()),
-            }
+            let err =
+                CnstTest::try_from(GREATER_MAX).expect_err("expected value greater than `MAX`");
+            assert_eq!(err, $Err::greater());
+        }
+
+        #[test]
+        fn constrained_fmt_impl() {
+            let cnst = CnstTest::default();
+            // Debug
+            assert_eq!(format!("{:?}", cnst), format!("{:?}", cnst.0));
+            // Display
+            assert_eq!(format!("{}", cnst), format!("{}", cnst.0));
+            // Binary
+            assert_eq!(format!("{:b}", cnst), format!("{:b}", cnst.0));
+            // Octal
+            assert_eq!(format!("{:o}", cnst), format!("{:o}", cnst.0));
+            // LowerHex
+            assert_eq!(format!("{:x}", cnst), format!("{:x}", cnst.0));
+            // UpperHex
+            assert_eq!(format!("{:X}", cnst), format!("{:X}", cnst.0));
         }
 
         #[test]
