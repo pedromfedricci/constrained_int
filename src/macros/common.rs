@@ -442,14 +442,21 @@ macro_rules! constrained_def_impl {
         /// }
         /// ```
         #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-        #[cfg_attr(feature = "std", derive(::thiserror::Error))]
-        #[cfg_attr(feature = "std", error("value must be greater or equal to {MIN}"))]
         pub struct $MinErr<const MIN: $Int>(());
 
         impl<const MIN: $Int> $MinErr<MIN> {
             /// The minimum **inclusive** bound enforced by the range.
             pub const MIN: $Int = MIN;
         }
+
+        impl<const MIN: $Int> ::core::fmt::Display for $MinErr<MIN> {
+            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+                write!(f, "value must be greater or equal to {MIN}")
+            }
+        }
+
+        #[cfg(feature = "std")]
+        impl<const MIN: $Int> ::std::error::Error for $MinErr<MIN> { }
 
         #[doc = concat!("This error indicates that a [`", stringify!($Int), "`] value ")]
         /// violates the range's upper bound.
@@ -471,14 +478,21 @@ macro_rules! constrained_def_impl {
         /// }
         /// ```
         #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-        #[cfg_attr(feature = "std", derive(::thiserror::Error))]
-        #[cfg_attr(feature = "std", error("value must be lower or equal to {MAX}"))]
         pub struct $MaxErr<const MAX: $Int>(());
 
         impl<const MAX: $Int> $MaxErr<MAX> {
             /// The maximum **inclusive** bound enforced by the range.
             pub const MAX: $Int = MAX;
         }
+
+        impl<const MAX: $Int> ::core::fmt::Display for $MaxErr<MAX> {
+            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+                write!(f, "value must be lower or equal to {MAX}")
+            }
+        }
+
+        #[cfg(feature = "std")]
+        impl<const MAX: $Int> ::std::error::Error for $MaxErr<MAX> { }
 
         #[doc = concat!("An error that indicates which range bound was violated by a [`", stringify!($Int), "`] value.")]
         ///
@@ -526,7 +540,6 @@ macro_rules! constrained_def_impl {
         /// let max = InvalidRange::MAX;
         /// ```
         #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-        #[cfg_attr(feature = "std", derive(::thiserror::Error))]
         pub enum $Err<const MIN: $Int, const MAX: $Int> {
             // All variants hold a type that users can't construct themselves, preventing
             // this type from being directly constructed by them.
@@ -534,12 +547,10 @@ macro_rules! constrained_def_impl {
             // This ensures that users can't create this type with parameters that don't
             // follow the condition `MAX` > `MIN`.
             #[doc = concat!("Indicates that the provided value is lower than [`", stringify!($Ty), "::MIN`].")]
-            #[cfg_attr(feature = "std", error(transparent))]
-            Lower(#[cfg_attr(feature = "std", from)] $MinErr<MIN>),
+            Lower($MinErr<MIN>),
 
             #[doc = concat!("Indicates that the provided value is greater than [`", stringify!($Ty), "::MAX`].")]
-            #[cfg_attr(feature = "std", error(transparent))]
-            Greater(#[cfg_attr(feature = "std", from)] $MaxErr<MAX>),
+            Greater($MaxErr<MAX>),
         }
 
         #[::const_guards::guard(<const MIN: $Int, const MAX: $Int> { guard_range::<MIN, MAX>() })]
@@ -598,6 +609,30 @@ macro_rules! constrained_def_impl {
                 Self::Greater($MaxErr(()))
             }
         }
+
+        impl<const MIN: $Int, const MAX: $Int> From<$MinErr<MIN>> for $Err<MIN, MAX> {
+            fn from(err: $MinErr<MIN>) -> Self {
+                Self::Lower(err)
+            }
+        }
+
+        impl<const MIN: $Int, const MAX: $Int> From<$MaxErr<MAX>> for $Err<MIN, MAX> {
+            fn from(err: $MaxErr<MAX>) -> Self {
+                Self::Greater(err)
+            }
+        }
+
+        impl<const MIN: $Int, const MAX: $Int> ::core::fmt::Display for $Err<MIN, MAX> {
+            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+                match self {
+                    Self::Lower(err) => err.fmt(f),
+                    Self::Greater(err) => err.fmt(f),
+                }
+            }
+        }
+
+        #[cfg(feature = "std")]
+        impl<const MIN: $Int, const MAX: $Int> ::std::error::Error for $Err<MIN, MAX> { }
     };
 }
 
@@ -791,6 +826,21 @@ macro_rules! tests_common {
             type TestError = $Err<{ <$Int>::MIN }, { <$Int>::MAX - 1 }>;
             assert_eq!(TestError::MIN, <$Int>::MIN);
             assert_eq!(TestError::MAX, <$Int>::MAX - 1);
+        }
+
+        #[test]
+        fn from_variants_types_for_err() {
+            type TestError = $Err<{ <$Int>::MIN }, { <$Int>::MAX - 1 }>;
+            type TestMinErr = $MinErr<{ <$Int>::MIN }>;
+            type TestMaxErr = $MaxErr<{ <$Int>::MAX - 1 }>;
+
+            let min_err: TestMinErr = $MinErr(());
+            let err: TestError = $Err::from(min_err);
+            assert_eq!(err, $Err::Lower(min_err));
+
+            let max_err: TestMaxErr = $MaxErr(());
+            let err: TestError = $Err::from(max_err);
+            assert_eq!(err, $Err::Greater(max_err));
         }
 
         #[cfg(feature = "std")]
