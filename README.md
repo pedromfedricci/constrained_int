@@ -27,10 +27,10 @@ This crate is `no_std` by default. See features section for more information.
 ## Install
 
 ```toml
-// Cargo.toml
+# Cargo.toml
 
 [dependencies]
-constrained_int = "0.1"
+constrained_int = "0.2"
 ```
 
 ## Example
