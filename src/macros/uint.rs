@@ -18,7 +18,6 @@ macro_rules! constrained_uint_impl {
             #[doc = concat!("assert_eq!(constrained.get(), ", stringify!($max), ");")]
             /// ```
             #[must_use = "this returns the result of the operation, without modifying the original"]
-            #[inline]
             pub const fn saturating_add(self, rhs: $UnsInt) -> Self {
                 // Can't use `unwrap_or` because it is not `const`.
                 match self.checked_add(rhs) {
@@ -43,7 +42,6 @@ macro_rules! constrained_uint_impl {
             #[doc = concat!("assert_eq!(constrained.get(), ", stringify!($min), ");")]
             /// ```
             #[must_use = "this returns the result of the operation, without modifying the original"]
-            #[inline]
             pub const fn saturating_sub(self, rhs: $UnsInt) -> Self {
                 // Can't use `unwrap_or` because it is not `const`.
                 match self.checked_sub(rhs) {
@@ -67,7 +65,6 @@ macro_rules! constrained_uint_impl {
             /// assert_eq!(constrained.checked_add(1), None);
             /// ```
             #[must_use = "this returns the result of the operation, without modifying the original"]
-            #[inline]
             pub const fn checked_add(self, rhs: $UnsInt) -> Option<Self> {
                 match self.0.checked_add(rhs) {
                     Some(value) if value <= MAX => Some(Self(value)),
@@ -90,7 +87,6 @@ macro_rules! constrained_uint_impl {
             /// assert_eq!(constrained.checked_sub(1), None);
             /// ```
             #[must_use = "this returns the result of the operation, without modifying the original"]
-            #[inline]
             pub const fn checked_sub(self, rhs: $UnsInt) -> Option<Self> {
                 match self.0.checked_sub(rhs) {
                     Some(value) if value >= MIN => Some(Self(value)),
@@ -113,7 +109,6 @@ macro_rules! constrained_uint_impl {
             /// assert!(constrained.try_add(1).is_err());
             /// ```
             #[must_use = "this returns the result of the operation, without modifying the original"]
-            #[inline]
             pub const fn try_add(self, rhs: $UnsInt) -> Result<Self, $MaxErr<MAX>> {
                 match self.checked_add(rhs) {
                     Some(this) => Ok(this),
@@ -136,7 +131,6 @@ macro_rules! constrained_uint_impl {
             /// assert!(constrained.try_sub(1).is_err());
             /// ```
             #[must_use = "this returns the result of the operation, without modifying the original"]
-            #[inline]
             pub const fn try_sub(self, rhs: $UnsInt) -> Result<Self, $MinErr<MIN>> {
                 match self.checked_sub(rhs) {
                     Some(this) => Ok(this),
@@ -268,7 +262,6 @@ macro_rules! constrained_uint_impl {
             /// Caller must ensure that `value` is greater than `MAX`, or else there will
             /// be an unexpected overflow.
             #[must_use]
-            #[inline(always)]
             const fn wrap_around_max(mut value: $UnsInt) -> Self {
                 debug_assert!(value > MAX, "value must be greater than `MIN`");
                 // Can't overflow since `MIN + x % range_size()` is at most equal to `MAX`.
@@ -281,7 +274,6 @@ macro_rules! constrained_uint_impl {
             /// Caller must ensure that `value` is lower than `MIN`, or else there will
             /// be an unexpected overflow.
             #[must_use]
-            #[inline(always)]
             const fn wrap_around_min(mut value: $UnsInt) -> Self {
                 debug_assert!(value < MIN, "value must be lower than `MIN`");
                 // Can't overflow since `MAX - x % range_size()` is at least equal to `MIN`.
@@ -299,7 +291,6 @@ macro_rules! constrained_uint_impl {
             /// Caller must ensure that `value` is lower than `<$UnsInt>::MAX`, or else
             /// there will be an unexpected overflow.
             #[must_use]
-            #[inline(always)]
             const fn wrap_around_max_over(value: $UnsInt) -> (Self, $UnsInt) {
                 debug_assert!(value < <$UnsInt>::MAX, "value must lower than <$UnsInt>::MAX");
                 // No conditional compilation based on constexpr evaluation unfortunately.
@@ -320,7 +311,6 @@ macro_rules! constrained_uint_impl {
             /// Caller must ensure that `value` is greater than `<$UnsInt>::MIN`, or else
             /// there will be an unexpected overflow.
             #[must_use]
-            #[inline(always)]
             const fn wrap_around_min_over(mut value: $UnsInt) -> (Self, $UnsInt) {
                 debug_assert!(value > <$UnsInt>::MIN, "value must greater than <$UnsInt>::MIN");
                 value = <$UnsInt>::MAX - value;
@@ -334,7 +324,6 @@ macro_rules! constrained_uint_impl {
 
             /// Returns the range size.
             #[must_use]
-            #[inline(always)]
             const fn range_size() -> $UnsInt {
                 // Can't overflow since construction is guarded against `MAX ==
                 // <$UnsInt>::MAX` AND `MIN == <$UnsInt>::MIN` at the same time, and

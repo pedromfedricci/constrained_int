@@ -23,7 +23,6 @@ macro_rules! constrained_int_impl {
             #[doc = concat!("assert_eq!(constrained.get(), ", stringify!($min), ");")]
             /// ```
             #[must_use = "this returns the result of the operation, without modifying the original"]
-            #[inline]
             pub const fn saturating_add(self, mut rhs: $SigInt) -> Self {
                 rhs = self.0.saturating_add(rhs);
                 Self::saturating_new_unguarded(rhs)
@@ -50,7 +49,6 @@ macro_rules! constrained_int_impl {
             #[doc = concat!("assert_eq!(constrained.get(), ", stringify!($max), ");")]
             /// ```
             #[must_use = "this returns the result of the operation, without modifying the original"]
-            #[inline]
             pub const fn saturating_sub(self, mut rhs: $SigInt) -> Self {
                 rhs = self.0.saturating_sub(rhs);
                 Self::saturating_new_unguarded(rhs)
@@ -75,7 +73,6 @@ macro_rules! constrained_int_impl {
             /// assert_eq!(constrained.checked_add(-1), None);
             /// ```
             #[must_use = "this returns the result of the operation, without modifying the original"]
-            #[inline]
             pub const fn checked_add(self, rhs: $SigInt) -> Option<Self> {
                 // Can't use `?` operator on const fn yet:
                 // https://github.com/rust-lang/rust/issues/74935.
@@ -104,7 +101,6 @@ macro_rules! constrained_int_impl {
             /// assert_eq!(constrained.checked_sub(-1), None);
             /// ```
             #[must_use = "this returns the result of the operation, without modifying the original"]
-            #[inline]
             pub const fn checked_sub(self, rhs: $SigInt) -> Option<Self> {
                 // Can't use `?` operator on const fn yet:
                 // https://github.com/rust-lang/rust/issues/74935.
@@ -133,7 +129,6 @@ macro_rules! constrained_int_impl {
             /// assert!(constrained.try_add(-1).is_err());
             /// ```
             #[must_use = "this returns the result of the operation, without modifying the original"]
-            #[inline]
             pub const fn try_add(self, rhs: $SigInt) -> Result<Self, $Err<MIN, MAX>> {
                 match self.checked_add(rhs) {
                     Some(this) => Ok(this),
@@ -161,7 +156,6 @@ macro_rules! constrained_int_impl {
             /// assert!(constrained.try_sub(-1).is_err());
             /// ```
             #[must_use = "this returns the result of the operation, without modifying the original"]
-            #[inline]
             pub const fn try_sub(self, rhs: $SigInt) -> Result<Self, $Err<MIN, MAX>> {
                 match self.checked_sub(rhs) {
                     Some(this) => Ok(this),
@@ -391,7 +385,6 @@ macro_rules! constrained_int_impl {
             /// assert_eq!(constrained.checked_abs(), None);
             /// ```
             #[must_use = "this returns the result of the operation, without modifyind the original"]
-            #[inline]
             pub const fn checked_abs(self) -> Option<Self> {
                 match self.0.checked_abs() {
                     Some(value) if value <= MAX => Some(Self(value)),
@@ -404,7 +397,6 @@ macro_rules! constrained_int_impl {
             /// Caller must ensure that `value` is greater from `MAX`, or else there will
             /// be an unexpected overflow.
             #[must_use]
-            #[inline(always)]
             const fn wrap_around_max(mut value: $SigInt) -> Self {
                 debug_assert!(value > MAX, "value must be greater than `MAX`");
                 let offset = (<$SigInt>::abs_diff(MAX, value) - 1) % Self::range_size();
@@ -418,7 +410,6 @@ macro_rules! constrained_int_impl {
             /// Caller must ensure that `value` is lower from `MIN`, or else there will
             /// be an unexpected overflow.
             #[must_use]
-            #[inline(always)]
             const fn wrap_around_min(mut value: $SigInt) -> Self {
                 debug_assert!(value < MIN, "value must be lower than `MIN`");
                 let offset = (<$SigInt>::abs_diff(MIN, value) - 1) % Self::range_size();
@@ -437,7 +428,6 @@ macro_rules! constrained_int_impl {
             /// Caller must ensure that `value` is lower than `<$SigInt>::MAX`, or else
             /// there will be an unexpected overflow.
             #[must_use]
-            #[inline(always)]
             const fn wrap_around_max_over(mut value: $SigInt) -> (Self, $SigInt) {
                 debug_assert!(value < <$SigInt>::MAX, "value must lower than <$SigInt>::MAX");
                 value = <$SigInt>::abs_diff(<$SigInt>::MIN, value) as $SigInt;
@@ -459,7 +449,6 @@ macro_rules! constrained_int_impl {
             /// Caller must ensure that `value` is greater than `<$SigInt>::MIN`, or else
             /// there will be an unexpected overflow.
             #[must_use]
-            #[inline(always)]
             const fn wrap_around_min_over(mut value: $SigInt) -> (Self, $SigInt) {
                 debug_assert!(value > <$SigInt>::MIN, "value must greater than <$SigInt>::MIN");
                 value = <$SigInt>::abs_diff(<$SigInt>::MAX, value) as $SigInt;
@@ -476,7 +465,6 @@ macro_rules! constrained_int_impl {
             /// `wrapped`: overflowed integer.
             /// `is_pos`: must be `true` if `rhs` was positive, `false` otherwise.
             #[must_use]
-            #[inline(always)]
             const fn overflowed_add(wrapped: $SigInt, is_pos: bool) -> (Self, $SigInt) {
                 if is_pos {
                     Self::wrap_around_max_over(wrapped)
@@ -491,7 +479,6 @@ macro_rules! constrained_int_impl {
             /// `wrapped`: overflowed integer.
             /// `is_pos`: must be `true` if `rhs` was positive, `false` otherwise.
             #[must_use]
-            #[inline(always)]
             const fn overflowed_sub(wrapped: $SigInt, is_pos: bool) -> (Self, $SigInt) {
                 if is_pos {
                     Self::wrap_around_min_over(wrapped)
@@ -503,7 +490,6 @@ macro_rules! constrained_int_impl {
 
             /// Returns the range size.
             #[must_use]
-            #[inline(always)]
             const fn range_size() -> $UnsInt {
                 // Can't overflow since construction is guarded against `MAX ==
                 // <$SigInt>::MAX` AND `MIN == <$SigInt>::MIN` at the same time,
@@ -518,7 +504,6 @@ macro_rules! constrained_int_impl {
                 /// represented as a signed integer of the same size.
                 #[cfg(test)]
                 #[must_use]
-                #[inline(always)]
                 const fn range_signed() -> $SigInt {
                     Self::range_size() as $SigInt
                 }
@@ -535,6 +520,7 @@ macro_rules! constrained_int_def_impl {
             //  int, mod_name, TypeName, ErrorName, MinErrorName, MaxErrorName, min..=max, (min-1, max+1)
                 $SigInt, $md, $Ty, $Err, $MinErr, $MaxErr, -127..=126, (-128, 127)
             }
+
             constrained_int_impl! {
             //  int, uint, TypeName, ErrorName, min..=max
                 $SigInt, $UnsInt, $md, $Ty, $Err, -127..=126

@@ -310,7 +310,6 @@ macro_rules! constrained_def_impl {
         impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> $Ty<MIN, MAX, DEF> {
             /// Checks if value is within the defined range, assuming that `MAX` < `MIN`
             /// is an impossible state.
-            #[inline(always)]
             const fn in_range(value: $Int) -> Result<(), $Err<MIN, MAX>> {
                 debug_assert!(!(MIN > MAX), "`MIN` can't be greater than `MAX`");
 
@@ -324,7 +323,6 @@ macro_rules! constrained_def_impl {
             }
 
             /// Unguarded private `new` constructor.
-            #[inline(always)]
             const fn new_unguarded(value: $Int) -> Result<Self, $Err<MIN, MAX>> {
                 // Can't use `?` operator on const fn yet:
                 // https://github.com/rust-lang/rust/issues/74935.
@@ -336,7 +334,6 @@ macro_rules! constrained_def_impl {
 
             /// Unguarded private `saturating` constructor.
             #[must_use]
-            #[inline(always)]
             const fn saturating_new_unguarded(value: $Int) -> Self {
                 match Self::in_range(value) {
                     Ok(_) => Self(value),
@@ -347,7 +344,6 @@ macro_rules! constrained_def_impl {
 
             /// Unguarded private `checked` constructor.
             #[must_use]
-            #[inline(always)]
             const fn checked_new_unguarded(value: $Int) -> Option<Self> {
                 match Self::in_range(value) {
                     Ok(_) => Some(Self(value)),
@@ -611,12 +607,14 @@ macro_rules! constrained_def_impl {
         }
 
         impl<const MIN: $Int, const MAX: $Int> From<$MinErr<MIN>> for $Err<MIN, MAX> {
+            #[inline(always)]
             fn from(err: $MinErr<MIN>) -> Self {
                 Self::Lower(err)
             }
         }
 
         impl<const MIN: $Int, const MAX: $Int> From<$MaxErr<MAX>> for $Err<MIN, MAX> {
+            #[inline(always)]
             fn from(err: $MaxErr<MAX>) -> Self {
                 Self::Greater(err)
             }
@@ -640,7 +638,6 @@ macro_rules! constrained_def_impl {
 macro_rules! constrained_fmt_impl {
     ($($Trait:ident),+ for $Ty:ident($Int:ty)) => {$(
         impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> ::core::fmt::$Trait for $Ty<MIN, MAX, DEF> {
-            #[inline(always)]
             fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
                 self.get().fmt(f)
             }
