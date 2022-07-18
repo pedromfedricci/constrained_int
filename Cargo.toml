@@ -11,10 +11,10 @@ repository = "https://github.com/pedromfedricci/constrained_int"
 homepage = "https://github.com/pedromfedricci/constrained_int"
 authors = ["Pedro de Matos Fedricci <pedromfedricci@gmail.com>"]
 
-categories = ["no-std", "mathematics", "science"]
+categories = ["no-std", "mathematics", "algorithms"]
 keywords = ["no_std", "numerics"]
 
-exclude = [".github"]
+exclude = [".github", "ci"]
 
 [features]
 # This will import std as a dependency.
