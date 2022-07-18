@@ -263,7 +263,7 @@ macro_rules! constrained_uint_impl {
             /// be an unexpected overflow.
             #[must_use]
             const fn wrap_around_max(mut value: $UnsInt) -> Self {
-                debug_assert!(value > MAX, "value must be greater than `MIN`");
+                debug_assert!(value > MAX, "value must be greater than `MAX`");
                 // Can't overflow since `MIN + x % range_size()` is at most equal to `MAX`.
                 value = MIN + (value - MAX - 1) % Self::range_size();
                 Self(value)
