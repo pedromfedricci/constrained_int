@@ -1,7 +1,32 @@
+# Run the ci checks locally with the exception of the tarpaulin run.
+[tasks.ci-fast]
+dependencies = ["check-format", "clippy", "docs", "no-std", "audit"]
+
 # Run the full ci checks locally.
-# `default` runs: cargo fmt, cargo build and cargo test.
 [tasks.ci]
-dependencies = ["default", "docs", "clippy", "audit", "coverage-tarpaulin"]
+dependencies = ["ci-fast", "coverage-tarpaulin"]
+
+[tasks.clippy]
+args = ["clippy", "--all-features"]
+
+[tasks.docs]
+args = ["doc", "--no-deps", "--all-features"]
+
+[tasks.no-std]
+command = "cargo"
+args = ["build", "--target", "thumbv7m-none-eabi"]
+
+[tasks.coverage-tarpaulin.linux]
+command = "cargo"
+args = [
+    "tarpaulin",
+    "--out",
+    "Xml",
+    "--all-features",
+    "--ignore-tests",
+    "--exclude-files",
+    "src/lib.rs",
+]
 
 [tasks.report-public-api]
 script = { file = "ci/report_public_api.sh" }
