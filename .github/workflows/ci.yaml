@@ -13,17 +13,17 @@ env:
 
 jobs:
   format:
-    name: Code format
+    name: Format
     runs-on: ubuntu-latest
 
     steps:
       - name: Install stable toolchain
         uses: actions-rs/toolchain@v1
         with:
-          profile: minimal
-          override: true
           toolchain: stable
+          profile: minimal
           components: rustfmt
+          override: true
 
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -35,7 +35,7 @@ jobs:
           args: --all -- --check
 
   linter:
-    name: Code linter
+    name: Linter
     runs-on: ubuntu-latest
 
     steps:
@@ -43,7 +43,6 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly
           components: clippy
           override: true
 
@@ -60,7 +59,7 @@ jobs:
           args: --all-features -- -D warnings
 
   docs:
-    name: Code documentation
+    name: Documentation
     runs-on: ubuntu-latest
 
     steps:
@@ -68,8 +67,8 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly
           components: rust-docs
+          override: true
 
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -84,15 +83,15 @@ jobs:
           args: --all-features
 
   tests:
-    name: Code tests
+    name: Tests
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install nightly
+      - name: Install nightly toolchain
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly
+          override: true
 
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -107,15 +106,15 @@ jobs:
           args: --all-features
 
   coverage:
-    name: Code coverage
+    name: Coverage
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install nightly
+      - name: Install nightly toolchain
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly
+          override: true
 
       - name: Chechout repository
         uses: actions/checkout@v2
@@ -139,16 +138,16 @@ jobs:
         uses: codecov/codecov-action@v3
 
   no_std:
-    name: Support for no_std
+    name: No std
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install nightly
+      - name: Install nightly toolchain
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly
           target: thumbv7m-none-eabi
+          override: true
 
       - name: Chechout repository
         uses: actions/checkout@v2
@@ -163,17 +162,17 @@ jobs:
           args: --target thumbv7m-none-eabi
 
   public:
-    name: Report public api changes
+    name: Public changes
     runs-on: ubuntu-latest
     env:
       CARGO_PUBLIC_API_VERSION: 0.12.3
 
     steps:
-      - name: Install nightly
+      - name: Install nightly toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
           profile: minimal
+          override: true
 
       - name: Chechout repository
         uses: actions/checkout@v2
@@ -186,7 +185,7 @@ jobs:
 
       - name: Install cargo-public-api
         uses: actions-rs/cargo@v1
-        if: steps.cargo-cache.outputs.cache-hit == false
+        if: steps.cargo-cache.outputs.cache-hit != true
         with:
           command: install
           args: >
