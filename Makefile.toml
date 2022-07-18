@@ -3,6 +3,9 @@
 [tasks.ci]
 dependencies = ["default", "docs", "clippy", "audit", "coverage-tarpaulin"]
 
+[tasks.report-public-api]
+script = { file = "ci/report_public_api.sh" }
+
 # Run all `uX` related tests.
 [tasks.tuint]
 command = "cargo"

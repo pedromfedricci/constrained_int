@@ -149,7 +149,6 @@ jobs:
           profile: minimal
           toolchain: nightly
           target: thumbv7m-none-eabi
-          override: true
 
       - name: Chechout repository
         uses: actions/checkout@v2
@@ -162,3 +161,37 @@ jobs:
         with:
           command: build
           args: --target thumbv7m-none-eabi
+
+  public:
+    name: Report public api changes
+    runs-on: ubuntu-latest
+    env:
+      CARGO_PUBLIC_API_VERSION: 0.12.3
+
+    steps:
+      - name: Install nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          profile: minimal
+
+      - name: Chechout repository
+        uses: actions/checkout@v2
+
+      - name: Check cargo cache
+        id: cargo-cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          env-vars: CARGO_PUBLIC_API_VERSION
+
+      - name: Install cargo-public-api
+        uses: actions-rs/cargo@v1
+        if: steps.cargo-cache.outputs.cache-hit == false
+        with:
+          command: install
+          args: >
+            cargo-public-api
+            --version=${{ env.CARGO_PUBLIC_API_VERSION }}
+
+      - name: Run cargo-public-api
+        run: sh ci/report_public_api.sh
