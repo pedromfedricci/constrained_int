@@ -82,8 +82,8 @@
 #[cfg(test)]
 extern crate static_assertions as sa;
 
-// Import constrained_uint_def_impl!.
-// Import constrained_int_def_impl!.
+// Import `constrained_uint_def_impl!` macro.
+// Import `constrained_int_def_impl!` macro.
 #[macro_use]
 mod macros;
 

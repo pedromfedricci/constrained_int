@@ -21,7 +21,7 @@ macro_rules! constrained_uint_impl {
             pub const fn saturating_add(self, rhs: $UnsInt) -> Self {
                 // Can't use `unwrap_or` because it is not `const`.
                 match self.checked_add(rhs) {
-                    Some(value) => value,
+                    Some(this) => this,
                     None => Self(MAX),
                 }
             }
@@ -45,7 +45,7 @@ macro_rules! constrained_uint_impl {
             pub const fn saturating_sub(self, rhs: $UnsInt) -> Self {
                 // Can't use `unwrap_or` because it is not `const`.
                 match self.checked_sub(rhs) {
-                    Some(value) => value,
+                    Some(this) => this,
                     None => Self(MIN),
                 }
             }
