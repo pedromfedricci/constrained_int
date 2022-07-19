@@ -1,10 +1,18 @@
-# Run the ci checks locally with the exception of the tarpaulin run.
+# Run the most important ci checks locally.
 [tasks.ci-fast]
-dependencies = ["check-format", "clippy", "docs", "no-std", "audit"]
+dependencies = ["check-format", "clippy", "docs", "no-std", "audit", "test"]
 
 # Run the full ci checks locally.
 [tasks.ci]
-dependencies = ["ci-fast", "coverage-tarpaulin"]
+dependencies = [
+    "check-format",
+    "clippy",
+    "docs",
+    "no-std",
+    "audit",
+    "coverage-tarpaulin",
+    "report-public-api",
+]
 
 [tasks.clippy]
 args = ["clippy", "--all-features"]
