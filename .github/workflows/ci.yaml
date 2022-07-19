@@ -10,6 +10,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  RUST_CHANNEL: nightly-2022-07-01
 
 jobs:
   format:
@@ -42,6 +43,7 @@ jobs:
       - name: Install nightly toolchain
         uses: actions-rs/toolchain@v1
         with:
+          toolchain: ${{ env.RUST_CHANNEL }}
           profile: minimal
           components: clippy
           override: true
@@ -66,6 +68,7 @@ jobs:
       - name: Install nightly toolchain
         uses: actions-rs/toolchain@v1
         with:
+          toolchain: ${{ env.RUST_CHANNEL }}
           profile: minimal
           components: rust-docs
           override: true
@@ -90,6 +93,7 @@ jobs:
       - name: Install nightly toolchain
         uses: actions-rs/toolchain@v1
         with:
+          toolchain: ${{ env.RUST_CHANNEL }}
           profile: minimal
           override: true
 
@@ -113,6 +117,7 @@ jobs:
       - name: Install nightly toolchain
         uses: actions-rs/toolchain@v1
         with:
+          toolchain: ${{ env.RUST_CHANNEL }}
           profile: minimal
           override: true
 
@@ -145,6 +150,7 @@ jobs:
       - name: Install nightly toolchain
         uses: actions-rs/toolchain@v1
         with:
+          toolchain: ${{ env.RUST_CHANNEL }}
           profile: minimal
           target: thumbv7m-none-eabi
           override: true
@@ -171,6 +177,7 @@ jobs:
       - name: Install nightly toolchain
         uses: actions-rs/toolchain@v1
         with:
+          toolchain: ${{ env.RUST_CHANNEL }}
           profile: minimal
           override: true
 
