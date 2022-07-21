@@ -285,6 +285,25 @@ macro_rules! constrained_def_impl {
             pub const fn new_max() -> Self {
                 Self(MAX)
             }
+
+            /// Returns a `[RangeInclusive]` value corresponding to the type's bondaries.
+            ///
+            /// # Example
+            ///
+            /// ```
+            #[doc = concat!("use constrained_int::", stringify!($md), "::", stringify!($Ty), ";")]
+            ///
+            #[doc = concat!("type Constrained = ", stringify!($Ty), "<", stringify!($min, $max), ">;")]
+            ///
+            /// let range = Constrained::range();
+            /// assert_eq!(Constrained::MIN, *range.start());
+            /// assert_eq!(Constrained::MAX, *range.end());
+            /// ```
+            #[must_use]
+            #[inline(always)]
+            pub const fn range() -> ::core::ops::RangeInclusive<$Int> {
+                ::core::ops::RangeInclusive::new(MIN, MAX)
+            }
         }
 
         // Guard this constructor.
@@ -770,6 +789,13 @@ macro_rules! tests_common {
         }
 
         #[test]
+        fn constrained_range_inclusive() {
+            let range = CnstTest::range();
+            assert_eq!(CnstTest::MIN, *range.start());
+            assert_eq!(CnstTest::MAX, *range.end());
+        }
+
+        #[test]
         fn constrained_try_from_bounded() {
             let cnst = CnstTest::try_from(CnstTest::MIN).expect("expected in range value");
             assert_eq!(cnst.get(), CnstTest::MIN);
@@ -788,6 +814,7 @@ macro_rules! tests_common {
             assert_eq!(err, $Err::greater());
         }
 
+        #[cfg(feature = "std")]
         #[test]
         fn constrained_fmt_impl() {
             let cnst = CnstTest::default();
