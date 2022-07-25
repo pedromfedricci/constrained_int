@@ -318,10 +318,10 @@ macro_rules! constrained_def_impl {
 
         // Guard this constructor.
         #[::const_guards::guard(<const MIN: $Int, const MAX: $Int, const DEF: $Int> { guard_construction::<MIN, MAX, DEF>() })]
-        impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> ::core::convert::TryFrom<$Int> for $Ty<MIN, MAX, DEF> {
+        impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> TryFrom<$Int> for $Ty<MIN, MAX, DEF> {
             type Error = $Err<MIN, MAX>;
 
-            fn try_from(value: $Int) -> ::core::result::Result<Self, Self::Error> {
+            fn try_from(value: $Int) -> Result<Self, Self::Error> {
                 Self::new_unguarded(value)
             }
         }
@@ -462,6 +462,12 @@ macro_rules! constrained_def_impl {
         impl<const MIN: $Int> $MinErr<MIN> {
             /// The minimum **inclusive** bound enforced by the range.
             pub const MIN: $Int = MIN;
+
+            #[must_use]
+            #[inline(always)]
+            const fn new() -> Self {
+                Self(())
+            }
         }
 
         impl<const MIN: $Int> ::core::fmt::Display for $MinErr<MIN> {
@@ -498,6 +504,12 @@ macro_rules! constrained_def_impl {
         impl<const MAX: $Int> $MaxErr<MAX> {
             /// The maximum **inclusive** bound enforced by the range.
             pub const MAX: $Int = MAX;
+
+            #[must_use]
+            #[inline(always)]
+            const fn new() -> Self {
+                Self(())
+            }
         }
 
         impl<const MAX: $Int> ::core::fmt::Display for $MaxErr<MAX> {
@@ -614,14 +626,14 @@ macro_rules! constrained_def_impl {
             #[must_use]
             #[inline(always)]
             const fn lower() -> Self {
-                Self::Lower($MinErr(()))
+                Self::Lower($MinErr::<MIN>::new())
             }
 
             /// Returns [`Greater`] variant.
             #[must_use]
             #[inline(always)]
             const fn greater() -> Self {
-                Self::Greater($MaxErr(()))
+                Self::Greater($MaxErr::<MAX>::new())
             }
         }
 
@@ -662,6 +674,137 @@ macro_rules! constrained_fmt_impl {
             }
         }
     )+};
+}
+
+#[cfg(test)]
+macro_rules! cnst_gen {
+    ($Int:ty, $int_md:ident, $Ty:ident) => {
+        #[derive(Clone, Copy, Debug)]
+        struct CnstGen<const MIN: $Int, const MAX: $Int, const DEF: $Int>;
+
+        impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> CnstGen<MIN, MAX, DEF> {
+            const RANGE: RangeInclusive<$Int> = MIN..=MAX;
+        }
+
+        impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> Strategy
+            for CnstGen<MIN, MAX, DEF>
+        {
+            type Value = $Ty<MIN, MAX, DEF>;
+            type Tree = CnstBinarySearch<MIN, MAX, DEF>;
+
+            fn new_tree(&self, runner: &mut TestRunner) -> NewTree<Self> {
+                Ok(CnstBinarySearch(Self::RANGE.new_tree(runner)?))
+            }
+        }
+
+        #[derive(Clone, Copy, Debug)]
+        struct CnstBinarySearch<const MIN: $Int, const MAX: $Int, const DEF: $Int>(
+            ::proptest::num::$int_md::BinarySearch,
+        );
+
+        impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> ValueTree
+            for CnstBinarySearch<MIN, MAX, DEF>
+        {
+            type Value = $Ty<MIN, MAX, DEF>;
+
+            fn current(&self) -> Self::Value {
+                $Ty::<MIN, MAX, DEF>::new_unguarded(self.0.current()).unwrap()
+            }
+
+            fn simplify(&mut self) -> bool {
+                self.0.simplify()
+            }
+
+            fn complicate(&mut self) -> bool {
+                self.0.complicate()
+            }
+        }
+    };
+}
+
+#[cfg(test)]
+macro_rules! rhs_gen {
+    ($Int:ty, $int_md:ident) => {
+        #[derive(Clone, Copy, Debug)]
+        struct RhsGen<const S: $Int, const E: $Int>;
+
+        impl<const S: $Int, const E: $Int> RhsGen<S, E> {
+            const RANGE: RangeInclusive<$Int> = S..=E;
+        }
+
+        impl<const S: $Int, const E: $Int> Strategy for RhsGen<S, E> {
+            type Value = Rhs<S, E>;
+            type Tree = RhsBinarySearch<S, E>;
+
+            fn new_tree(&self, runner: &mut TestRunner) -> NewTree<Self> {
+                Ok(RhsBinarySearch(Self::RANGE.new_tree(runner)?))
+            }
+        }
+
+        #[derive(Clone, Copy, Debug)]
+        struct RhsBinarySearch<const S: $Int, const E: $Int>(
+            ::proptest::num::$int_md::BinarySearch,
+        );
+
+        impl<const S: $Int, const E: $Int> ValueTree for RhsBinarySearch<S, E> {
+            type Value = Rhs<S, E>;
+
+            fn current(&self) -> Self::Value {
+                Rhs::try_from(self.0.current()).unwrap()
+            }
+
+            fn simplify(&mut self) -> bool {
+                self.0.simplify()
+            }
+
+            fn complicate(&mut self) -> bool {
+                self.0.complicate()
+            }
+        }
+
+        #[derive(Clone, Copy, Debug)]
+        struct Rhs<const S: $Int, const E: $Int>($Int);
+
+        impl<const S: $Int, const E: $Int> Add<Rhs<S, E>> for $Int {
+            type Output = $Int;
+
+            fn add(self, rhs: Rhs<S, E>) -> Self::Output {
+                self + rhs.0
+            }
+        }
+
+        impl<const S: $Int, const E: $Int> Sub<Rhs<S, E>> for $Int {
+            type Output = $Int;
+
+            fn sub(self, rhs: Rhs<S, E>) -> Self::Output {
+                self - rhs.0
+            }
+        }
+
+        impl<const S: $Int, const E: $Int> TryFrom<$Int> for Rhs<S, E> {
+            type Error = &'static str;
+
+            fn try_from(num: $Int) -> Result<Self, Self::Error> {
+                if num >= S && num <= E {
+                    Ok(Self(num))
+                } else {
+                    Err("value is not contained within Rhs's range")
+                }
+            }
+        }
+    };
+}
+
+#[cfg(test)]
+macro_rules! impl_proptest_strategy {
+    ($CnstInt:ty, $RhsInt:ty, $cnst_int:ident, $rhs_int:ident, $Ty:ident) => {
+        use ::core::ops::{Add, RangeInclusive, Sub};
+        use ::proptest::strategy::{NewTree, Strategy, ValueTree};
+        use ::proptest::test_runner::TestRunner;
+
+        cnst_gen! { $CnstInt, $cnst_int, $Ty }
+        rhs_gen! { $RhsInt, $rhs_int }
+    };
 }
 
 // Implements tests that are common to both signed and unsigned.
