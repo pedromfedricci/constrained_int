@@ -112,7 +112,7 @@ macro_rules! constrained_uint_impl {
             pub const fn try_add(self, rhs: $UnsInt) -> Result<Self, $MaxErr<MAX>> {
                 match self.checked_add(rhs) {
                     Some(this) => Ok(this),
-                    None => Err($MaxErr(())),
+                    None => Err($MaxErr::<MAX>::new()),
                 }
             }
 
@@ -134,7 +134,7 @@ macro_rules! constrained_uint_impl {
             pub const fn try_sub(self, rhs: $UnsInt) -> Result<Self, $MinErr<MIN>> {
                 match self.checked_sub(rhs) {
                     Some(this) => Ok(this),
-                    None => Err($MinErr(())),
+                    None => Err($MinErr::<MIN>::new()),
                 }
             }
 
@@ -337,32 +337,32 @@ macro_rules! constrained_uint_impl {
 
 // Defines mods, containers, errors, impls, tests and default doc values for unsigned integers.
 macro_rules! constrained_uint_def_impl {
-    ($({ $UnsInt:ty, $md:ident, $Ty:ident, $Err:ident, $MinErr:ident, $MaxErr:ident }),+ $(,)*) => {$(
+    ($({ $UnsInt:ty, $uint_md:ident, $Ty:ident, $Err:ident, $MinErr:ident, $MaxErr:ident }),+ $(,)*) => {$(
         #[doc = concat!("Container and Error types for a range constrained [`prim@", stringify!($UnsInt), "`].")]
-        pub mod $md {
+        pub mod $uint_md {
             constrained_def_impl! {
-            //  uint, mod_name, TypeName, ErrorName, MinErrorName, MaxErrorName, min..=max, (min-1, max+1)
-                $UnsInt, $md, $Ty, $Err, $MinErr, $MaxErr, 1..=254, (0, 255)
+            //  uint, uint_mod, TypeName, ErrorName, MinErrorName, MaxErrorName, min..=max, (min-1, max+1)
+                $UnsInt, $uint_md, $Ty, $Err, $MinErr, $MaxErr, 1..=254, (0, 255)
             }
 
             constrained_uint_impl! {
-            //  uint, mod_name, TypeName, MinErrorName, MaxErrorName, min..=max
-                $UnsInt, $md, $Ty, $MinErr, $MaxErr, 1..=254
+            //  uint, uint_mod, TypeName, MinErrorName, MaxErrorName, min..=max
+                $UnsInt, $uint_md, $Ty, $MinErr, $MaxErr, 1..=254
             }
 
             #[cfg(test)]
             mod tests_uint_common {
                 tests_common! {
-                //  uint, mod_path, TypeName, ErrorName, MinErrorName, MaxErrorName
+                //  uint, ty_mod_path, TypeName, ErrorName, MinErrorName, MaxErrorName
                     $UnsInt, super, $Ty, $Err, $MinErr, $MaxErr
                 }
             }
 
             #[cfg(test)]
-            mod tests_uint {
+            mod tests_uint_specific {
                 tests_uint! {
-                //  uint, mod_path, TypeName, MinErrorName, MaxErrorName
-                    $UnsInt, super, $Ty, $MinErr, $MaxErr
+                //  uint, uint_mod, ty_mod_path, TypeName, MinErrorName, MaxErrorName
+                    $UnsInt, $uint_md, super, $Ty, $MinErr, $MaxErr
                 }
             }
         }
@@ -372,349 +372,274 @@ macro_rules! constrained_uint_def_impl {
 // Implements all unsigned integer specific tests.
 #[cfg(test)]
 macro_rules! tests_uint {
-    ($UnsInt:ty, $ty_path:path, $Ty:ident, $MinErr:ident, $MaxErr:ident) => {
+    ($UnsInt:ty, $uint_md:ident, $ty_path:path, $Ty:ident, $MinErr:ident, $MaxErr:ident) => {
         use ::core::fmt::Debug;
-        use ::core::ops::RangeInclusive;
-        use $ty_path::*;
+        use $ty_path::{$MaxErr, $MinErr, $Ty};
+
+        cnst_gen_def_impl! { $UnsInt, $uint_md, cnst_gen, $ty_path, $Ty }
+        use cnst_gen::CnstGen;
+
+        rhs_gen_def_impl! { { $UnsInt, $uint_md, uns_rhs }, }
+        use uns_rhs::{Rhs as UnsRhs, RhsGen as UnsRhsGen};
+
+        fn assert_add_bounded<const MIN: $UnsInt, const MAX: $UnsInt, const DEF: $UnsInt>(
+            rhs: UnsRhs<{ 0 }, { $Ty::<MIN, MAX, DEF>::range_size() - 1 }>,
+            add: impl Fn($Ty<MIN, MAX, DEF>, $UnsInt) -> $Ty<MIN, MAX, DEF>,
+        ) {
+            let mut cnst = $Ty(MIN);
+            cnst = add(cnst, rhs.get());
+            assert_eq!(cnst.get(), MIN + rhs);
+        }
+
+        fn assert_sub_bounded<const MIN: $UnsInt, const MAX: $UnsInt, const DEF: $UnsInt>(
+            rhs: UnsRhs<{ 0 }, { $Ty::<MIN, MAX, DEF>::range_size() - 1 }>,
+            sub: impl Fn($Ty<MIN, MAX, DEF>, $UnsInt) -> $Ty<MIN, MAX, DEF>,
+        ) {
+            let mut cnst = $Ty(MAX);
+            cnst = sub(cnst, rhs.get());
+            assert_eq!(cnst.get(), MAX - rhs);
+        }
+
+        fn assert_unbounded<
+            const MIN: $UnsInt,
+            const MAX: $UnsInt,
+            const DEF: $UnsInt,
+            T: Eq + Debug,
+        >(
+            cnst: $Ty<MIN, MAX, DEF>,
+            rhs: UnsRhs<{ $Ty::<MIN, MAX, DEF>::range_size() }, { <$UnsInt>::MAX }>,
+            expected: T,
+            op: impl Fn($Ty<MIN, MAX, DEF>, $UnsInt) -> T,
+        ) {
+            let returned = op(cnst, rhs.get());
+            assert_eq!(returned, expected);
+        }
+
+        fn assert_wrapping_add_unbounded<
+            const MIN: $UnsInt,
+            const MAX: $UnsInt,
+            const DEF: $UnsInt,
+        >(
+            rhs: UnsRhs<{ 1 }, { $Ty::<MIN, MAX, DEF>::range_size() }>,
+            add: impl Fn($Ty<MIN, MAX, DEF>, $UnsInt) -> $Ty<MIN, MAX, DEF>,
+        ) {
+            let mut cnst = $Ty(MAX);
+            cnst = add(cnst, rhs.get());
+            assert_eq!(cnst.get(), MIN + (rhs - 1));
+        }
+
+        fn assert_wrapping_sub_unbounded<
+            const MIN: $UnsInt,
+            const MAX: $UnsInt,
+            const DEF: $UnsInt,
+        >(
+            rhs: UnsRhs<{ 1 }, { $Ty::<MIN, MAX, DEF>::range_size() }>,
+            sub: impl Fn($Ty<MIN, MAX, DEF>, $UnsInt) -> $Ty<MIN, MAX, DEF>,
+        ) {
+            let mut cnst = $Ty(MIN);
+            cnst = sub(cnst, rhs.get());
+            assert_eq!(cnst.get(), MAX - (rhs - 1));
+        }
+
+        fn assert_wrapping_range_size<
+            const MIN: $UnsInt,
+            const MAX: $UnsInt,
+            const DEF: $UnsInt,
+        >(
+            mut cnst: $Ty<MIN, MAX, DEF>,
+            wrap: impl Fn($Ty<MIN, MAX, DEF>, $UnsInt) -> $Ty<MIN, MAX, DEF>,
+        ) {
+            let inner = cnst.get();
+            cnst = wrap(cnst, $Ty::<MIN, MAX, DEF>::range_size());
+            assert_eq!(cnst.get(), inner);
+        }
 
         // For testing purposes:
         //
-        // Defines a type for arithmetic tests that **will not** overflow the inner integer.
-        const MIN: $UnsInt = (<$UnsInt>::MAX / 5) * 2;
-        const MAX: $UnsInt = (<$UnsInt>::MAX / 5) * 3;
-        type ConstrainedEx = $Ty<{ MIN }, { MAX }>;
-        // The range size must be a least 3.
-        sa::const_assert!(ConstrainedEx::range_size() >= 3);
-        // Must be able to wrap `range_size() - 2` around `MIN` without overflowing the inner integer.
-        sa::const_assert!(<$UnsInt>::MIN < (ConstrainedEx::MIN - ConstrainedEx::range_size() - 2));
-        // Must be able to wrap `range_size() + 2` around `MAX` without overflowing the inner integer.
-        sa::const_assert!(<$UnsInt>::MAX > (ConstrainedEx::MAX + ConstrainedEx::range_size() + 2));
-
-        const DEF_WRAP_RANGE: RangeInclusive<$UnsInt> = RangeInclusive::new(1, 2);
-        const OFF_WRAP_RANGE: RangeInclusive<$UnsInt> = RangeInclusive::new(2, 3);
-
-        // For tests that evaluate correct range wrapping while operations on the
-        // inner integers have overflowed.
-        //
-        // Verify with the same lower bound as inner integer type for wrapping operations.
+        // Verify arithmetics for a range definition with the same lower bound as the
+        // inner integer.
         type ConstrainedMin = $Ty<{ <$UnsInt>::MIN }, { <$UnsInt>::MAX - 1 }>;
-        // Verify with the same upper bound as inner integer type for wrapping operations.
+        // Verify arithmetics for a range definition with the same upper bound as the
+        // inner integer.
         type ConstrainedMax = $Ty<{ <$UnsInt>::MIN + 1 }, { <$UnsInt>::MAX }>;
 
-        fn assert_add_bounded<F: Fn(ConstrainedEx, $UnsInt) -> ConstrainedEx>(succeed: F) {
-            let mut constrained: ConstrainedEx;
-
-            for value in 0..=2 {
-                constrained = ConstrainedEx::new_min();
-                constrained = succeed(constrained, value);
-                assert_eq!(constrained.get(), ConstrainedEx::MIN + value);
-            }
-
-            for value in 1..=2 {
-                constrained = ConstrainedEx::new_min();
-                constrained = succeed(constrained, ConstrainedEx::range_size() - value);
-                assert_eq!(constrained.get(), ConstrainedEx::MAX - value + 1);
-            }
-        }
-
-        #[test]
-        fn checked_add_bounded() {
-            assert_add_bounded(|cnst, value| cnst.checked_add(value).unwrap());
-        }
-
-        #[test]
-        fn try_add_bounded() {
-            assert_add_bounded(|cnst, value| cnst.try_add(value).unwrap());
-        }
-
-        #[test]
-        fn saturating_add_bounded() {
-            assert_add_bounded(ConstrainedEx::saturating_add);
-        }
-
-        #[test]
-        fn wrapping_add_bounded() {
-            assert_add_bounded(ConstrainedEx::wrapping_add);
-        }
-
-        #[test]
-        fn overflowing_add_bounded() {
-            assert_add_bounded(|cnst, value| {
-                let (cnst, overflowed) = cnst.overflowing_add(value);
-                assert!(!overflowed);
-                cnst
-            })
-        }
-
-        fn assert_add_unbounded<T: Eq + Debug, F: Fn(ConstrainedEx, $UnsInt) -> T>(
-            fail: F,
-            failed: T,
-        ) {
-            let mut constrained: ConstrainedEx;
-
-            for value in 0..=2 {
-                constrained = ConstrainedEx::new_min();
-                let res = fail(constrained, ConstrainedEx::range_size() + value);
-                assert_eq!(res, failed);
-            }
-
-            constrained = ConstrainedEx::new_max();
-            assert_eq!(fail(constrained, <$UnsInt>::MAX), failed);
-        }
-
-        #[test]
-        fn checked_add_unbounded() {
-            assert_add_unbounded(ConstrainedEx::checked_add, None);
-        }
-
-        #[test]
-        fn try_add_unbounded() {
-            assert_add_unbounded(ConstrainedEx::try_add, Err($MaxErr(())));
-        }
-
-        #[test]
-        fn saturating_add_unbounded() {
-            assert_add_unbounded(ConstrainedEx::saturating_add, $Ty(ConstrainedEx::MAX));
-        }
-
-        fn assert_sub_bounded<F: Fn(ConstrainedEx, $UnsInt) -> ConstrainedEx>(succeed: F) {
-            let mut constrained: ConstrainedEx;
-
-            for value in 0..=2 {
-                constrained = ConstrainedEx::new_max();
-                constrained = succeed(constrained, value);
-                assert_eq!(constrained.get(), ConstrainedEx::MAX - value);
-            }
-
-            for value in 1..=2 {
-                constrained = ConstrainedEx::new_max();
-                constrained = succeed(constrained, ConstrainedEx::range_size() - value);
-                assert_eq!(constrained.get(), ConstrainedEx::MIN + value - 1);
-            }
-        }
-
-        #[test]
-        fn checked_sub_bounded() {
-            assert_sub_bounded(|cnst, value| cnst.checked_sub(value).unwrap());
-        }
-
-        #[test]
-        fn try_sub_bounded() {
-            assert_sub_bounded(|cnst, value| cnst.try_sub(value).unwrap());
-        }
-
-        #[test]
-        fn saturating_sub_bounded() {
-            assert_sub_bounded(ConstrainedEx::saturating_sub);
-        }
-
-        #[test]
-        fn wrapping_sub_bounded() {
-            assert_sub_bounded(ConstrainedEx::wrapping_sub);
-        }
-
-        #[test]
-        fn overflowing_sub_bounded() {
-            assert_sub_bounded(|cnst, value| {
-                let (cnst, overflowed) = cnst.overflowing_sub(value);
-                assert!(!overflowed);
-                cnst
-            })
-        }
-
-        fn assert_sub_unbounded<T: Eq + Debug, F: Fn(ConstrainedEx, $UnsInt) -> T>(
-            fail: F,
-            failed: T,
-        ) {
-            let mut constrained: ConstrainedEx;
-
-            for value in 0..=2 {
-                constrained = ConstrainedEx::new_max();
-                let res = fail(constrained, ConstrainedEx::range_size() + value);
-                assert_eq!(res, failed);
-            }
-
-            constrained = ConstrainedEx::new_min();
-            assert_eq!(fail(constrained, <$UnsInt>::MAX), failed);
-        }
-
-        #[test]
-        fn checked_sub_unbounded() {
-            assert_sub_unbounded(ConstrainedEx::checked_sub, None);
-        }
-
-        #[test]
-        fn try_sub_unbounded() {
-            assert_sub_unbounded(ConstrainedEx::try_sub, Err($MinErr(())));
-        }
-
-        #[test]
-        fn saturating_sub_unbounded() {
-            assert_sub_unbounded(ConstrainedEx::saturating_sub, $Ty(ConstrainedEx::MIN));
-        }
-
-        fn assert_wrapping_add_wraps<
-            F: Fn($Ty<MIN, MAX, DEF>, $UnsInt) -> $Ty<MIN, MAX, DEF>,
-            const MIN: $UnsInt,
-            const MAX: $UnsInt,
-            const DEF: $UnsInt,
-        >(
-            wrap: F,
-            range: RangeInclusive<$UnsInt>,
-        ) {
-            let mut constrained: $Ty<MIN, MAX, DEF>;
-
-            for value in range {
-                constrained = $Ty(MAX);
-                constrained = wrap(constrained, value);
-                assert_eq!(constrained.get(), MIN + value - 1);
-            }
-
-            for value in 0..=2 {
-                constrained = $Ty(MAX);
-                constrained = wrap(constrained, $Ty::<MIN, MAX, DEF>::range_size() - value);
-                assert_eq!(constrained.get(), MAX - value);
-            }
-
-            for value in 1..=2 {
-                constrained = $Ty(MAX);
-                constrained = wrap(constrained, $Ty::<MIN, MAX, DEF>::range_size());
-                constrained = wrap(constrained, value);
-                assert_eq!(constrained.get(), MIN + value - 1);
-            }
-        }
-
-        #[test]
-        fn wrapping_add_wraps() {
-            assert_wrapping_add_wraps(ConstrainedEx::wrapping_add, DEF_WRAP_RANGE);
-        }
-
-        #[test]
-        fn overflowing_add_wraps() {
-            assert_wrapping_add_wraps(
-                |cnst: ConstrainedEx, value| {
-                    let (cnst, overflowed) = cnst.overflowing_add(value);
-                    assert!(overflowed);
-                    cnst
-                },
-                DEF_WRAP_RANGE,
-            )
-        }
-
-        #[test]
-        fn wrapping_add_wraps_inner_overflow_min() {
-            assert_wrapping_add_wraps(ConstrainedMin::wrapping_add, OFF_WRAP_RANGE);
-        }
-
-        #[test]
-        fn overflowing_add_wraps_inner_overflow_min() {
-            assert_wrapping_add_wraps(
-                |cnst: ConstrainedMin, value| {
-                    let (cnst, overflowed) = cnst.overflowing_add(value);
-                    assert!(overflowed);
-                    cnst
-                },
-                OFF_WRAP_RANGE,
-            );
-        }
-
-        #[test]
-        fn wrapping_add_wraps_inner_overflow_max() {
-            assert_wrapping_add_wraps(ConstrainedMax::wrapping_add, DEF_WRAP_RANGE);
-        }
-
-        #[test]
-        fn overflowing_add_wraps_inner_overflow_max() {
-            assert_wrapping_add_wraps(
-                |cnst: ConstrainedMax, value| {
-                    let (cnst, overflowed) = cnst.overflowing_add(value);
-                    assert!(overflowed);
-                    cnst
-                },
-                DEF_WRAP_RANGE,
-            );
-        }
-
-        fn assert_wrapping_sub_wraps<
-            F: Fn($Ty<MIN, MAX, DEF>, $UnsInt) -> $Ty<MIN, MAX, DEF>,
-            const MIN: $UnsInt,
-            const MAX: $UnsInt,
-            const DEF: $UnsInt,
-        >(
-            wrap: F,
-            range: RangeInclusive<$UnsInt>,
-        ) {
-            let mut constrained: $Ty<MIN, MAX, DEF>;
-
-            for value in range {
-                constrained = $Ty(MIN);
-                constrained = wrap(constrained, value);
-                assert_eq!(constrained.get(), MAX - value + 1);
-            }
-
-            for value in 0..=2 {
-                constrained = $Ty(MIN);
-                constrained = wrap(constrained, $Ty::<MIN, MAX, DEF>::range_size() - value);
-                assert_eq!(constrained.get(), MIN + value);
-            }
-
-            for value in 1..=2 {
-                constrained = $Ty(MIN);
-                constrained = wrap(constrained, $Ty::<MIN, MAX, DEF>::range_size());
-                constrained = wrap(constrained, value);
-                assert_eq!(constrained.get(), MAX - value + 1);
-            }
-        }
-
-        #[test]
-        fn wrapping_sub_wraps() {
-            assert_wrapping_sub_wraps(ConstrainedEx::wrapping_sub, DEF_WRAP_RANGE);
-        }
-
-        #[test]
-        fn overflowing_sub_wraps() {
-            assert_wrapping_sub_wraps(
-                |cnst: ConstrainedEx, value| {
-                    let (cnst, overflowed) = cnst.overflowing_sub(value);
-                    assert!(overflowed);
-                    cnst
-                },
-                DEF_WRAP_RANGE,
-            )
-        }
-
-        #[test]
-        fn wrapping_sub_wraps_inner_overflow_min() {
-            assert_wrapping_sub_wraps(ConstrainedMin::wrapping_sub, DEF_WRAP_RANGE);
-        }
-
-        #[test]
-        fn overflowing_sub_wraps_inner_overflow_min() {
-            assert_wrapping_sub_wraps(
-                |cnst: ConstrainedMin, value| {
-                    let (cnst, overflowed) = cnst.overflowing_sub(value);
-                    assert!(overflowed);
-                    cnst
-                },
-                DEF_WRAP_RANGE,
-            );
-        }
-
-        #[test]
-        fn wrapping_sub_wraps_inner_overflow_max() {
-            assert_wrapping_sub_wraps(ConstrainedMax::wrapping_sub, OFF_WRAP_RANGE);
-        }
-
-        #[test]
-        fn overflowing_sub_wraps_inner_overflow_max() {
-            assert_wrapping_sub_wraps(
-                |cnst: ConstrainedMax, value| {
-                    let (cnst, overflowed) = cnst.overflowing_sub(value);
-                    assert!(overflowed);
-                    cnst
-                },
-                OFF_WRAP_RANGE,
-            );
+        impl_uint_prop_tests_for! {
+        //  { uint, MinErrorName, MaxErrorName },
+            { $UnsInt, $MinErr, $MaxErr },
+        //  { module_name, TypeName },+
+            { min, ConstrainedMin },
+            { max, ConstrainedMax },
         }
     };
+}
+
+// Implement property tests for arithemtic operations for a number of
+// **parameterized** `Constrained` types, e.g: `ConstrainedU8<0, 100, 0>`;
+#[cfg(test)]
+macro_rules! impl_uint_prop_tests_for {
+    ({ $UnsInt:ty, $MinErr:ident, $MaxErr:ident }, $({ $md:ident, $Ty:ty }),+ $(,)*) => {$(
+        #[cfg(test)]
+        mod $md {
+            use ::proptest::proptest;
+            use super::*;
+
+            type Cnst = $Ty;
+            type MinErr = $MinErr<{ Cnst::MIN }>;
+            type MaxErr = $MaxErr<{ Cnst::MAX }>;
+
+            proptest! {
+                #[test]
+                fn checked_add_bounded(rhs in UnsRhsGen) {
+                    assert_add_bounded(rhs, |cnst: Cnst, rhs| {
+                        cnst.checked_add(rhs).expect("expected `checked_add` to succeed")
+                    });
+                }
+
+                #[test]
+                fn try_add_bounded(rhs in UnsRhsGen) {
+                    assert_add_bounded(rhs, |cnst: Cnst, rhs| {
+                        cnst.try_add(rhs).expect("expected `try_add` to succeed")
+                    });
+                }
+
+                #[test]
+                fn saturating_add_bounded(rhs in UnsRhsGen) {
+                    assert_add_bounded(rhs, Cnst::saturating_add);
+                }
+
+                #[test]
+                fn wrapping_add_bounded(rhs in UnsRhsGen) {
+                    assert_add_bounded(rhs, Cnst::wrapping_add);
+                }
+
+                #[test]
+                fn overflowing_add_bounded(rhs in UnsRhsGen) {
+                    assert_add_bounded(rhs, |cnst: Cnst, rhs| {
+                        let (cnst, overflowed) = cnst.overflowing_add(rhs);
+                        assert!(!overflowed, "expected `overflowing_add` to not overflow");
+                        cnst
+                    });
+                }
+
+                #[test]
+                fn checked_sub_bounded(rhs in UnsRhsGen) {
+                    assert_sub_bounded(rhs, |cnst: Cnst, rhs| {
+                        cnst.checked_sub(rhs).expect("expected `checked_sub` to succeed")
+                    });
+                }
+
+                #[test]
+                fn try_sub_bounded(rhs in UnsRhsGen) {
+                    assert_sub_bounded(rhs, |cnst: Cnst, rhs| {
+                        cnst.try_sub(rhs).expect("expected `try_sub` to succeed")
+                    });
+                }
+
+                #[test]
+                fn saturating_sub_bounded(rhs in UnsRhsGen) {
+                    assert_sub_bounded(rhs, Cnst::saturating_sub);
+                }
+
+                #[test]
+                fn wrapping_sub_bounded(rhs in UnsRhsGen) {
+                    assert_sub_bounded(rhs, Cnst::wrapping_sub);
+                }
+
+                #[test]
+                fn overflowing_sub_bounded(rhs in UnsRhsGen) {
+                    assert_sub_bounded(rhs, |cnst: Cnst, rhs| {
+                        let (cnst, overflowed) = cnst.overflowing_sub(rhs);
+                        assert!(!overflowed, "expected `overflowing_sub` to not overflow");
+                        cnst
+                    });
+                }
+
+                #[test]
+                fn checked_add_unbounded((cnst, rhs) in (CnstGen, UnsRhsGen)) {
+                    assert_unbounded(cnst, rhs, None, Cnst::checked_add);
+                }
+
+                #[test]
+                fn try_add_unbounded((cnst, rhs) in (CnstGen, UnsRhsGen)) {
+                    assert_unbounded(cnst, rhs, Err(MaxErr::new()), Cnst::try_add);
+                }
+
+                #[test]
+                fn saturating_add_unbounded((cnst, rhs) in (CnstGen, UnsRhsGen)) {
+                    assert_unbounded(cnst, rhs, Cnst::new_max(), Cnst::saturating_add);
+                }
+
+                #[test]
+                fn checked_sub_unbounded((cnst, rhs) in (CnstGen, UnsRhsGen)) {
+                    assert_unbounded(cnst, rhs, None, Cnst::checked_sub);
+                }
+
+                #[test]
+                fn try_sub_unbounded((cnst, rhs) in (CnstGen, UnsRhsGen)) {
+                    assert_unbounded(cnst, rhs, Err(MinErr::new()), Cnst::try_sub);
+                }
+
+                #[test]
+                fn saturating_sub_unbounded((cnst, rhs) in (CnstGen, UnsRhsGen)) {
+                    assert_unbounded(cnst, rhs, Cnst::new_min(), Cnst::saturating_sub);
+                }
+
+                #[test]
+                fn wrapping_add_unbounded(rhs in UnsRhsGen) {
+                    assert_wrapping_add_unbounded(rhs, Cnst::wrapping_add);
+                }
+
+                #[test]
+                fn overflowing_add_unbounded(rhs in UnsRhsGen) {
+                    assert_wrapping_add_unbounded(rhs, |cnst: Cnst, rhs| {
+                        let (cnst, overflowed) = cnst.overflowing_add(rhs);
+                        assert!(overflowed, "expected `overflowing_add` to overflow");
+                        cnst
+                    });
+                }
+
+                #[test]
+                fn wrapping_sub_unbounded(rhs in UnsRhsGen) {
+                    assert_wrapping_sub_unbounded(rhs, Cnst::wrapping_sub);
+                }
+
+                #[test]
+                fn overflowing_sub_unbounded(rhs in UnsRhsGen) {
+                    assert_wrapping_sub_unbounded(rhs, |cnst: Cnst, rhs| {
+                        let (cnst, overflowed) = cnst.overflowing_sub(rhs);
+                        assert!(overflowed, "expected `overflowing_sub` to overflow");
+                        cnst
+                    });
+                }
+
+                #[test]
+                fn wrapping_add_range_size(cnst in CnstGen) {
+                    assert_wrapping_range_size(cnst, Cnst::wrapping_add);
+                }
+
+                #[test]
+                fn overflowing_add_range_size(cnst in CnstGen) {
+                    assert_wrapping_range_size(cnst, |cnst: Cnst, rsize| {
+                        let (cnst, overflowed) = cnst.overflowing_add(rsize);
+                        assert!(overflowed);
+                        cnst
+                    });
+                }
+
+                #[test]
+                fn wrapping_sub_range_size(cnst in CnstGen) {
+                    assert_wrapping_range_size(cnst, Cnst::wrapping_sub);
+                }
+
+                #[test]
+                fn overflowing_sub_range_size(cnst in CnstGen) {
+                    assert_wrapping_range_size(cnst, |cnst: Cnst, rsize| {
+                        let (cnst, overflowed) = cnst.overflowing_sub(rsize);
+                        assert!(overflowed);
+                        cnst
+                    });
+                }
+            }
+        }
+    )+};
 }

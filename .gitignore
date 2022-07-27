@@ -3,3 +3,4 @@
 /.vscode
 todo.txt
 cobertura.xml
+/proptest-regressions

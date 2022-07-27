@@ -73,24 +73,32 @@
 //
 // Tracking issue for `doc_auto_cfg` feature:
 // https://github.com/rust-lang/rust/issues/43781.
-#![cfg_attr(docsrs, feature(doc_auto_cfg))]
+#![feature(doc_auto_cfg)]
 //
 // rustdoc lints.
 #![warn(missing_docs)]
 #![warn(rustdoc::missing_crate_level_docs)]
-
-#[cfg(test)]
-extern crate static_assertions as sa;
 
 // Import `constrained_uint_def_impl!` macro.
 // Import `constrained_int_def_impl!` macro.
 #[macro_use]
 mod macros;
 
-// Define mods, containers, errors, tests and impls for unsigned integers with default
-// values for doc examples.
+// Define mods, containers, errors, tests and impls for unsigned integers with
+// default values for doc examples.
+//
+// Format:
+//  { uint, uint_mod, TypeName, ErrorName, MinErrorName, MaxErrorName },+
+//
+// Builds `u8` only, which is significantly faster. Useful for most development
+// purposes.
+#[cfg(cnst8bitonly)]
 constrained_uint_def_impl! {
-//  { uint, mod_name, TypeName, ErrorName, MinErrorName, MaxErrorName },
+    { u8, u8, ConstrainedU8, ConstrainedU8Error, MinU8Error, MaxU8Error }
+}
+// Builds all unsigned types by default.
+#[cfg(not(cnst8bitonly))]
+constrained_uint_def_impl! {
     { u8, u8, ConstrainedU8, ConstrainedU8Error, MinU8Error, MaxU8Error },
     { u16, u16, ConstrainedU16, ConstrainedU16Error, MinU16Error, MaxU16Error },
     { u32, u32, ConstrainedU32, ConstrainedU32Error, MinU32Error, MaxU32Error },
@@ -99,14 +107,25 @@ constrained_uint_def_impl! {
     { usize, usize, ConstrainedUsize, ConstrainedUsizeError, MinUsizeError, MaxUsizeError },
 }
 
-// Define mods, containers, errors, tests and impls for signed integers with default
-// values for doc examples.
+// Define mods, containers, errors, tests and impls for signed integers with
+// default values for doc examples.
+//
+// Format:
+//  { sint, uint, sint_mod, uint_mod, TypeName, ErrorName, MinErrorName, MaxErrorName },+
+//
+// Builds `i8` only, which is significantly faster. Useful for most development
+// purposes.
+#[cfg(cnst8bitonly)]
 constrained_int_def_impl! {
-//  { int, uint, mod_name, TypeName, ErrorName, MinErrorName, MaxErrorName },
-    { i8, u8, i8, ConstrainedI8, ConstrainedI8Error, MinI8Error, MaxI8Error },
-    { i16, u16, i16, ConstrainedI16, ConstrainedI16Error, MinI16Error, MaxI16Error },
-    { i32, u32, i32, ConstrainedI32, ConstrainedI32Error, MinI32Error, MaxI32Error },
-    { i64, u64, i64, ConstrainedI64, ConstrainedI64Error, MinI64Error, MaxI64Error },
-    { i128, u128, i128, ConstrainedI128, ConstrainedI128Error, MinI128Error, MaxI128Error },
-    { isize, usize, isize, ConstrainedIsize, ConstrainedIsizeError, MinIsizeError, MaxIsizeError },
+    { i8, u8, i8, u8, ConstrainedI8, ConstrainedI8Error, MinI8Error, MaxI8Error },
+}
+// Builds all signed types by default.
+#[cfg(not(cnst8bitonly))]
+constrained_int_def_impl! {
+    { i8, u8, i8, u8, ConstrainedI8, ConstrainedI8Error, MinI8Error, MaxI8Error },
+    { i16, u16, i16, u16, ConstrainedI16, ConstrainedI16Error, MinI16Error, MaxI16Error },
+    { i32, u32, i32, u32, ConstrainedI32, ConstrainedI32Error, MinI32Error, MaxI32Error },
+    { i64, u64, i64, u64, ConstrainedI64, ConstrainedI64Error, MinI64Error, MaxI64Error },
+    { i128, u128, i128, u128, ConstrainedI128, ConstrainedI128Error, MinI128Error, MaxI128Error },
+    { isize, usize, isize, usize, ConstrainedIsize, ConstrainedIsizeError, MinIsizeError, MaxIsizeError },
 }
