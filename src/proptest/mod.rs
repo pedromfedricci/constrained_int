@@ -1,5 +1,6 @@
 // Import `strategies_uint_def_impl!` macro.
 // Import `strategies_int_def_impl!` macro.
+#[cfg(test)]
 #[macro_use]
 mod macros;
 
