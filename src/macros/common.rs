@@ -1,8 +1,8 @@
 // Defines containers, errors, common impls and doc values for integers.
 macro_rules! constrained_def_impl {
-    ($Int:ty, $md:ident, $Ty:ident, $Err:ident, $MinErr:ident, $MaxErr:ident,
-        $min:literal..=$max:literal, ($l:literal, $h:literal)) =>
-    {
+    (   $Int:ty, $md:ident, $Ty:ident, $Err:ident, $MinErr:ident, $MaxErr:ident,
+        $min:literal..=$max:literal, ($l:literal, $h:literal)
+    ) => {
         // This const function is used to enforce constraints for the range definition.
         // Relevant const generics are: `MIN`, `MAX`.
         // The constraints are:
@@ -417,6 +417,15 @@ macro_rules! constrained_def_impl {
             #[inline(always)]
             pub const fn get(&self) -> $Int {
                 self.0
+            }
+
+            /// **Not** part of the public API, implementation detail.
+            // Unfortunate workaround.
+            // Issue: https://github.com/Mari-W/const_guards/issues/2.
+            #[doc(hidden)]
+            #[cfg(test)]
+            pub const fn __new(value: $Int) -> Result<Self, $Err<MIN, MAX>> {
+                Self::new_unguarded(value)
             }
         }
 

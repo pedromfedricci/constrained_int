@@ -20,6 +20,7 @@ args = ["clippy", "--all-features"]
 [tasks.docs]
 args = ["doc", "--no-deps", "--all-features"]
 
+# Build package in no_std environment.
 [tasks.no-std]
 command = "cargo"
 args = ["build", "--target", "thumbv7m-none-eabi"]
@@ -54,6 +55,11 @@ run_task = "chkall"
 [tasks.cov8]
 env = { "RUSTFLAGS" = "--cfg=cnst8bitonly" }
 run_task = "coverage-tarpaulin"
+
+# Linter check with 8bit types only.
+[tasks.clp8]
+env = { "RUSTFLAGS" = "--cfg=cnst8bitonly" }
+run_task = "clippy"
 
 # Run all 8bit related unit tests.
 [tasks.t8]
@@ -129,3 +135,7 @@ args = [
     "i128",
     "isize",
 ]
+
+# Run all 8bit related doc examples only.
+[tasks.td8]
+run_task = { name = ["tdu8", "tdi8"] }
