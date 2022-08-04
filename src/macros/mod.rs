@@ -11,9 +11,3 @@ mod uint;
 // Requires `constrained_def_impl!` macro.
 #[macro_use]
 mod int;
-
-// Import `cnst_gen_def_impl!` macro.
-// Import `rhs_gen_def_impl!` macro.
-#[cfg(test)]
-#[macro_use]
-mod proptest;

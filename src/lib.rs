@@ -71,6 +71,10 @@
 #![allow(incomplete_features)]
 #![feature(generic_const_exprs)]
 //
+// Tracking issue for `mixed_integer_ops`:
+// https://github.com/rust-lang/rust/issues/87840.
+#![feature(mixed_integer_ops)]
+//
 // Tracking issue for `doc_auto_cfg` feature:
 // https://github.com/rust-lang/rust/issues/43781.
 #![feature(doc_auto_cfg)]
@@ -88,23 +92,20 @@ mod macros;
 // default values for doc examples.
 //
 // Format:
-//  { uint, uint_mod, TypeName, ErrorName, MinErrorName, MaxErrorName },+
+//  { uint, sint, uint_mod, sint_mod, TypeName, ErrorName, MinErrorName, MaxErrorName },+
 //
-// Builds `u8` only, which is significantly faster. Useful for most development
-// purposes.
-#[cfg(cnst8bitonly)]
+// Building 8bit related types exclusively is faster, useful for most development purposes.
+#[cfg(any(cnst8bitonly, not(cnst8bitonly)))]
 constrained_uint_def_impl! {
-    { u8, u8, ConstrainedU8, ConstrainedU8Error, MinU8Error, MaxU8Error }
+    { u8, i8, u8, i8, ConstrainedU8, ConstrainedU8Error, MinU8Error, MaxU8Error }
 }
-// Builds all unsigned types by default.
 #[cfg(not(cnst8bitonly))]
 constrained_uint_def_impl! {
-    { u8, u8, ConstrainedU8, ConstrainedU8Error, MinU8Error, MaxU8Error },
-    { u16, u16, ConstrainedU16, ConstrainedU16Error, MinU16Error, MaxU16Error },
-    { u32, u32, ConstrainedU32, ConstrainedU32Error, MinU32Error, MaxU32Error },
-    { u64, u64, ConstrainedU64, ConstrainedU64Error, MinU64Error, Max64Error },
-    { u128, u128, ConstrainedU128, ConstrainedU128Error, Min128Error, Max128Error },
-    { usize, usize, ConstrainedUsize, ConstrainedUsizeError, MinUsizeError, MaxUsizeError },
+    { u16, i16, u16, i16, ConstrainedU16, ConstrainedU16Error, MinU16Error, MaxU16Error },
+    { u32, i32, u32, i32, ConstrainedU32, ConstrainedU32Error, MinU32Error, MaxU32Error },
+    { u64, i64, u64, i64, ConstrainedU64, ConstrainedU64Error, MinU64Error, Max64Error },
+    { u128, i128, u128, i128, ConstrainedU128, ConstrainedU128Error, Min128Error, Max128Error },
+    { usize, isize, usize, isize, ConstrainedUsize, ConstrainedUsizeError, MinUsizeError, MaxUsizeError },
 }
 
 // Define mods, containers, errors, tests and impls for signed integers with
@@ -113,19 +114,19 @@ constrained_uint_def_impl! {
 // Format:
 //  { sint, uint, sint_mod, uint_mod, TypeName, ErrorName, MinErrorName, MaxErrorName },+
 //
-// Builds `i8` only, which is significantly faster. Useful for most development
-// purposes.
-#[cfg(cnst8bitonly)]
+// Building 8bit related types exclusively is faster, useful for most development purposes.
+#[cfg(any(cnst8bitonly, not(cnst8bitonly)))]
 constrained_int_def_impl! {
     { i8, u8, i8, u8, ConstrainedI8, ConstrainedI8Error, MinI8Error, MaxI8Error },
 }
-// Builds all signed types by default.
 #[cfg(not(cnst8bitonly))]
 constrained_int_def_impl! {
-    { i8, u8, i8, u8, ConstrainedI8, ConstrainedI8Error, MinI8Error, MaxI8Error },
     { i16, u16, i16, u16, ConstrainedI16, ConstrainedI16Error, MinI16Error, MaxI16Error },
     { i32, u32, i32, u32, ConstrainedI32, ConstrainedI32Error, MinI32Error, MaxI32Error },
     { i64, u64, i64, u64, ConstrainedI64, ConstrainedI64Error, MinI64Error, MaxI64Error },
     { i128, u128, i128, u128, ConstrainedI128, ConstrainedI128Error, MinI128Error, MaxI128Error },
     { isize, usize, isize, usize, ConstrainedIsize, ConstrainedIsizeError, MinIsizeError, MaxIsizeError },
 }
+
+#[cfg(test)]
+mod proptest;

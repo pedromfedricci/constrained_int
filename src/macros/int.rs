@@ -1,9 +1,11 @@
-// API implementation and doc values especific to signed integers.
+// API implementation and doc values specific to signed integers.
 macro_rules! constrained_int_impl {
-    ($SigInt:ty, $UnsInt:ty, $md:ident, $Ty:ident, $Err:ident, $min:literal..=$max:literal) => {
+    (   $SigInt:ty, $UnsInt:ty, $md:ident, $Ty:ident, $Err:ident,
+        $MinErr:ident, $MaxErr:ident, $min:literal..=$max:literal
+    ) => {
         impl<const MIN: $SigInt, const MAX: $SigInt, const DEF: $SigInt> $Ty<MIN, MAX, DEF> {
-            /// Saturating integer addition. Computes self + rhs, saturating the result
-            /// at either of the range bounds.
+            /// Saturating integer addition. Computes `self + rhs`, saturating the result
+            /// at the range's inclusive bounds.
             ///
             /// # Example
             ///
@@ -28,8 +30,29 @@ macro_rules! constrained_int_impl {
                 Self::saturating_new_unguarded(rhs)
             }
 
-            /// Saturating integer substraction. Computes self - rhs, saturating the
-            /// result at either of the range bounds.
+            /// Saturating addition with unsigned integer. Computes `self + rhs`, saturating
+            /// the result at range's upper bound.
+            ///
+            /// # Example
+            ///
+            /// ```
+            #[doc = concat!("use constrained_int::", stringify!($md), "::", stringify!($Ty), ";")]
+            ///
+            #[doc = concat!("type Constrained = ", stringify!($Ty), "<", stringify!($min, $max), ">;")]
+            ///
+            /// let mut constrained = Constrained::new_max();
+            /// // Saturates at upper bound.
+            #[doc = concat!("constrained = constrained.saturating_add_unsigned(1_", stringify!($UnsInt), ");")]
+            #[doc = concat!("assert_eq!(constrained.get(), ", stringify!($max), ");")]
+            /// ```
+            #[must_use = "this returns the result of the operation, without modifying the original"]
+            pub const fn saturating_add_unsigned(self, rhs: $UnsInt) -> Self {
+                let rhs = self.0.saturating_add_unsigned(rhs);
+                Self::saturating_new_unguarded(rhs)
+            }
+
+            /// Saturating integer substraction. Computes self - rhs, saturating the result
+            /// at the range's inclusive bounds.
             ///
             /// # Example
             ///
@@ -54,7 +77,28 @@ macro_rules! constrained_int_impl {
                 Self::saturating_new_unguarded(rhs)
             }
 
-            /// Checked integer addition. Computes self + rhs, returning [`None`] if
+            /// Saturating substraction with unsigned integer. Computes `self - rhs`,
+            /// saturating the result at range's lower bound.
+            ///
+            /// # Example
+            ///
+            /// ```
+            #[doc = concat!("use constrained_int::", stringify!($md), "::", stringify!($Ty), ";")]
+            ///
+            #[doc = concat!("type Constrained = ", stringify!($Ty), "<", stringify!($min, $max), ">;")]
+            ///
+            /// let mut constrained = Constrained::new_min();
+            /// // Saturates at the lower bound.
+            #[doc = concat!("constrained = constrained.saturating_sub_unsigned(1_", stringify!($UnsInt), ");")]
+            #[doc = concat!("assert_eq!(constrained.get(), ", stringify!($min), ");")]
+            /// ```
+            #[must_use = "this returns the result of the operation, without modifying the original"]
+            pub const fn saturating_sub_unsigned(self, rhs: $UnsInt) -> Self {
+                let rhs = self.0.saturating_sub_unsigned(rhs);
+                Self::saturating_new_unguarded(rhs)
+            }
+
+            /// Checked integer addition. Computes `self + rhs`, returning [`None`] if
             /// result is out of the range's inclusive bounds.
             ///
             /// # Example
@@ -77,6 +121,30 @@ macro_rules! constrained_int_impl {
                 // Can't use `?` operator on const fn yet:
                 // https://github.com/rust-lang/rust/issues/74935.
                 match self.0.checked_add(rhs) {
+                    Some(value) => Self::checked_new_unguarded(value),
+                    None => None,
+                }
+            }
+
+            /// Checked addition with unsigned integer. Computes `self + rhs`, returning
+            /// [`None`] if result is grater than the range's upper bound.
+            ///
+            /// # Example
+            ///
+            /// ```
+            #[doc = concat!("use constrained_int::", stringify!($md), "::", stringify!($Ty), ";")]
+            ///
+            #[doc = concat!("type Constrained = ", stringify!($Ty), "<", stringify!($min, $max), ">;")]
+            ///
+            /// let mut constrained = Constrained::new_max();
+            /// // Above upper bound.
+            #[doc = concat!("assert_eq!(constrained.checked_add_unsigned(1_", stringify!($UnsInt), "), None);")]
+            /// ```
+            #[must_use = "this returns the result of the operation, without modifying the original"]
+            pub const fn checked_add_unsigned(self, rhs: $UnsInt) -> Option<Self> {
+                // Can't use `?` operator on const fn yet:
+                // https://github.com/rust-lang/rust/issues/74935.
+                match self.0.checked_add_unsigned(rhs) {
                     Some(value) => Self::checked_new_unguarded(value),
                     None => None,
                 }
@@ -110,6 +178,30 @@ macro_rules! constrained_int_impl {
                 }
             }
 
+            /// Checked substraction with unsigned integer. Computes `self - rhs`, returning
+            /// [`None`] if result is lower than the range's lower bound.
+            ///
+            /// # Example
+            ///
+            /// ```
+            #[doc = concat!("use constrained_int::", stringify!($md), "::", stringify!($Ty), ";")]
+            ///
+            #[doc = concat!("type Constrained = ", stringify!($Ty), "<", stringify!($min, $max), ">;")]
+            ///
+            /// let mut constrained = Constrained::new_min();
+            /// // Above upper bound.
+            #[doc = concat!("assert_eq!(constrained.checked_sub_unsigned(1_", stringify!($UnsInt), "), None);")]
+            /// ```
+            #[must_use = "this returns the result of the operation, without modifying the original"]
+            pub const fn checked_sub_unsigned(self, rhs: $UnsInt) -> Option<Self> {
+                // Can't use `?` operator on const fn yet:
+                // https://github.com/rust-lang/rust/issues/74935.
+                match self.0.checked_sub_unsigned(rhs) {
+                    Some(value) => Self::checked_new_unguarded(value),
+                    None => None,
+                }
+            }
+
             /// Fallible integer addition. Computes `self + rhs`, returning an error
             /// if the result is out of the range's inclusive bounds.
             ///
@@ -134,6 +226,28 @@ macro_rules! constrained_int_impl {
                     Some(this) => Ok(this),
                     None if rhs.is_positive() => Err($Err::greater()),
                     None => Err($Err::lower()),
+                }
+            }
+
+            /// Fallible addition with unsigned. Computes `self + rhs`, returning an error
+            /// if the result is greater than the range's upper bound.
+            ///
+            /// # Example
+            ///
+            /// ```
+            #[doc = concat!("use constrained_int::", stringify!($md), "::", stringify!($Ty), ";")]
+            ///
+            #[doc = concat!("type Constrained = ", stringify!($Ty), "<", stringify!($min, $max), ">;")]
+            ///
+            /// let mut constrained = Constrained::new_max();
+            /// // Above upper bound.
+            #[doc = concat!("assert!(constrained.try_add_unsigned(1_", stringify!($UnsInt), ").is_err());")]
+            /// ```
+            #[must_use = "this returns the result of the operation, without modifying the original"]
+            pub const fn try_add_unsigned(self, rhs: $UnsInt) -> Result<Self, $MaxErr<MAX>> {
+                match self.checked_add_unsigned(rhs) {
+                    Some(this) => Ok(this),
+                    None => Err($MaxErr::new()),
                 }
             }
 
@@ -164,8 +278,32 @@ macro_rules! constrained_int_impl {
                 }
             }
 
-            /// Wrapping (modular) addition. Computes `self + rhs`, wrapping around at
-            /// the boundary of the range.
+            /// Fallible substraction with unsigned. Computes `self + rhs`, returning an
+            /// error if the result is lower than the range's lower bound.
+            ///
+            /// # Example
+            ///
+            /// ```
+            #[doc = concat!("use constrained_int::", stringify!($md), "::", stringify!($Ty), ";")]
+            ///
+            #[doc = concat!("type Constrained = ", stringify!($Ty), "<", stringify!($min, $max), ">;")]
+            ///
+            /// let mut constrained = Constrained::new_min();
+            /// // Below lower bound.
+            #[doc = concat!("assert!(constrained.try_sub_unsigned(1_", stringify!($UnsInt), ").is_err());")]
+            /// ```
+            #[must_use = "this returns the result of the operation, without modifying the original"]
+            pub const fn try_sub_unsigned(self, rhs: $UnsInt) -> Result<Self, $MinErr<MIN>> {
+                match self.checked_sub_unsigned(rhs) {
+                    Some(this) => Ok(this),
+                    None => Err($MinErr::new()),
+                }
+            }
+
+            /// Wrapping (modular) addition.
+            ///
+            /// Computes `self + rhs`, wrapping the result around the range's upper bound
+            /// if the integer is positive, or at the range's lower bound if negative.
             ///
             /// # Example
             ///
@@ -190,14 +328,42 @@ macro_rules! constrained_int_impl {
                     (value, false) if value >= MIN && value <= MAX => return Self(value),
                     (value, false) if value > MAX => return Self::wrap_around_max(value),
                     (value, false) => return Self::wrap_around_min(value),
-                    (wrapped, true) => Self::overflowed_add(wrapped, rhs.is_positive()),
+                    (wrapped, true) => Self::wrapped_add(wrapped, rhs.is_positive()),
                 };
 
                 self.wrapping_add(rhs)
             }
 
-            /// Wrapping (modular) substraction. Computes `self - rhs`, wrapping around
-            /// at the boundary of the range.
+            /// Wrapping (modular) addition with unsigned integer. Computes `self + rhs`,
+            /// wrapping around at the range's upper bound.
+            ///
+            /// # Example
+            ///
+            /// ```
+            #[doc = concat!("use constrained_int::", stringify!($md), "::", stringify!($Ty), ";")]
+            ///
+            #[doc = concat!("type Constrained = ", stringify!($Ty), "<", stringify!($min, $max), ">;")]
+            ///
+            /// let mut constrained = Constrained::new_max();
+            /// // Wraps around upper bound.
+            #[doc = concat!("constrained = constrained.wrapping_add_unsigned(1_", stringify!($UnsInt), ");")]
+            /// assert_eq!(constrained.get(), Constrained::MIN);
+            /// ```
+            #[must_use = "this returns the result of the operation, without modifyind the original"]
+            pub const fn wrapping_add_unsigned(mut self, mut rhs: $UnsInt) -> Self {
+                (self, rhs) = match self.0.overflowing_add_unsigned(rhs) {
+                    (value, false) if value <= MAX => return Self(value),
+                    (value, false) => return Self::wrap_around_max(value),
+                    (wrapped, true) => Self::wrap_around_max_uns_over(wrapped),
+                };
+
+                self.wrapping_add_unsigned(rhs)
+            }
+
+            /// Wrapping (modular) substraction.
+            ///
+            /// Computes `self - rhs`, wrapping the result around the range's upper bound
+            /// if the integer is negative, or at the range's lower bound if positive.
             ///
             /// # Example
             ///
@@ -222,17 +388,44 @@ macro_rules! constrained_int_impl {
                     (value, false) if value >= MIN && value <= MAX => return Self(value),
                     (value, false) if value < MIN => return Self::wrap_around_min(value),
                     (value, false) => return Self::wrap_around_max(value),
-                    (wrapped, true) => Self::overflowed_sub(wrapped, rhs.is_positive()),
+                    (wrapped, true) => Self::wrapped_sub(wrapped, rhs.is_positive()),
                 };
 
                 self.wrapping_sub(rhs)
             }
 
-            /// Calculates `self` + `rhs`, indicating if result was wrapped around.
+            /// Wrapping (modular) substraction with unsigned integer. Computes `self - rhs`,
+            /// wrapping around at the range's lower bound.
             ///
-            /// Returns a tuple of the addition along with a boolean indicating whether
-            /// the result was wrapped around either of the range bounds. If a range
-            /// overflow would have occurred then the wrapped value is returned.
+            /// # Example
+            ///
+            /// ```
+            #[doc = concat!("use constrained_int::", stringify!($md), "::", stringify!($Ty), ";")]
+            ///
+            #[doc = concat!("type Constrained = ", stringify!($Ty), "<", stringify!($min, $max), ">;")]
+            ///
+            /// let mut constrained = Constrained::new_min();
+            /// // Wraps around upper bound.
+            #[doc = concat!("constrained = constrained.wrapping_sub_unsigned(1_", stringify!($UnsInt), ");")]
+            /// assert_eq!(constrained.get(), Constrained::MAX);
+            /// ```
+            #[must_use = "this returns the result of the operation, without modifyind the original"]
+            pub const fn wrapping_sub_unsigned(mut self, mut rhs: $UnsInt) -> Self {
+                (self, rhs) = match self.0.overflowing_sub_unsigned(rhs) {
+                    (value, false) if value >= MIN => return Self(value),
+                    (value, false) => return Self::wrap_around_min(value),
+                    (wrapped, true) => Self::wrap_around_min_uns_over(wrapped),
+                };
+
+                self.wrapping_sub_unsigned(rhs)
+            }
+
+            /// Wrapping (modular) addition, indicating if result was wrapped around.
+            ///
+            /// Computes `self + rhs`, wrapping the result around the range's upper
+            /// bound if the integer is positive, or at the range's lower bound if
+            /// negative. If a wrapping addition would have occurred, then the boolean
+            /// is set to `true`, else to `false`.
             ///
             /// # Example
             ///
@@ -255,23 +448,52 @@ macro_rules! constrained_int_impl {
             /// assert_eq!(wrapped, false);
             /// ```
             #[must_use = "this returns the result of the operation, without modifyind the original"]
-            pub const fn overflowing_add(mut self, mut rhs: $SigInt) -> (Self, bool) {
+            pub const fn overflowing_add(self, rhs: $SigInt) -> (Self, bool) {
                 match self.0.overflowing_add(rhs) {
                     (value, false) if value >= MIN && value <= MAX => (Self(value), false),
                     (value, false) if value > MAX => (Self::wrap_around_max(value), true),
                     (value, false) => (Self::wrap_around_min(value), true),
-                    (wrapped, true) => {
-                        (self, rhs) = Self::overflowed_add(wrapped, rhs.is_positive());
-                        (self.wrapping_add(rhs), true)
-                    }
+                    (wrapped, true) => (Self::overflowed_add(wrapped, rhs.is_positive()), true),
                 }
             }
 
-            /// Calculates `self` - `rhs`, indicating if result was wrapped around.
+            /// Wrapping (modular) addition with unsigned integer, indicating if result
+            /// was wrapped around.
             ///
-            /// Returns a tuple of the substraction along with a boolean indicating
-            /// whether the result was wrapped around either of the range bounds. If a
-            /// range overflow would have occurred then the wrapped value is returned.
+            /// Computes `self + rhs`, wrapping the result around the range's upper
+            /// bound. If a wrapping addition would have occurred, then the boolean
+            /// is set to `true`, else to `false`.
+            ///
+            /// # Example
+            ///
+            /// ```
+            #[doc = concat!("use constrained_int::", stringify!($md), "::", stringify!($Ty), ";")]
+            ///
+            #[doc = concat!("type Constrained = ", stringify!($Ty), "<", stringify!($min, $max), ">;")]
+            ///
+            /// let mut constrained = Constrained::new_max();
+            /// let mut wrapped: bool;
+            ///
+            /// // Wraps around the upper bound, the boolean is set to `true`.
+            #[doc = concat!("(constrained, wrapped) = constrained.overflowing_add_unsigned(1_", stringify!($UnsInt), ");")]
+            /// assert_eq!(constrained.get(), Constrained::MIN);
+            /// assert_eq!(wrapped, true);
+            /// ```
+            #[must_use = "this returns the result of the operation, without modifyind the original"]
+            pub const fn overflowing_add_unsigned(self, rhs: $UnsInt) -> (Self, bool) {
+                match self.0.overflowing_add_unsigned(rhs) {
+                    (value, false) if value <= MAX => (Self(value), false),
+                    (value, false) => (Self::wrap_around_max(value), true),
+                    (wrapped, true) => (Self::overflowed_add_unsigned(wrapped), true),
+                }
+            }
+
+            /// Wrapping (modular) substraction, indicating if result was wrapped around.
+            ///
+            /// Computes `self - rhs`, wrapping the result around the range's upper
+            /// bound if the integer is negative, or at the range's lower bound if
+            /// positive. If a wrapping substraction would have occurred, then the boolean
+            /// is set to `true`, else to `false`.
             ///
             /// # Example
             ///
@@ -294,15 +516,43 @@ macro_rules! constrained_int_impl {
             /// assert_eq!(wrapped, false);
             /// ```
             #[must_use = "this returns the result of the operation, without modifyind the original"]
-            pub const fn overflowing_sub(mut self, mut rhs: $SigInt) -> (Self, bool) {
+            pub const fn overflowing_sub(self, rhs: $SigInt) -> (Self, bool) {
                 match self.0.overflowing_sub(rhs) {
                     (value, false) if value >= MIN && value <= MAX => (Self(value), false),
                     (value, false) if value < MIN => (Self::wrap_around_min(value), true),
                     (value, false) => (Self::wrap_around_max(value), true),
-                    (wrapped, true) => {
-                        (self, rhs) = Self::overflowed_sub(wrapped, rhs.is_positive());
-                        (self.wrapping_sub(rhs), true)
-                    }
+                    (wrapped, true) => (Self::overflowed_sub(wrapped, rhs.is_positive()), true),
+                }
+            }
+
+            /// Wrapping (modular) substraction with unsigned integer, indicating if result
+            /// was wrapped around.
+            ///
+            /// Computes `self - rhs`, wrapping the result around the range's lower
+            /// bound. If a wrapping addition would have occurred, then the boolean
+            /// is set to `true`, else to `false`.
+            ///
+            /// # Example
+            ///
+            /// ```
+            #[doc = concat!("use constrained_int::", stringify!($md), "::", stringify!($Ty), ";")]
+            ///
+            #[doc = concat!("type Constrained = ", stringify!($Ty), "<", stringify!($min, $max), ">;")]
+            ///
+            /// let mut constrained = Constrained::new_min();
+            /// let mut wrapped: bool;
+            ///
+            /// // Wraps around the upper bound, the boolean is set to `true`.
+            #[doc = concat!("(constrained, wrapped) = constrained.overflowing_sub_unsigned(1_", stringify!($UnsInt), ");")]
+            /// assert_eq!(constrained.get(), Constrained::MAX);
+            /// assert_eq!(wrapped, true);
+            /// ```
+            #[must_use = "this returns the result of the operation, without modifyind the original"]
+            pub const fn overflowing_sub_unsigned(self, rhs: $UnsInt) -> (Self, bool) {
+                match self.0.overflowing_sub_unsigned(rhs) {
+                    (value, false) if value >= MIN => (Self(value), false),
+                    (value, false) => (Self::wrap_around_min(value), true),
+                    (wrapped, true) => (Self::overflowed_sub_unsigned(wrapped), true),
                 }
             }
 
@@ -392,9 +642,9 @@ macro_rules! constrained_int_impl {
                 }
             }
 
-            /// Wraps the value around the range upper bound.
+            /// Wraps the value around the range's upper bound.
             ///
-            /// Caller must ensure that `value` is greater from `MAX`, or else there will
+            /// Caller must ensure that `value` is greater than `MAX`, or else there will
             /// be an unexpected overflow.
             #[must_use]
             const fn wrap_around_max(mut value: $SigInt) -> Self {
@@ -405,9 +655,9 @@ macro_rules! constrained_int_impl {
                 Self(value)
             }
 
-            /// Wraps the value around the range lower bound.
+            /// Wraps the value around the range's lower bound.
             ///
-            /// Caller must ensure that `value` is lower from `MIN`, or else there will
+            /// Caller must ensure that `value` is lower than `MIN`, or else there will
             /// be an unexpected overflow.
             #[must_use]
             const fn wrap_around_min(mut value: $SigInt) -> Self {
@@ -418,20 +668,20 @@ macro_rules! constrained_int_impl {
                 Self(value)
             }
 
-            /// Computes the value to wrap around the range upper bound from a integer
-            /// overflow.
+            /// Computes the value to wrap around the range's upper bound from the value
+            /// returned by a overflowed signed operation.
             ///
-            /// Wraps `<$SigInt>::MAX` around the range upper bound and returns the result
-            /// as the first value. Computes the remaining from provided overflowed
-            /// integer and returns it as the second value.
+            /// Wraps `<$SigInt>::MAX` around the range's upper bound and returns the
+            /// result as the first value. Computes the remaining from the wrapped value
+            /// and returns it as the second value.
             ///
-            /// Caller must ensure that `value` is lower than `<$SigInt>::MAX`, or else
-            /// there will be an unexpected overflow.
+            /// Caller must ensure that `value` is lower than 0, or else there will be
+            /// a unexpected overflow.
             #[must_use]
             const fn wrap_around_max_over(mut value: $SigInt) -> (Self, $SigInt) {
-                debug_assert!(value < <$SigInt>::MAX, "value must lower than <$SigInt>::MAX");
+                debug_assert!(value < 0, "value must lower than 0");
                 value = <$SigInt>::abs_diff(<$SigInt>::MIN, value) as $SigInt;
-                // No conditional compilation based on constexpr evaluation unfortunately.
+                // TODO: No conditional compilation based on constexpr evaluation yet.
                 if <$SigInt>::MAX > MAX {
                     (Self::wrap_around_max(<$SigInt>::MAX), value + 1)
                 } else {
@@ -439,20 +689,66 @@ macro_rules! constrained_int_impl {
                 }
             }
 
-            /// Computes the value to wrap around the range lower bound from a integer
-            /// overflow.
+            /// Computes the value to wrap around the range's upper bound from the value
+            /// returned by a overflowed unsigned operation.
             ///
-            /// Wraps `<$SigInt>::MIN` around the range lower bound and returns the result
-            /// as the first value. Computes the remaining from provided overflowed
-            /// integer and returns it as the second value.
+            /// Wraps `<$SigInt>::MAX` around the range's upper bound and returns the
+            /// result as the first value. Computes the remaining from the wrapped value
+            /// and returns it in the second position.
             ///
-            /// Caller must ensure that `value` is greater than `<$SigInt>::MIN`, or else
-            /// there will be an unexpected overflow.
+            /// Caller must ensure that `value` is lower than `<$SigInt>::MAX`, or else
+            /// there will be a unexpected overflow.
+            #[must_use]
+            const fn wrap_around_max_uns_over(value: $SigInt) -> (Self, $UnsInt) {
+                debug_assert!(value < <$SigInt>::MAX,
+                    concat!("value must be lower than ", stringify!($SigInt), "::MAX")
+                );
+                let value = <$SigInt>::abs_diff(<$SigInt>::MIN, value);
+                // TODO: No conditional compilation based on constexpr evaluation yet.
+                if <$SigInt>::MAX > MAX {
+                    (Self::wrap_around_max(<$SigInt>::MAX), value + 1)
+                } else {
+                    (Self(MIN), value)
+                }
+            }
+
+            /// Computes the value to wrap around the range's upper bound from the value
+            /// returned by a overflowed signed operation.
+            ///
+            /// Wraps `<$SigInt>::MIN` around the range's lower bound and returns the
+            /// result as the first value. Computes the remaining from the wrapped value
+            /// and returns it in the second position.
+            ///
+            /// Caller must ensure that `value` is greater than 0, or else there will be
+            /// an unexpected overflow.
             #[must_use]
             const fn wrap_around_min_over(mut value: $SigInt) -> (Self, $SigInt) {
-                debug_assert!(value > <$SigInt>::MIN, "value must greater than <$SigInt>::MIN");
+                debug_assert!(value > 0, "value must greater than 0");
                 value = <$SigInt>::abs_diff(<$SigInt>::MAX, value) as $SigInt;
-                // No conditional compilation based on constexpr evaluation unfortunately.
+                // TODO: No conditional compilation based on constexpr evaluation yet.
+                if <$SigInt>::MIN < MIN {
+                    (Self::wrap_around_min(<$SigInt>::MIN), value + 1)
+                } else {
+                    (Self(MAX), value)
+                }
+            }
+
+            /// Computes the value to wrap around the range's lower bound from the value
+            /// returned by a overflowed unsigned operation.
+            ///
+            /// Wraps `<$SigInt>::MIN` around the range's lower bound and returns the
+            /// result as the first value. Computes the remaining from the wrapped value
+            /// and returns it in the second position.
+            ///
+            /// Caller must ensure that `value` is greater than <$SigInt>::MIN, or else
+            /// there will be an unexpected overflow.
+            #[must_use]
+            const fn wrap_around_min_uns_over(value: $SigInt) -> (Self, $UnsInt) {
+                debug_assert!(value > <$SigInt>::MIN,
+                    concat!("value must be greater than ", stringify!($SigInt), "::MIN")
+                );
+                let value = <$SigInt>::abs_diff(<$SigInt>::MAX, value);
+                // TODO: No conditional compilation based on constexpr evaluation yet.
                 if <$SigInt>::MIN < MIN {
                     (Self::wrap_around_min(<$SigInt>::MIN), value + 1)
                 } else {
@@ -465,7 +761,7 @@ macro_rules! constrained_int_impl {
             /// `wrapped`: overflowed integer.
             /// `is_pos`: must be `true` if `rhs` was positive, `false` otherwise.
             #[must_use]
-            const fn overflowed_add(wrapped: $SigInt, is_pos: bool) -> (Self, $SigInt) {
+            const fn wrapped_add(wrapped: $SigInt, is_pos: bool) -> (Self, $SigInt) {
                 if is_pos {
                     Self::wrap_around_max_over(wrapped)
                 } else {
@@ -479,7 +775,7 @@ macro_rules! constrained_int_impl {
             /// `wrapped`: overflowed integer.
             /// `is_pos`: must be `true` if `rhs` was positive, `false` otherwise.
             #[must_use]
-            const fn overflowed_sub(wrapped: $SigInt, is_pos: bool) -> (Self, $SigInt) {
+            const fn wrapped_sub(wrapped: $SigInt, is_pos: bool) -> (Self, $SigInt) {
                 if is_pos {
                     Self::wrap_around_min_over(wrapped)
                 } else {
@@ -488,12 +784,51 @@ macro_rules! constrained_int_impl {
                 }
             }
 
+            /// Handles overflowed `overflowing_add` calls from inner integer.
+            ///
+            /// `wrapped`: overflowed integer.
+            /// `is_pos`: must be `true` if `rhs` was positive, `false` otherwise.
+            #[must_use]
+            const fn overflowed_add(wrapped: $SigInt, is_pos: bool) -> Self {
+                let (this, rhs) = Self::wrapped_add(wrapped, is_pos);
+                this.wrapping_add(rhs)
+            }
+
+            /// Handles overflowed `overflowing_sub` calls from inner integer.
+            ///
+            /// `wrapped`: overflowed integer.
+            /// `is_pos`: must be `true` if `rhs` was positive, `false` otherwise.
+            #[must_use]
+            const fn overflowed_sub(wrapped: $SigInt, is_pos: bool) -> Self {
+                let (this, rhs) = Self::wrapped_sub(wrapped, is_pos);
+                this.wrapping_sub(rhs)
+            }
+
+            /// Handles overflowed `overflowing_add_unsigned` calls from inner integer.
+            ///
+            /// `wrapped`: overflowed integer.
+            /// `is_pos`: must be `true` if `rhs` was positive, `false` otherwise.
+            #[must_use]
+            const fn overflowed_add_unsigned(wrapped: $SigInt) -> Self {
+                let (this, rhs) = Self::wrap_around_max_uns_over(wrapped);
+                this.wrapping_add_unsigned(rhs)
+            }
+
+            /// Handles overflowed `overflowing_sub_unsigned` calls from inner integer.
+            ///
+            /// `wrapped`: overflowed integer.
+            /// `is_pos`: must be `true` if `rhs` was positive, `false` otherwise.
+            #[must_use]
+            const fn overflowed_sub_unsigned(wrapped: $SigInt) -> Self {
+                let (this, rhs) = Self::wrap_around_min_uns_over(wrapped);
+                this.wrapping_sub_unsigned(rhs)
+            }
+
             /// Returns the range size.
             #[must_use]
             const fn range_size() -> $UnsInt {
                 // Can't overflow since construction is guarded against `MAX ==
-                // <$SigInt>::MAX` AND `MIN == <$SigInt>::MIN` at the same time,
-                // and `MIN` can't be greater than `MAX`.
+                // <$SigInt>::MAX` AND `MIN == <$SigInt>::MIN` at the same time.
                 debug_assert!(guard_arithmetics::<MIN, MAX>(), "invalid range");
                 <$SigInt>::abs_diff(MIN, MAX) + 1
             }
@@ -516,8 +851,8 @@ macro_rules! constrained_int_impl {
 // Defines mods, containers, errors and impls, tests and default doc values for unsigned integers.
 macro_rules! constrained_int_def_impl {
     ($({ $SigInt:ty, $UnsInt:ty, $sint_md:ident, $uint_md:ident,
-        $Ty:ident, $Err:ident, $MinErr:ident, $MaxErr:ident }),+ $(,)*) =>
-    {$(
+         $Ty:ident, $Err:ident, $MinErr:ident, $MaxErr:ident }),+ $(,)*
+    ) => {$(
         #[doc = concat!("Container and Error types for a range constrained [`prim@", stringify!($SigInt), "`].")]
         pub mod $sint_md {
             constrained_def_impl! {
@@ -526,8 +861,8 @@ macro_rules! constrained_int_def_impl {
             }
 
             constrained_int_impl! {
-            //  sint, uint, sint_mod, TypeName, ErrorName, min..=max
-                $SigInt, $UnsInt, $sint_md, $Ty, $Err, -127..=126
+            //  sint, uint, sint_mod, TypeName, ErrorName, MinErrorName, MaxErrorName, min..=max
+                $SigInt, $UnsInt, $sint_md, $Ty, $Err, $MinErr, $MaxErr, -127..=126
             }
 
             #[cfg(test)]
@@ -541,8 +876,8 @@ macro_rules! constrained_int_def_impl {
             #[cfg(test)]
             mod tests_int_specific {
                 tests_int! {
-                //  sint, uint, sint_mod, uint_mod, ty_mod_path, TypeName, ErrorName
-                    $SigInt, $UnsInt, $sint_md, $uint_md, super, $Ty, $Err
+                //  sint, uint, sint_mod, uint_mod, ty_mod_path, TypeName, ErrorName, MinErrorName, MaxErrorName
+                    $SigInt, $UnsInt, $sint_md, $uint_md, super, $Ty, $Err, $MinErr, $MaxErr
                 }
             }
         }
@@ -552,12 +887,13 @@ macro_rules! constrained_int_def_impl {
 // Implements all signed integer specific tests.
 #[cfg(test)]
 macro_rules! tests_int {
-    ($SigInt:ty, $UnsInt:ty, $sint_md:ident, $uint_md:ident, $ty_path:path, $Ty:ident, $Err:ident) => {
+    (   $SigInt:ty, $UnsInt:ty, $sint_md:ident, $uint_md:ident, $ty_path:path,
+        $Ty:ident, $Err:ident, $MinErr:ident, $MaxErr:ident
+    ) => {
+        use crate::proptest::$sint_md::{CnstGen, Rhs as SigRhs, RhsGen as SigRhsGen};
+        use crate::proptest::$uint_md::{Rhs as UnsRhs, RhsGen as UnsRhsGen};
         use ::core::fmt::Debug;
-        use $ty_path::{$Err, $Ty};
-
-        rhs_gen_def_impl! { { $SigInt, $sint_md, sig_rhs }, }
-        use sig_rhs::{Rhs as SigRhs, RhsGen as SigRhsGen};
+        use $ty_path::{$Err, $MaxErr, $MinErr, $Ty};
 
         #[test]
         fn signum() {
@@ -611,15 +947,6 @@ macro_rules! tests_int {
 
             let constrained = $Ty::<-2, 1>::new_min();
             assert_eq!(constrained.checked_abs(), None);
-        }
-
-        #[cfg(test)]
-        impl<const S: $SigInt, const E: $SigInt> ::core::ops::Neg for SigRhs<S, E> {
-            type Output = $SigInt;
-
-            fn neg(self) -> Self::Output {
-                -self.get()
-            }
         }
 
         fn assert_add_bounded<const MIN: $SigInt, const MAX: $SigInt, const DEF: $SigInt>(
@@ -720,6 +1047,86 @@ macro_rules! tests_int {
             assert_eq!(cnst.get(), MIN + (rhs - 1));
         }
 
+        fn assert_add_unsigned_bounded<
+            const MIN: $SigInt,
+            const MAX: $SigInt,
+            const DEF: $SigInt,
+        >(
+            rhs: UnsRhs<{ 0 }, { $Ty::<MIN, MAX, DEF>::range_size() - 1 }>,
+            add: impl Fn($Ty<MIN, MAX, DEF>, $UnsInt) -> $Ty<MIN, MAX, DEF>,
+        ) {
+            let mut cnst = $Ty(MIN);
+            cnst = add(cnst, rhs.get());
+            assert_eq!(cnst.get(), MIN.checked_add_unsigned(rhs.get()).unwrap());
+        }
+
+        fn assert_sub_unsigned_bounded<
+            const MIN: $SigInt,
+            const MAX: $SigInt,
+            const DEF: $SigInt,
+        >(
+            rhs: UnsRhs<{ 0 }, { $Ty::<MIN, MAX, DEF>::range_size() - 1 }>,
+            sub: impl Fn($Ty<MIN, MAX, DEF>, $UnsInt) -> $Ty<MIN, MAX, DEF>,
+        ) {
+            let mut cnst = $Ty(MAX);
+            cnst = sub(cnst, rhs.get());
+            assert_eq!(cnst.get(), MAX.checked_sub_unsigned(rhs.get()).unwrap());
+        }
+
+        fn assert_unsigned_unbounded<
+            const MIN: $SigInt,
+            const MAX: $SigInt,
+            const DEF: $SigInt,
+            T: Eq + Debug,
+        >(
+            cnst: $Ty<MIN, MAX, DEF>,
+            rhs: UnsRhs<{ $Ty::<MIN, MAX, DEF>::range_size() }, { <$UnsInt>::MAX }>,
+            expected: T,
+            op: impl Fn($Ty<MIN, MAX, DEF>, $UnsInt) -> T,
+        ) {
+            let returned = op(cnst, rhs.get());
+            assert_eq!(returned, expected);
+        }
+
+        fn assert_wrapping_add_unsigned_unbounded<
+            const MIN: $SigInt,
+            const MAX: $SigInt,
+            const DEF: $SigInt,
+        >(
+            rhs: UnsRhs<{ 1 }, { $Ty::<MIN, MAX, DEF>::range_size() }>,
+            add: impl Fn($Ty<MIN, MAX, DEF>, $UnsInt) -> $Ty<MIN, MAX, DEF>,
+        ) {
+            let mut cnst = $Ty(MAX);
+            cnst = add(cnst, rhs.get());
+            assert_eq!(cnst.get(), MIN.checked_add_unsigned(rhs - 1).unwrap());
+        }
+
+        fn assert_wrapping_sub_unsigned_unbounded<
+            const MIN: $SigInt,
+            const MAX: $SigInt,
+            const DEF: $SigInt,
+        >(
+            rhs: UnsRhs<{ 1 }, { $Ty::<MIN, MAX, DEF>::range_size() }>,
+            sub: impl Fn($Ty<MIN, MAX, DEF>, $UnsInt) -> $Ty<MIN, MAX, DEF>,
+        ) {
+            let mut cnst = $Ty(MIN);
+            cnst = sub(cnst, rhs.get());
+            assert_eq!(cnst.get(), MAX.checked_sub_unsigned(rhs - 1).unwrap());
+        }
+
+        fn assert_wrapping_unsigned_range_size<
+            const MIN: $SigInt,
+            const MAX: $SigInt,
+            const DEF: $SigInt,
+        >(
+            mut cnst: $Ty<MIN, MAX, DEF>,
+            wrap: impl Fn($Ty<MIN, MAX, DEF>, $UnsInt) -> $Ty<MIN, MAX, DEF>,
+        ) {
+            let inner = cnst.get();
+            cnst = wrap(cnst, $Ty::<MIN, MAX, DEF>::range_size());
+            assert_eq!(cnst.get(), inner);
+        }
+
         // For testing purposes:
         //
         // Verify arithmetics for a range definition with the same lower bound as the
@@ -730,8 +1137,8 @@ macro_rules! tests_int {
         type ConstrainedMax = $Ty<{ <$SigInt>::MIN + 1 }, { <$SigInt>::MAX }>;
 
         impl_int_prop_tests_for! {
-        //  { int, uint, ErrorName },
-            { $SigInt, $UnsInt, $Err },
+        //  { ErrorName, MinErrorName, MaxErrorName },
+            { $Err, $MinErr, $MaxErr },
         //  { module_name, TypeName },+
             { min, ConstrainedMin },
             { max, ConstrainedMax },
@@ -743,13 +1150,15 @@ macro_rules! tests_int {
 // `Constrained` types, e.g: `Constrainedi8<-10, 21, 0>`;
 #[cfg(test)]
 macro_rules! impl_int_prop_tests_for {
-    ({ $SigInt:ty, $UnsInt:ty, $Err:ident }, $({ $md:ident, $Ty:ty }),+ $(,)*) => {$(
+    ({ $Err:ident, $MinErr:ident, $MaxErr:ident }, $({ $md:ident, $Ty:ty }),+ $(,)*) => {$(
         #[cfg(test)]
         mod $md {
             use ::proptest::proptest;
             use super::*;
 
             type Cnst = $Ty;
+            type MinErr = $MinErr<{ Cnst::MIN }>;
+            type MaxErr = $MaxErr<{ Cnst::MAX }>;
             type CnstErr = $Err<{ Cnst::MIN }, { Cnst::MAX }>;
 
             proptest! {
@@ -820,6 +1229,72 @@ macro_rules! impl_int_prop_tests_for {
                 }
 
                 #[test]
+                fn checked_add_unsigned_bounded(rhs in UnsRhsGen) {
+                    assert_add_unsigned_bounded(rhs, |cnst: Cnst, rhs| {
+                        cnst.checked_add_unsigned(rhs).expect("expected `checked_add_unsigned` to succeed")
+                    });
+                }
+
+                #[test]
+                fn try_add_unsigned_bounded(rhs in UnsRhsGen) {
+                    assert_add_unsigned_bounded(rhs, |cnst: Cnst, rhs| {
+                        cnst.try_add_unsigned(rhs).expect("expected `try_add_unsigned` to succeed")
+                    });
+                }
+
+                #[test]
+                fn saturating_add_unsigned_bounded(rhs in UnsRhsGen) {
+                    assert_add_unsigned_bounded(rhs, Cnst::saturating_add_unsigned);
+                }
+
+                #[test]
+                fn wrapping_add_unsigned_bounded(rhs in UnsRhsGen) {
+                    assert_add_unsigned_bounded(rhs, Cnst::wrapping_add_unsigned);
+                }
+
+                #[test]
+                fn overflowing_add_unsigned_bounded(rhs in UnsRhsGen) {
+                    assert_add_unsigned_bounded(rhs, |cnst: Cnst, rhs| {
+                        let (cnst, overflowed) = cnst.overflowing_add_unsigned(rhs);
+                        assert!(!overflowed, "expected `overflowing_add_unsigned` to not overflow");
+                        cnst
+                    });
+                }
+
+                #[test]
+                fn checked_sub_unsigned_bounded(rhs in UnsRhsGen) {
+                    assert_sub_unsigned_bounded(rhs, |cnst: Cnst, rhs| {
+                        cnst.checked_sub_unsigned(rhs).expect("expected `checked_sub_unsigned` to succeed")
+                    })
+                }
+
+                #[test]
+                fn try_sub_unsigned_bounded(rhs in UnsRhsGen) {
+                    assert_sub_unsigned_bounded(rhs, |cnst: Cnst, rhs| {
+                        cnst.try_sub_unsigned(rhs).expect("expected `try_sub_unsigned` to succeed")
+                    });
+                }
+
+                #[test]
+                fn saturating_sub_unsigned_bounded(rhs in UnsRhsGen) {
+                    assert_sub_unsigned_bounded(rhs, Cnst::saturating_sub_unsigned);
+                }
+
+                #[test]
+                fn wrapping_sub_unsigned_bounded(rhs in UnsRhsGen) {
+                    assert_sub_unsigned_bounded(rhs, Cnst::wrapping_sub_unsigned);
+                }
+
+                #[test]
+                fn overflowing_sub_unsigned_bounded(rhs in UnsRhsGen) {
+                    assert_sub_unsigned_bounded(rhs, |cnst: Cnst, rhs| {
+                        let (cnst, overflowed) = cnst.overflowing_sub_unsigned(rhs);
+                        assert!(!overflowed, "expected `overflowing_sub_unsigned` to not overflow");
+                        cnst
+                    });
+                }
+
+                #[test]
                 fn checked_add_unbounded(rhs in SigRhsGen) {
                     assert_add_unbounded(rhs, (None, None), Cnst::checked_add);
                 }
@@ -866,6 +1341,36 @@ macro_rules! impl_int_prop_tests_for {
                 }
 
                 #[test]
+                fn checked_add_unsigned_unbounded((cnst, rhs) in (CnstGen, UnsRhsGen)) {
+                    assert_unsigned_unbounded(cnst, rhs, None, Cnst::checked_add_unsigned);
+                }
+
+                #[test]
+                fn try_add_unsigned_unbounded((cnst, rhs) in (CnstGen, UnsRhsGen)) {
+                    assert_unsigned_unbounded(cnst, rhs, Err(MaxErr::new()), Cnst::try_add_unsigned);
+                }
+
+                #[test]
+                fn saturating_add_unsigned_unbounded((cnst, rhs) in (CnstGen, UnsRhsGen)) {
+                    assert_unsigned_unbounded(cnst, rhs, Cnst::new_max(), Cnst::saturating_add_unsigned);
+                }
+
+                #[test]
+                fn checked_sub_unsigned_unbounded((cnst, rhs) in (CnstGen, UnsRhsGen)) {
+                    assert_unsigned_unbounded(cnst, rhs, None, Cnst::checked_sub_unsigned);
+                }
+
+                #[test]
+                fn try_sub_unsigned_unbounded((cnst, rhs) in (CnstGen, UnsRhsGen)) {
+                    assert_unsigned_unbounded(cnst, rhs, Err(MinErr::new()), Cnst::try_sub_unsigned);
+                }
+
+                #[test]
+                fn saturating_sub_unsigned_unbounded((cnst, rhs) in (CnstGen, UnsRhsGen)) {
+                    assert_unsigned_unbounded(cnst, rhs, Cnst::new_min(), Cnst::saturating_sub_unsigned);
+                }
+
+                #[test]
                 fn wrapping_add_unbounded(rhs in SigRhsGen) {
                     assert_wrapping_add_unbounded(rhs, Cnst::wrapping_add);
                 }
@@ -888,6 +1393,62 @@ macro_rules! impl_int_prop_tests_for {
                 fn overflowing_sub_unbounded(rhs in SigRhsGen) {
                     assert_wrapping_sub_unbounded(rhs, |cnst: Cnst, rhs| {
                         let (cnst, overflowed) = cnst.overflowing_sub(rhs);
+                        assert!(overflowed, "expected `overflowing_sub` to overflow");
+                        cnst
+                    });
+                }
+
+                #[test]
+                fn wrapping_add_unsigned_unbounded(rhs in UnsRhsGen) {
+                    assert_wrapping_add_unsigned_unbounded(rhs, Cnst::wrapping_add_unsigned);
+                }
+
+                #[test]
+                fn overflowing_add_unsigned_unbounded(rhs in UnsRhsGen) {
+                    assert_wrapping_add_unsigned_unbounded(rhs, |cnst: Cnst, rhs| {
+                        let (cnst, overflowed) = cnst.overflowing_add_unsigned(rhs);
+                        assert!(overflowed, "expected `overflowing_add_unsigned` to overflow");
+                        cnst
+                    });
+                }
+
+                #[test]
+                fn wrapping_sub_unsigned_unbounded(rhs in UnsRhsGen) {
+                    assert_wrapping_sub_unsigned_unbounded(rhs, Cnst::wrapping_sub_unsigned);
+                }
+
+                #[test]
+                fn overflowing_sub_unsigned_unbounded(rhs in UnsRhsGen) {
+                    assert_wrapping_sub_unsigned_unbounded(rhs, |cnst: Cnst, rhs| {
+                        let (cnst, overflowed) = cnst.overflowing_sub_unsigned(rhs);
+                        assert!(overflowed, "expected `overflowing_sub_unsigned` to overflow");
+                        cnst
+                    });
+                }
+
+                #[test]
+                fn wrapping_add_unsigned_range_size(cnst in CnstGen) {
+                    assert_wrapping_unsigned_range_size(cnst, Cnst::wrapping_add_unsigned);
+                }
+
+                #[test]
+                fn overflowing_add_unsigned_range_size(cnst in CnstGen) {
+                    assert_wrapping_unsigned_range_size(cnst, |cnst: Cnst, rsize| {
+                        let (cnst, overflowed) = cnst.overflowing_add_unsigned(rsize);
+                        assert!(overflowed, "expected `overflowing_add` to overflow");
+                        cnst
+                    });
+                }
+
+                #[test]
+                fn wrapping_sub_unsigned_range_size(cnst in CnstGen) {
+                    assert_wrapping_unsigned_range_size(cnst, Cnst::wrapping_sub_unsigned);
+                }
+
+                #[test]
+                fn overflowing_sub_unsigned_range_size(cnst in CnstGen) {
+                    assert_wrapping_unsigned_range_size(cnst, |cnst: Cnst, rsize| {
+                        let (cnst, overflowed) = cnst.overflowing_sub_unsigned(rsize);
                         assert!(overflowed, "expected `overflowing_sub` to overflow");
                         cnst
                     });
