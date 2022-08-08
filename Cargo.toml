@@ -14,14 +14,16 @@ authors = ["Pedro de Matos Fedricci <pedromfedricci@gmail.com>"]
 categories = ["no-std", "mathematics", "algorithms"]
 keywords = ["no_std", "numerics"]
 
-exclude = [".github", "ci"]
+exclude = [".github", "ci", "Makefile.toml", "codecov.yaml"]
 
 [features]
-# This will import std as a dependency.
+# This will import `std` as a dependency.
 std = []
+serde = ["dep:serde"]
 
 [dependencies]
 const_guards = { version = "0.1.3" }
+serde = { version = "1", default-features = false, optional = true }
 
 [dev-dependencies]
 proptest = { version = "1" }
