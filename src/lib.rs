@@ -88,6 +88,12 @@
 #[macro_use]
 mod macros;
 
+#[cfg(feature = "serde")]
+mod deserialize;
+
+#[cfg(test)]
+mod proptest;
+
 // Define mods, containers, errors, tests and impls for unsigned integers with
 // default values for doc examples.
 //
@@ -127,6 +133,3 @@ constrained_int_def_impl! {
     { i128, u128, i128, u128, ConstrainedI128, ConstrainedI128Error, MinI128Error, MaxI128Error },
     { isize, usize, isize, usize, ConstrainedIsize, ConstrainedIsizeError, MinIsizeError, MaxIsizeError },
 }
-
-#[cfg(test)]
-mod proptest;
