@@ -44,7 +44,7 @@ args = [
 # Check package with all types.
 [tasks.chkall]
 command = "cargo"
-args = ["check", "--all-features", "--tests"]
+args = ["check", "--all-features"]
 
 # Check package with 8bit types only.
 [tasks.chk8]

@@ -1,2 +1,7 @@
 [main]
-features = "std"
+all-features = true
+ignore-tests = true
+# Else tarpaulin will report uncovered
+# code for the macro calls at lib.
+exclude-files = ["src/lib.rs"]
+out = ["Xml"]

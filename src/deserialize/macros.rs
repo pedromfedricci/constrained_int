@@ -126,6 +126,7 @@ macro_rules! int_to_uint {
 
 // Casts a 128bit visitor to inner's (128bit) type, if representable. Then constructs the
 // container if the range definiton is valid, and the value is within range.
+#[cfg(not(cnst8bitonly))]
 macro_rules! num_128 {
     ($Inner:ty, $Visit:ty : $visit:ident) => {
         fn $visit<E: DesError>(self, v: $Visit) -> Result<Self::Value, E> {

@@ -131,15 +131,6 @@ jobs:
 
       - name: Run cargo tarpaulin
         uses: actions-rs/tarpaulin@v0.1
-        with:
-          # tarpaulin is reporting uncovered
-          # documentation code in src/lib.rs
-          # for some reason.
-          args: >
-            --all-features
-            --ignore-tests
-            --exclude-files src/lib.rs
-            --out Xml
 
       - name: Upload coverage report
         uses: codecov/codecov-action@v3
