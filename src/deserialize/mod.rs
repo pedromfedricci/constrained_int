@@ -41,6 +41,14 @@ constrained_deserialize_impl! {
     int_to_uint!(usize, i8:visit_i8 i16:visit_i16 i32:visit_i32 i64:visit_i64);
 }
 
+#[cfg(not(cnst8bitonly))]
+constrained_deserialize_impl! {
+    u128, u128, ConstrainedU128, deserialize_u128,
+    num_as_self_uint!(u128, u8:visit_u8 u16:visit_u16 u32:visit_u32 u64:visit_u64 u128:visit_u128);
+    num_as_self_int!(u128, i8:visit_i8 i16:visit_i16 i32:visit_i32 i64:visit_i64);
+    num_128!(u128, i128:visit_i128);
+}
+
 #[cfg(any(cnst8bitonly, not(cnst8bitonly)))]
 constrained_deserialize_impl! {
     i8, i8, ConstrainedI8, deserialize_i8,
@@ -78,4 +86,12 @@ constrained_deserialize_impl! {
     num_as_self_int!(isize, i8:visit_i8  i16:visit_i16);
     int_to_int!(isize, i32:visit_i32 i64:visit_i64);
     uint_to_self!(isize, u8:visit_u8 u16:visit_u16 u32:visit_u32 u64:visit_u64);
+}
+
+#[cfg(not(cnst8bitonly))]
+constrained_deserialize_impl! {
+    i128, i128, ConstrainedI128, deserialize_i128,
+    num_as_self_int!(i128, i8:visit_i8 i16:visit_i16 i32:visit_i32 i64:visit_i64 i128:visit_i128);
+    num_as_self_uint!(i128, u8:visit_u8 u16:visit_u16 u32:visit_u32 u64:visit_u64);
+    num_128!(i128, u128:visit_u128);
 }
