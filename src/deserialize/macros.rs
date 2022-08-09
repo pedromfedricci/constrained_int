@@ -114,7 +114,7 @@ macro_rules! int_to_uint {
         fn $visit<E: DesError>(self, v: $SigInt) -> Result<Self::Value, E> {
             self.guard_construction()?;
 
-            if 0 < v && v as u64 <= <$UnsInner>::MAX as u64 {
+            if 0 <= v && v as u64 <= <$UnsInner>::MAX as u64 {
                 if let Ok(value) = Self::Value::__new(v as $UnsInner) {
                     return Ok(value);
                 }

@@ -27,6 +27,11 @@ serde = { version = "1", default-features = false, optional = true }
 
 [dev-dependencies]
 proptest = { version = "1" }
+serde_test = { version = "1" }
 
 [package.metadata.docs.rs]
 all-features = true
+
+[[test]]
+name = "deserialize"
+required-features = ["serde"]
