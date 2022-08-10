@@ -57,7 +57,7 @@ run_task = "clippy"
 [tasks.t8]
 env = { "RUSTFLAGS" = "--cfg=cnst8bitonly" }
 command = "cargo"
-args = ["test", "--all-features", "--lib"]
+args = ["test", "--all-features", "--tests"]
 
 # Run `u8` related unit tests only.
 [tasks.tu8]

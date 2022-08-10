@@ -87,9 +87,16 @@ jobs:
           command: doc
           args: --all-features
 
-  tests:
-    name: Tests
+  checks:
+    name: Check
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - features: "--no-default-features"
+          - features: "--features std"
+          - features: "--features serde"
+          - features: "--all-features"
 
     steps:
       - name: Install nightly toolchain
@@ -108,8 +115,8 @@ jobs:
       - name: Run cargo test
         uses: actions-rs/cargo@v1
         with:
-          command: test
-          args: --all-features
+          command: check
+          args: ${{ matrix.features }}
 
   coverage:
     name: Coverage
@@ -138,6 +145,11 @@ jobs:
   no_std:
     name: No std
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - features: "--no-default-features"
+          - features: "--features serde"
 
     steps:
       - name: Install nightly toolchain
@@ -154,11 +166,13 @@ jobs:
       - name: Check build cache
         uses: Swatinem/rust-cache@v1
 
-      - name: Run cargo build
+      - name: Run cargo check
         uses: actions-rs/cargo@v1
         with:
-          command: build
-          args: --target thumbv7m-none-eabi
+          command: check
+          args: >
+            --target thumbv7m-none-eabi
+            ${{ matrix.features }}
 
   public:
     name: Public changes
@@ -170,7 +184,7 @@ jobs:
       - name: Install nightly toolchain
         uses: actions-rs/toolchain@v1
         with:
-          # cargo-pulic-api will only build report if it finds
+          # cargo-pulic-api will only build reports if it finds
           # `nightly-x86_64-unknown-linux-gnu` specifically.
           toolchain: nightly
           profile: minimal

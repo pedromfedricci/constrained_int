@@ -15,6 +15,7 @@ where
 }
 
 #[test]
+#[cfg(any(cnst8bitonly, not(cnst8bitonly)))]
 fn unbounded_value_cnst_i8() {
     use constrained_int::i8::ConstrainedI8;
     type CnstMin = ConstrainedI8<-128, 126>;
@@ -53,6 +54,7 @@ fn unbounded_value_cnst_i8() {
 }
 
 #[test]
+#[cfg(not(cnst8bitonly))]
 fn unbounded_value_cnst_i16() {
     use constrained_int::i16::ConstrainedI16;
     type CnstMin = ConstrainedI16<-32768, 32766>;
@@ -85,6 +87,7 @@ fn unbounded_value_cnst_i16() {
 }
 
 #[test]
+#[cfg(not(cnst8bitonly))]
 fn unbounded_value_cnst_i32() {
     use constrained_int::i32::ConstrainedI32;
     type CnstMin = ConstrainedI32<-2147483648, 2147483646>;
@@ -111,6 +114,7 @@ fn unbounded_value_cnst_i32() {
 }
 
 #[test]
+#[cfg(not(cnst8bitonly))]
 fn unbounded_value_cnst_i64() {
     use constrained_int::i64::ConstrainedI64;
     type CnstMin = ConstrainedI64<-9223372036854775808, 9223372036854775806>;
@@ -143,6 +147,7 @@ fn unbounded_value_cnst_i64() {
 }
 
 #[test]
+#[cfg(any(cnst8bitonly, not(cnst8bitonly)))]
 fn unbounded_value_cnst_u8() {
     use constrained_int::u8::ConstrainedU8;
     type CnstMin = ConstrainedU8<0, 254>;
@@ -180,6 +185,7 @@ fn unbounded_value_cnst_u8() {
 }
 
 #[test]
+#[cfg(not(cnst8bitonly))]
 fn unbounded_value_cnst_u16() {
     use constrained_int::u16::ConstrainedU16;
     type CnstMin = ConstrainedU16<0, 65534>;
@@ -213,6 +219,7 @@ fn unbounded_value_cnst_u16() {
 }
 
 #[test]
+#[cfg(not(cnst8bitonly))]
 fn unbounded_value_cnst_u32() {
     use constrained_int::u32::ConstrainedU32;
     type CnstMin = ConstrainedU32<0, 4294967294>;
@@ -242,6 +249,7 @@ fn unbounded_value_cnst_u32() {
 }
 
 #[test]
+#[cfg(not(cnst8bitonly))]
 fn unbounded_value_cnst_u64() {
     use constrained_int::u64::ConstrainedU64;
     type CnstMin = ConstrainedU64<0, 18446744073709551614>;
@@ -334,15 +342,24 @@ macro_rules! impl_invalid_range_test_for {
     )+};
 }
 
+#[cfg(any(cnst8bitonly, not(cnst8bitonly)))]
 impl_invalid_range_test_for! {
     { u8, u8, ConstrainedU8, invalid_range_cnst_u8 },
+}
+#[cfg(not(cnst8bitonly))]
+impl_invalid_range_test_for! {
     { u16, u16, ConstrainedU16, invalid_range_cnst_u16 },
     { u32, u32, ConstrainedU32, invalid_range_cnst_u32 },
     { u64, u64, ConstrainedU64, invalid_range_cnst_u64 },
     { u128, u128, ConstrainedU128, invalid_range_cnst_u128 },
     { usize, usize, ConstrainedUsize, invalid_range_cnst_usize },
-
+}
+#[cfg(any(cnst8bitonly, not(cnst8bitonly)))]
+impl_invalid_range_test_for! {
     { i8, i8, ConstrainedI8, invalid_range_cnst_i8 },
+}
+#[cfg(not(cnst8bitonly))]
+impl_invalid_range_test_for! {
     { i16, i16, ConstrainedI16, invalid_range_cnst_i16 },
     { i32, i32, ConstrainedI32, invalid_range_cnst_i32 },
     { i64, i64, ConstrainedI64, invalid_range_cnst_i64 },
