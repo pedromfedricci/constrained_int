@@ -73,7 +73,7 @@ macro_rules! num_as_self_int {
     };
 }
 
-// Casts a uint visitor to inner's type, if representable. Then constructs the
+// Casts a uint visit to inner's type, if representable. Then constructs the
 // container if the range definition is valid, and the value is within range.
 macro_rules! uint_to_self {
     ($Inner:ty, $UnsInt:ty : $visit:ident) => {
@@ -90,7 +90,7 @@ macro_rules! uint_to_self {
     };
 }
 
-// Casts a int visitor to inner's (int) type, if representable. Then constructs the
+// Casts a int visit to inner's (int) type, if representable. Then constructs the
 // container if the range definition is valid, and the value is within range.
 macro_rules! int_to_int {
     ($SigInner:ty, $SigInt:ty : $visit:ident) => {
@@ -107,7 +107,7 @@ macro_rules! int_to_int {
     };
 }
 
-// Casts a int visitor to inner's (uint) type, if representable. Then constructs the
+// Casts a int visit to inner's (uint) type, if representable. Then constructs the
 // container if the range definiton is valid, and the value is within range.
 macro_rules! int_to_uint {
     ($UnsInner:ty, $SigInt:ty : $visit:ident) => {
@@ -124,7 +124,7 @@ macro_rules! int_to_uint {
     };
 }
 
-// Casts a 128bit visitor to inner's (128bit) type, if representable. Then constructs the
+// Casts a 128bit visit to inner's (128bit) type, if representable. Then constructs the
 // container if the range definiton is valid, and the value is within range.
 #[cfg(not(cnst8bitonly))]
 macro_rules! num_128 {

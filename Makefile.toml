@@ -31,15 +31,7 @@ script = { file = "ci/report_public_api.sh" }
 
 [tasks.coverage-tarpaulin.linux]
 command = "cargo"
-args = [
-    "tarpaulin",
-    "--out",
-    "Xml",
-    "--all-features",
-    "--ignore-tests",
-    "--exclude-files",
-    "src/lib.rs",
-]
+args = ["tarpaulin", "--config", "tarpaulin.toml"]
 
 # Check package with all types.
 [tasks.chkall]
