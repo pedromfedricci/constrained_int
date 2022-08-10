@@ -40,6 +40,13 @@ jobs:
   linter:
     name: Linter
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - features: "--no-default-features"
+          - features: "--features std"
+          - features: "--features serde"
+          - features: "--all-features"
 
     steps:
       - name: Install nightly toolchain
@@ -60,7 +67,7 @@ jobs:
         uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          args: --all-features -- -D warnings
+          args: ${{ matrix.features }} -- -D warnings
 
   docs:
     name: Documentation
@@ -86,37 +93,6 @@ jobs:
         with:
           command: doc
           args: --all-features
-
-  checks:
-    name: Check
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - features: "--no-default-features"
-          - features: "--features std"
-          - features: "--features serde"
-          - features: "--all-features"
-
-    steps:
-      - name: Install nightly toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: ${{ env.RUST_CHANNEL }}
-          profile: minimal
-          override: true
-
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Check build cache
-        uses: Swatinem/rust-cache@v1
-
-      - name: Run cargo test
-        uses: actions-rs/cargo@v1
-        with:
-          command: check
-          args: ${{ matrix.features }}
 
   coverage:
     name: Coverage
@@ -171,8 +147,8 @@ jobs:
         with:
           command: check
           args: >
-            --target thumbv7m-none-eabi
             ${{ matrix.features }}
+            --target thumbv7m-none-eabi
 
   public:
     name: Public changes
