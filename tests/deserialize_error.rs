@@ -270,7 +270,8 @@ macro_rules! range_err {
             // serde's invalid_type.
             "invalid type: ",
             // user defined.
-            stringify!($Cnst), "<MIN, MAX, DEF>",
+            stringify!($Cnst),
+            "<MIN, MAX, DEF>",
             // serde's expecting.
             ", expected ",
             // user defined.
