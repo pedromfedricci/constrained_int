@@ -642,14 +642,14 @@ macro_rules! constrained_def_impl {
         }
 
         impl<const MIN: $Int, const MAX: $Int> $Err<MIN, MAX> {
-            /// Returns [`Lower`] variant.
+            /// Returns `Lower` variant.
             #[must_use]
             #[inline(always)]
             const fn lower() -> Self {
                 Self::Lower($MinErr::<MIN>::new())
             }
 
-            /// Returns [`Greater`] variant.
+            /// Returns `Greater` variant.
             #[must_use]
             #[inline(always)]
             const fn greater() -> Self {

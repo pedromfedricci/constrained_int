@@ -28,7 +28,9 @@ macro_rules! constrained_deserialize_impl {
                         if guard_construction::<MIN, MAX, DEF>() {
                             Ok(())
                         } else {
-                            Err(E::invalid_type(Unexpected::Other("invalid range definition"), self))
+                            Err(E::invalid_type(Unexpected::Other(
+                                concat!(stringify!($Cnst), "<MIN, MAX, DEF>")),
+                                self))
                         }
                     }
                 }
@@ -39,7 +41,11 @@ macro_rules! constrained_deserialize_impl {
                     type Value = crate::$num_mod::$Cnst<MIN, MAX, DEF>;
 
                     fn expecting(&self, f: &mut Formatter<'_>) -> FmtResult {
-                        write!(f, "a constrained {} value within {MIN}..={MAX}", stringify!($Num))
+                        if !guard_construction::<MIN, MAX, DEF>() {
+                            write!(f, "MIN, MAX and DEF to comply with construction constraints")
+                        } else {
+                            write!(f, "a constrained {} value within {MIN}..={MAX}", stringify!($Num))
+                        }
                     }
 
                     $($($method!($Inner, $Visit : $visit);)*)*
