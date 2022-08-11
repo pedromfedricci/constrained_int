@@ -35,3 +35,7 @@ all-features = true
 [[test]]
 name = "deserialize"
 required-features = ["serde"]
+
+[[test]]
+name = "deserialize_error"
+required-features = ["serde"]
