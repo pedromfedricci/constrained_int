@@ -76,6 +76,11 @@ This project documentation is hosted at [docs.rs][doc-link].
 
 ## Feature flags
 
+This crate does not provide any default features. The features that can be
+enabled are: `std` and `serde`.
+
+### std
+
 This crate does not link against the standard library by default, so it is
 suitable for `no_std` environments. It does provide a `std` feature though,
 that enables the standard library as a dependency. By enabling this crate's
@@ -86,12 +91,17 @@ that enables the standard library as a dependency. By enabling this crate's
 If users already are importing the standard library on their crate, enabling
 `std` feature comes at no additional cost.
 
+### serde
+
+The `serde` feature implements [serde]'s `Serialize` and `Deserialize` traits
+for all `Constrained` types.
+
 ## License
 
 Licensed under either of
 
-- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or <http://apache.org/licenses/LICENSE-2.0>)
-- MIT license ([LICENSE-MIT](LICENSE-MIT) or <http://opensource.org/licenses/MIT>)
+- Apache License, Version 2.0 ([LICENSE-APACHE] or <http://apache.org/licenses/LICENSE-2.0>)
+- MIT license ([LICENSE-MIT] or <http://opensource.org/licenses/MIT>)
 
 ## Contribution
 
@@ -108,11 +118,14 @@ each of your dependencies, including this one.
 
 [const_guards]: https://docs.rs/const_guards/latest/const_guards/
 [generic_const_exprs]: https://github.com/rust-lang/rust/issues/76560
+[serde]: https://serde.rs/
 [cargo-crev]: https://github.com/crev-dev/cargo-crev
 [doc-link]: https://docs.rs/constrained_int
 [crate-link]: https://crates.io/crates/constrained_int
 [codecov-link]: https://codecov.io/gh/pedromfedricci/constrained_int
 [ci-link]: https://github.com/pedromfedricci/constrained_int/actions/workflows/ci.yaml
+[LICENSE-APACHE]: ./LICENSE-APACHE
+[LICENSE-MIT]: ./LICENSE-MIT
 
 [//]: # (badges)
 

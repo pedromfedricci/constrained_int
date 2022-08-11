@@ -68,7 +68,13 @@ macro_rules! constrained_def_impl {
         /// The condition `MAX` > `MIN` **must** be satified, or else the type can't
         /// be constructed.
         ///
-        /// A default can be supplied by assigning a value to the parameter `DEF`.
+        /// A default can be supplied by assigning a value to the parameter `DEF`. The
+        /// default value must be contained by the range, meaning: `MIN` <= `DEF` <= `MAX`.
+        /// Or else the type can't be constructed.
+        ///
+        /// It's also required that either `MIN` to be greater than the primitive's `MIN`
+        /// or `MAX` to be lower than the primitive's `MAX`, or else the type can't be
+        /// constructed.
         ///
         /// # Examples
         ///

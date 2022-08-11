@@ -354,6 +354,7 @@ impl_invalid_range_test_for! {
     { u128, u128, ConstrainedU128, invalid_range_cnst_u128 },
     { usize, usize, ConstrainedUsize, invalid_range_cnst_usize },
 }
+
 #[cfg(any(cnst8bitonly, not(cnst8bitonly)))]
 impl_invalid_range_test_for! {
     { i8, i8, ConstrainedI8, invalid_range_cnst_i8 },
