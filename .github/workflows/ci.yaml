@@ -40,6 +40,13 @@ jobs:
   linter:
     name: Linter
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - features: "--no-default-features"
+          - features: "--features std"
+          - features: "--features serde"
+          - features: "--all-features"
 
     steps:
       - name: Install nightly toolchain
@@ -60,7 +67,7 @@ jobs:
         uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          args: --all-features -- -D warnings
+          args: ${{ matrix.features }} -- -D warnings
 
   docs:
     name: Documentation
@@ -87,30 +94,6 @@ jobs:
           command: doc
           args: --all-features
 
-  tests:
-    name: Tests
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Install nightly toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: ${{ env.RUST_CHANNEL }}
-          profile: minimal
-          override: true
-
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Check build cache
-        uses: Swatinem/rust-cache@v1
-
-      - name: Run cargo test
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --all-features
-
   coverage:
     name: Coverage
     runs-on: ubuntu-latest
@@ -131,15 +114,6 @@ jobs:
 
       - name: Run cargo tarpaulin
         uses: actions-rs/tarpaulin@v0.1
-        with:
-          # tarpaulin is reporting uncovered
-          # documentation code in src/lib.rs
-          # for some reason.
-          args: >
-            --all-features
-            --ignore-tests
-            --exclude-files src/lib.rs
-            --out Xml
 
       - name: Upload coverage report
         uses: codecov/codecov-action@v3
@@ -147,6 +121,11 @@ jobs:
   no_std:
     name: No std
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - features: "--no-default-features"
+          - features: "--features serde"
 
     steps:
       - name: Install nightly toolchain
@@ -163,11 +142,13 @@ jobs:
       - name: Check build cache
         uses: Swatinem/rust-cache@v1
 
-      - name: Run cargo build
+      - name: Run cargo check
         uses: actions-rs/cargo@v1
         with:
-          command: build
-          args: --target thumbv7m-none-eabi
+          command: check
+          args: >
+            ${{ matrix.features }}
+            --target thumbv7m-none-eabi
 
   public:
     name: Public changes
@@ -179,7 +160,7 @@ jobs:
       - name: Install nightly toolchain
         uses: actions-rs/toolchain@v1
         with:
-          # cargo-pulic-api will only build report if it finds
+          # cargo-pulic-api will only build reports if it finds
           # `nightly-x86_64-unknown-linux-gnu` specifically.
           toolchain: nightly
           profile: minimal

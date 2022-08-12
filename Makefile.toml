@@ -31,20 +31,12 @@ script = { file = "ci/report_public_api.sh" }
 
 [tasks.coverage-tarpaulin.linux]
 command = "cargo"
-args = [
-    "tarpaulin",
-    "--out",
-    "Xml",
-    "--all-features",
-    "--ignore-tests",
-    "--exclude-files",
-    "src/lib.rs",
-]
+args = ["tarpaulin", "--config", "tarpaulin.toml"]
 
 # Check package with all types.
 [tasks.chkall]
 command = "cargo"
-args = ["check", "--all-features", "--tests"]
+args = ["check", "--all-features"]
 
 # Check package with 8bit types only.
 [tasks.chk8]
@@ -65,7 +57,7 @@ run_task = "clippy"
 [tasks.t8]
 env = { "RUSTFLAGS" = "--cfg=cnst8bitonly" }
 command = "cargo"
-args = ["test", "--all-features", "--lib"]
+args = ["test", "--all-features", "--tests"]
 
 # Run `u8` related unit tests only.
 [tasks.tu8]

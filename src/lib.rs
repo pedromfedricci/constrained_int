@@ -51,15 +51,29 @@
 //!
 //! ## Feature flags
 //!
+//! This crate does not provide any default features. The features that can be
+//! enabled are: `std` and `serde`.
+//!
+//! ### std
+//!
 //! This crate does not link against the standard library by default, so it is
-//! suitable for `no_std` environments.. It does provide a `std` feature though,
+//! suitable for `no_std` environments. It does provide a `std` feature though,
 //! that enables the standard library as a dependency. By  enabling this crate's
 //! `std` feature, these additional features are provided:
 //!   - All crate's error types will implement the `std::error::Error` trait.
 //! If users already are importing the standard library on their crate, enabling
 //! `std` feature comes at no additional cost.
 //!
+//! ### serde
+//!
+//! The `serde` feature implements [`serde`]'s `Serialize` and `Deserialize` traits
+//! for all `Constrained` types. Note that the construction constraints for the
+//! const generic parameters are checked at runtime when values are deserialized
+//! to one of the `Constrained` types. See each desired type documentation for
+//! for more information about the constraints.
+//!
 //! [`generic_const_exprs`]: https://github.com/rust-lang/rust/issues/76560
+//! [`serde`]: https://docs.rs/serde/latest/serde/
 
 // No raw pointers here, maybe in another castle.
 #![forbid(unsafe_code)]
@@ -87,6 +101,12 @@
 // Import `constrained_int_def_impl!` macro.
 #[macro_use]
 mod macros;
+
+#[cfg(feature = "serde")]
+mod deserialize;
+
+#[cfg(test)]
+mod proptest;
 
 // Define mods, containers, errors, tests and impls for unsigned integers with
 // default values for doc examples.
@@ -127,6 +147,3 @@ constrained_int_def_impl! {
     { i128, u128, i128, u128, ConstrainedI128, ConstrainedI128Error, MinI128Error, MaxI128Error },
     { isize, usize, isize, usize, ConstrainedIsize, ConstrainedIsizeError, MinIsizeError, MaxIsizeError },
 }
-
-#[cfg(test)]
-mod proptest;

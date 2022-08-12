@@ -68,7 +68,13 @@ macro_rules! constrained_def_impl {
         /// The condition `MAX` > `MIN` **must** be satified, or else the type can't
         /// be constructed.
         ///
-        /// A default can be supplied by assigning a value to the parameter `DEF`.
+        /// A default can be supplied by assigning a value to the parameter `DEF`. The
+        /// default value must be contained by the range, meaning: `MIN` <= `DEF` <= `MAX`.
+        /// Or else the type can't be constructed.
+        ///
+        /// It's also required that either `MIN` to be greater than the primitive's `MIN`
+        /// or `MAX` to be lower than the primitive's `MAX`, or else the type can't be
+        /// constructed.
         ///
         /// # Examples
         ///
@@ -216,7 +222,7 @@ macro_rules! constrained_def_impl {
             /// // Above upper bound, so it constructs with upper bound value.
             #[doc = concat!("let max = Constrained::saturating_new(", stringify!($h), ");")]
             #[doc = concat!("assert_eq!(max.get(), ", stringify!($max), ");")]
-            ///```
+            /// ```
             #[must_use]
             pub const fn saturating_new(value: $Int) -> Self {
                 Self::saturating_new_unguarded(value)
@@ -342,6 +348,7 @@ macro_rules! constrained_def_impl {
             }
 
             /// Unguarded private `new` constructor.
+            // TODO: visibilty should be `pub(crate)`.
             const fn new_unguarded(value: $Int) -> Result<Self, $Err<MIN, MAX>> {
                 // Can't use `?` operator on const fn yet:
                 // https://github.com/rust-lang/rust/issues/74935.
@@ -419,18 +426,17 @@ macro_rules! constrained_def_impl {
                 self.0
             }
 
-            /// **Not** part of the public API, implementation detail.
+            /// This function is **not** part of the public API, it's subject to change
+            /// without any prior notice.
+            // TODO: remove and reuse new_unguarded as `pub(crate)`.
             // Unfortunate workaround.
             // Issue: https://github.com/Mari-W/const_guards/issues/2.
             #[doc(hidden)]
-            #[cfg(test)]
+            #[cfg(any(test, feature = "serde"))]
             pub const fn __new(value: $Int) -> Result<Self, $Err<MIN, MAX>> {
                 Self::new_unguarded(value)
             }
         }
-
-        // Implements some ::core::fmt traits for `Constrained` types.
-        constrained_fmt_impl! { Debug, Display, Binary, Octal, LowerHex, UpperHex for $Ty($Int) }
 
         impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> ::core::ops::RangeBounds<$Int> for $Ty<MIN, MAX, DEF> {
             #[must_use]
@@ -445,6 +451,17 @@ macro_rules! constrained_def_impl {
                 ::core::ops::Bound::Included(&MAX)
             }
         }
+
+        #[cfg(feature = "serde")]
+        impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> ::serde::Serialize for $Ty<MIN, MAX, DEF> {
+            #[inline]
+            fn serialize<S: ::serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+                self.get().serialize(serializer)
+            }
+        }
+
+        // Implements some ::core::fmt traits for `Constrained` types.
+        constrained_fmt_impl! { Debug, Display, Binary, Octal, LowerHex, UpperHex for $Ty($Int) }
 
         #[doc = concat!("This error indicates that a [`", stringify!($Int), "`] value ")]
         /// violates the range's lower bound.
@@ -631,14 +648,14 @@ macro_rules! constrained_def_impl {
         }
 
         impl<const MIN: $Int, const MAX: $Int> $Err<MIN, MAX> {
-            /// Returns [`Lower`] variant.
+            /// Returns `Lower` variant.
             #[must_use]
             #[inline(always)]
             const fn lower() -> Self {
                 Self::Lower($MinErr::<MIN>::new())
             }
 
-            /// Returns [`Greater`] variant.
+            /// Returns `Greater` variant.
             #[must_use]
             #[inline(always)]
             const fn greater() -> Self {
