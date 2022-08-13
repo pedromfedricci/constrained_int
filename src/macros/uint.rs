@@ -396,7 +396,7 @@ macro_rules! constrained_uint_impl {
             const fn wrap_around_max(mut value: $UnsInt) -> Self {
                 debug_assert!(value > MAX, "value must be greater than `MAX`");
                 // Can't overflow since `MIN + x % range_size()` is at most equal to `MAX`.
-                value = MIN + (value - MAX - 1) % Self::range_size();
+                value = MIN + Self::remainder(value - MAX - 1);
                 Self(value)
             }
 
@@ -408,7 +408,7 @@ macro_rules! constrained_uint_impl {
             const fn wrap_around_min(mut value: $UnsInt) -> Self {
                 debug_assert!(value < MIN, "value must be lower than `MIN`");
                 // Can't overflow since `MAX - x % range_size()` is at least equal to `MIN`.
-                value = MAX - (MIN - value - 1) % Self::range_size();
+                value = MAX - Self::remainder(MIN - value - 1);
                 Self(value)
             }
 
@@ -428,9 +428,9 @@ macro_rules! constrained_uint_impl {
                 );
                 // No conditional compilation based on constexpr evaluation yet.
                 if <$UnsInt>::MAX > MAX {
-                    (Self::wrap_around_max(<$UnsInt>::MAX), value + 1)
+                    (Self::wrap_around_max(<$UnsInt>::MAX), Self::remainder(value + 1))
                 } else {
-                    (Self(MIN), value)
+                    (Self(MIN), Self::remainder(value))
                 }
             }
 
@@ -449,9 +449,9 @@ macro_rules! constrained_uint_impl {
                 value = <$UnsInt>::MAX - value;
                 // No conditional compilation based on constexpr evaluation yet.
                 if <$UnsInt>::MIN < MIN {
-                    (Self::wrap_around_min(<$UnsInt>::MIN), value + 1)
+                    (Self::wrap_around_min(<$UnsInt>::MIN), Self::remainder(value + 1))
                 } else {
-                    (Self(MAX), value)
+                    (Self(MAX), Self::remainder(value))
                 }
             }
 
@@ -480,6 +480,12 @@ macro_rules! constrained_uint_impl {
                 } else {
                     Self::overflowed_sub(wrapped)
                 }
+            }
+
+            /// Computes the remainder of `value` by the range's size.
+            #[must_use]
+            const fn remainder(value: $UnsInt) -> $UnsInt {
+                value % Self::range_size()
             }
 
             /// Returns the range size.

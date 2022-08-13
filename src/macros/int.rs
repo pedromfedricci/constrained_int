@@ -649,7 +649,7 @@ macro_rules! constrained_int_impl {
             #[must_use]
             const fn wrap_around_max(mut value: $SigInt) -> Self {
                 debug_assert!(value > MAX, "value must be greater than `MAX`");
-                let offset = (<$SigInt>::abs_diff(MAX, value) - 1) % Self::range_size();
+                let offset = Self::remainder(<$SigInt>::abs_diff(MAX, value) - 1);
                 // Can't overflow since `MIN + x % range_size()` is at most equal to `MAX`.
                 value = MIN + offset as $SigInt;
                 Self(value)
@@ -662,7 +662,7 @@ macro_rules! constrained_int_impl {
             #[must_use]
             const fn wrap_around_min(mut value: $SigInt) -> Self {
                 debug_assert!(value < MIN, "value must be lower than `MIN`");
-                let offset = (<$SigInt>::abs_diff(MIN, value) - 1) % Self::range_size();
+                let offset = Self::remainder(<$SigInt>::abs_diff(MIN, value) - 1);
                 // Can't overflow since `MAX - x % range_size()` is at least equal to `MIN`.
                 value = MAX - offset as $SigInt;
                 Self(value)
@@ -683,9 +683,9 @@ macro_rules! constrained_int_impl {
                 value = <$SigInt>::abs_diff(<$SigInt>::MIN, value) as $SigInt;
                 // TODO: No conditional compilation based on constexpr evaluation yet.
                 if <$SigInt>::MAX > MAX {
-                    (Self::wrap_around_max(<$SigInt>::MAX), value + 1)
+                    (Self::wrap_around_max(<$SigInt>::MAX), Self::remainder_signed(value + 1))
                 } else {
-                    (Self(MIN), value)
+                    (Self(MIN), Self::remainder_signed(value))
                 }
             }
 
@@ -706,9 +706,9 @@ macro_rules! constrained_int_impl {
                 let value = <$SigInt>::abs_diff(<$SigInt>::MIN, value);
                 // TODO: No conditional compilation based on constexpr evaluation yet.
                 if <$SigInt>::MAX > MAX {
-                    (Self::wrap_around_max(<$SigInt>::MAX), value + 1)
+                    (Self::wrap_around_max(<$SigInt>::MAX), Self::remainder(value + 1))
                 } else {
-                    (Self(MIN), value)
+                    (Self(MIN), Self::remainder(value))
                 }
             }
 
@@ -727,9 +727,9 @@ macro_rules! constrained_int_impl {
                 value = <$SigInt>::abs_diff(<$SigInt>::MAX, value) as $SigInt;
                 // TODO: No conditional compilation based on constexpr evaluation yet.
                 if <$SigInt>::MIN < MIN {
-                    (Self::wrap_around_min(<$SigInt>::MIN), value + 1)
+                    (Self::wrap_around_min(<$SigInt>::MIN), Self::remainder_signed(value + 1))
                 } else {
-                    (Self(MAX), value)
+                    (Self(MAX), Self::remainder_signed(value))
                 }
             }
 
@@ -750,9 +750,9 @@ macro_rules! constrained_int_impl {
                 let value = <$SigInt>::abs_diff(<$SigInt>::MAX, value);
                 // TODO: No conditional compilation based on constexpr evaluation yet.
                 if <$SigInt>::MIN < MIN {
-                    (Self::wrap_around_min(<$SigInt>::MIN), value + 1)
+                    (Self::wrap_around_min(<$SigInt>::MIN), Self::remainder(value + 1))
                 } else {
-                    (Self(MAX), value)
+                    (Self(MAX), Self::remainder(value))
                 }
             }
 
@@ -822,6 +822,23 @@ macro_rules! constrained_int_impl {
             const fn overflowed_sub_unsigned(wrapped: $SigInt) -> Self {
                 let (this, rhs) = Self::wrap_around_min_uns_over(wrapped);
                 this.wrapping_sub_unsigned(rhs)
+            }
+
+            /// Computes the remainder of `value` by the range's size.
+            #[must_use]
+            const fn remainder(value: $UnsInt) -> $UnsInt {
+                value % Self::range_size()
+            }
+
+            /// Computes the remainder of signed `value` by the range's size.
+            ///
+            /// Caller must ensure that `value` is a positive value, or else there will
+            /// be a unexpected overflow.
+            #[must_use]
+            const fn remainder_signed(value: $SigInt) -> $SigInt {
+                debug_assert!(value >= 0, "value must be greater or equal to 0");
+                let value = value as $UnsInt % Self::range_size();
+                value as $SigInt
             }
 
             /// Returns the range size.
