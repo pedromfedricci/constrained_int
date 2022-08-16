@@ -28,6 +28,7 @@ serde = { version = "1", default-features = false, optional = true }
 [dev-dependencies]
 proptest = { version = "1" }
 serde_test = { version = "1" }
+criterion = { version = "0.3", features = ["html_reports"] }
 
 [package.metadata.docs.rs]
 all-features = true
@@ -39,3 +40,27 @@ required-features = ["serde"]
 [[test]]
 name = "deserialize_error"
 required-features = ["serde"]
+
+[[bench]]
+name = "wrapping_add_uint"
+harness = false
+
+[[bench]]
+name = "wrapping_sub_uint"
+harness = false
+
+[[bench]]
+name = "wrapping_add_int"
+harness = false
+
+[[bench]]
+name = "wrapping_sub_int"
+harness = false
+
+[[bench]]
+name = "wrapping_add_unsigned"
+harness = false
+
+[[bench]]
+name = "wrapping_sub_unsigned"
+harness = false
