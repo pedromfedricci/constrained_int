@@ -1,4 +1,3 @@
-
 // For large integers, it's impractical to use the actual MAX value
 // as part of the benchmark id, so just stringify it like `prim`::MAX.
 macro_rules! max {
@@ -48,5 +47,5 @@ macro_rules! group {
 macro_rules! overflowed {
     ($Num:ident, $bits:literal, $func:literal) => {
         group!($bits, $func, concat!(stringify!($Num), " overflow"))
-    }
+    };
 }
