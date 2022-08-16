@@ -22,28 +22,28 @@ macro_rules! name {
     };
 }
 
-// Name a benchmark with a unique combination within group.
+// Name a benchmark with a Constrained type and a `Short` suffix.
 macro_rules! short {
     ($Cnst:ident) => {
         name!($Cnst, "Short")
     };
 }
 
-// Name a benchmark with a unique combination. within group.
+// Name a benchmark with a Constrained type and a `Large` suffix.
 macro_rules! large {
     ($Cnst:ident) => {
         name!($Cnst, "Large")
     };
 }
 
-// Group for wrapping_add with specific setup.
+// Name a group for a wrapping API with specific size and condition.
 macro_rules! group {
     ($bits:literal, $func:literal, $detail:expr) => {
         concat!($bits, ": ", $func, ": ", $detail)
     };
 }
 
-// Group for wrapping_add that does overflow the primitive integer.
+// Name a group for a wrapping API that does overflow the inner integer.
 macro_rules! overflowed {
     ($Num:ident, $bits:literal, $func:literal) => {
         group!($bits, $func, concat!(stringify!($Num), " overflow"))

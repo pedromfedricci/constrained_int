@@ -1,5 +1,6 @@
 #![feature(mixed_integer_ops)]
 
+#[path = "../macros.rs"]
 #[macro_use]
 mod macros;
 

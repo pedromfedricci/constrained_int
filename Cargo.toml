@@ -42,25 +42,31 @@ name = "deserialize_error"
 required-features = ["serde"]
 
 [[bench]]
-name = "wrapping_add_uint"
+name = "uint_wrapping_add"
+path = "benches/uint/wrapping_add.rs"
 harness = false
 
 [[bench]]
-name = "wrapping_sub_uint"
+name = "uint_wrapping_sub"
+path = "benches/uint/wrapping_sub.rs"
 harness = false
 
 [[bench]]
-name = "wrapping_add_int"
+name = "int_wrapping_add"
+path = "benches/int/wrapping_add.rs"
 harness = false
 
 [[bench]]
-name = "wrapping_sub_int"
+name = "int_wrapping_sub"
+path = "benches/int/wrapping_sub.rs"
 harness = false
 
 [[bench]]
 name = "wrapping_add_unsigned"
+path = "benches/int/wrapping_add_unsigned.rs"
 harness = false
 
 [[bench]]
 name = "wrapping_sub_unsigned"
+path = "benches/int/wrapping_sub_unsigned.rs"
 harness = false
