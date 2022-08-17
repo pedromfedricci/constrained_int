@@ -3,7 +3,7 @@
 mod macros;
 
 macro_rules! bench_wrapping_add_for {
-    ($({ $UnsInt:ident, $uint_mod:ident, $Cnst:ident, $bits:literal }),+ $(,)*) => {$(
+    ($({ $UnsInt:ident, $uint_mod:ident, $Cnst:ident }),+ $(,)*) => {$(
         mod $uint_mod {
             use constrained_int::$uint_mod::$Cnst;
             use criterion::{BenchmarkId, Criterion};
@@ -12,7 +12,7 @@ macro_rules! bench_wrapping_add_for {
                 type CnstShort = $Cnst<{ $UnsInt::MAX - 1 }, { $UnsInt::MAX }>;
                 type CnstLarge = $Cnst<{ $UnsInt::MIN + 1 }, { $UnsInt::MAX }>;
 
-                let mut group = c.benchmark_group(overflowed!($UnsInt, $bits, "wrapping_add"));
+                let mut group = c.benchmark_group(overflowed!($UnsInt, "wrapping_add"));
 
                 // Bench id format: Short ConstrainedUX/ux::MAX.
                 group.bench_with_input(
@@ -60,15 +60,15 @@ macro_rules! bench_wrapping_add_for {
 
 #[cfg(cnst8bitonly)]
 bench_wrapping_add_for! {
-    { u8, u8, ConstrainedU8, "8-bit unsigned" },
+    { u8, u8, ConstrainedU8 },
 }
 
 #[cfg(not(cnst8bitonly))]
 bench_wrapping_add_for! {
-    { u8, u8, ConstrainedU8, "8-bit unsigned" },
-    { u16, u16, ConstrainedU16, "16-bit unsigned" },
-    { u32, u32, ConstrainedU32, "32-bit unsigned" },
-    { u64, u64, ConstrainedU64, "64-bit unsigned" },
-    { u128, u128, ConstrainedU128, "128-bit unsigned" },
-    { usize, usize, ConstrainedUsize, "pointer-sized unsigned" }
+    { u8, u8, ConstrainedU8 },
+    { u16, u16, ConstrainedU16 },
+    { u32, u32, ConstrainedU32 },
+    { u64, u64, ConstrainedU64 },
+    { u128, u128, ConstrainedU128 },
+    { usize, usize, ConstrainedUsize }
 }

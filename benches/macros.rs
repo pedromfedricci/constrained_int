@@ -1,3 +1,5 @@
+#![allow(unused_macros)]
+
 // For large integers, it's impractical to use the actual MAX value
 // as part of the benchmark id, so just stringify it like `prim`::MAX.
 macro_rules! max {
@@ -8,7 +10,6 @@ macro_rules! max {
 
 // For large integers, it's impractical to use the actual MIN value
 // as part of the benchmark id, so just stringify it like `prim`::MIN.
-#[allow(unused_macros)]
 macro_rules! min {
     ($Num:ident) => {
         concat!(stringify!($Num), "::MIN")
@@ -36,16 +37,17 @@ macro_rules! large {
     };
 }
 
-// Name a group for a wrapping API with specific size and condition.
+// Name a group for a wrapping API with a unique combination of
+// integer, function name and detail.
 macro_rules! group {
-    ($bits:literal, $func:literal, $detail:expr) => {
-        concat!($bits, ": ", $func, ": ", $detail)
+    ($num:expr, $func:expr, $detail:expr) => {
+        concat!($num, ": ", $func, ": ", $detail)
     };
 }
 
 // Name a group for a wrapping API that does overflow the inner integer.
 macro_rules! overflowed {
-    ($Num:ident, $bits:literal, $func:literal) => {
-        group!($bits, $func, concat!(stringify!($Num), " overflow"))
+    ($Num:ty, $func:expr) => {
+        group!(stringify!($Num), $func, "arithmetic overflow")
     };
 }

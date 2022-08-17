@@ -5,7 +5,7 @@
 mod macros;
 
 macro_rules! bench_wrapping_sub_unsigned_for {
-    ($({ $SigInt:ident, $UnsInt:ident, $int_mod:ident, $Cnst:ident, $bits:literal }),+ $(,)*) => {$(
+    ($({ $SigInt:ident, $UnsInt:ident, $int_mod:ident, $Cnst:ident }),+ $(,)*) => {$(
         mod $int_mod {
             use constrained_int::$int_mod::$Cnst;
             use criterion::{BenchmarkId, Criterion};
@@ -14,7 +14,7 @@ macro_rules! bench_wrapping_sub_unsigned_for {
                 type CnstShort = $Cnst<{ $SigInt::MIN }, { $SigInt::MIN + 1 }>;
                 type CnstLarge = $Cnst<{ $SigInt::MIN }, { $SigInt::MAX - 1 }>;
 
-                let mut group = c.benchmark_group(overflowed!($SigInt, $bits, "wrapping_sub_unsigned"));
+                let mut group = c.benchmark_group(overflowed!($SigInt, "wrapping_sub_unsigned"));
 
                 // Bench id format: Short ConstrainedIX/ux::MAX.
                 group.bench_with_input(
@@ -62,15 +62,15 @@ macro_rules! bench_wrapping_sub_unsigned_for {
 
 #[cfg(cnst8bitonly)]
 bench_wrapping_sub_unsigned_for! {
-    { i8, u8, i8, ConstrainedI8, "8-bit signed" },
+    { i8, u8, i8, ConstrainedI8 },
 }
 
 #[cfg(not(cnst8bitonly))]
 bench_wrapping_sub_unsigned_for! {
-    { i8, u8, i8, ConstrainedI8, "8-bit signed" },
-    { i16, u16, i16, ConstrainedI16, "16-bit signed" },
-    { i32, u32, i32, ConstrainedI32, "32-bit signed" },
-    { i64, u64, i64, ConstrainedI64, "64-bit signed" },
-    { i128, u128, i128, ConstrainedI128, "128-bit signed" },
-    { isize, usize, isize, ConstrainedIsize, "pointer-sized signed" }
+    { i8, u8, i8, ConstrainedI8 },
+    { i16, u16, i16, ConstrainedI16 },
+    { i32, u32, i32, ConstrainedI32 },
+    { i64, u64, i64, ConstrainedI64 },
+    { i128, u128, i128, ConstrainedI128 },
+    { isize, usize, isize, ConstrainedIsize }
 }

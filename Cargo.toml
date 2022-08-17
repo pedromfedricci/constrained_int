@@ -21,6 +21,9 @@ exclude = [".github", "ci", "Makefile.toml", "codecov.yaml"]
 std = []
 serde = ["dep:serde"]
 
+[lib]
+bench = false
+
 [dependencies]
 const_guards = { version = "0.1.3" }
 serde = { version = "1", default-features = false, optional = true }
