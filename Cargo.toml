@@ -50,8 +50,28 @@ path = "benches/uint/wrapping_add.rs"
 harness = false
 
 [[bench]]
+name = "uint_overflowing_add"
+path = "benches/uint/overflowing_add.rs"
+harness = false
+
+[[bench]]
 name = "uint_wrapping_sub"
 path = "benches/uint/wrapping_sub.rs"
+harness = false
+
+[[bench]]
+name = "uint_overflowing_sub"
+path = "benches/uint/overflowing_sub.rs"
+harness = false
+
+[[bench]]
+name = "wrapping_add_signed"
+path = "benches/uint/wrapping_add_signed.rs"
+harness = false
+
+[[bench]]
+name = "overflowing_add_signed"
+path = "benches/uint/overflowing_add_signed.rs"
 harness = false
 
 [[bench]]
@@ -60,8 +80,18 @@ path = "benches/int/wrapping_add.rs"
 harness = false
 
 [[bench]]
+name = "int_overflowing_add"
+path = "benches/int/overflowing_add.rs"
+harness = false
+
+[[bench]]
 name = "int_wrapping_sub"
 path = "benches/int/wrapping_sub.rs"
+harness = false
+
+[[bench]]
+name = "int_overflowing_sub"
+path = "benches/int/overflowing_sub.rs"
 harness = false
 
 [[bench]]
@@ -70,6 +100,16 @@ path = "benches/int/wrapping_add_unsigned.rs"
 harness = false
 
 [[bench]]
+name = "overflowing_add_unsigned"
+path = "benches/int/overflowing_add_unsigned.rs"
+harness = false
+
+[[bench]]
 name = "wrapping_sub_unsigned"
 path = "benches/int/wrapping_sub_unsigned.rs"
+harness = false
+
+[[bench]]
+name = "overflowing_sub_unsigned"
+path = "benches/int/overflowing_sub_unsigned.rs"
 harness = false

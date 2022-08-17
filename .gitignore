@@ -5,4 +5,4 @@ todo.txt
 cobertura.xml
 /proptest-regressions
 /semver-checks
-/bench-reports
+**/bench-reports
