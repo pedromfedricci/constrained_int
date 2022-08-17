@@ -1,13 +1,6 @@
-#[macro_use]
-mod bench_sub;
+use benches::bench_overflowing_sub_uint;
 
-#[cfg(cnst8bitonly)]
-bench_overflowing_sub_for! {
-    { u8, u8, ConstrainedU8 },
-}
-
-#[cfg(not(cnst8bitonly))]
-bench_overflowing_sub_for! {
+bench_overflowing_sub_uint! {
     { u8, u8, ConstrainedU8 },
     { u16, u16, ConstrainedU16 },
     { u32, u32, ConstrainedU32 },

@@ -1,13 +1,6 @@
-#[macro_use]
-mod bench_add;
+use benches::bench_overflowing_sub_int;
 
-#[cfg(cnst8bitonly)]
-bench_wrapping_add_for! {
-    { i8, i8, ConstrainedI8 },
-}
-
-#[cfg(not(cnst8bitonly))]
-bench_wrapping_add_for! {
+bench_overflowing_sub_int! {
     { i8, i8, ConstrainedI8 },
     { i16, i16, ConstrainedI16 },
     { i32, i32, ConstrainedI32 },

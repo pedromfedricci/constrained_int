@@ -1,13 +1,6 @@
-#[macro_use]
-mod bench_add;
+use benches::bench_wrapping_add_uint;
 
-#[cfg(cnst8bitonly)]
-bench_wrapping_add_for! {
-    { u8, u8, ConstrainedU8 },
-}
-
-#[cfg(not(cnst8bitonly))]
-bench_wrapping_add_for! {
+bench_wrapping_add_uint! {
     { u8, u8, ConstrainedU8 },
     { u16, u16, ConstrainedU16 },
     { u32, u32, ConstrainedU32 },

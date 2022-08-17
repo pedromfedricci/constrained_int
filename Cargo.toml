@@ -16,13 +16,13 @@ keywords = ["no_std", "numerics"]
 
 exclude = [".github", "ci", "Makefile.toml", "codecov.yaml"]
 
+[workspace]
+members = [".", "benches"]
+
 [features]
 # This will import `std` as a dependency.
 std = []
 serde = ["dep:serde"]
-
-[lib]
-bench = false
 
 [dependencies]
 const_guards = { version = "0.1.3" }
@@ -43,73 +43,3 @@ required-features = ["serde"]
 [[test]]
 name = "deserialize_error"
 required-features = ["serde"]
-
-[[bench]]
-name = "uint_wrapping_add"
-path = "benches/uint/wrapping_add.rs"
-harness = false
-
-[[bench]]
-name = "uint_overflowing_add"
-path = "benches/uint/overflowing_add.rs"
-harness = false
-
-[[bench]]
-name = "uint_wrapping_sub"
-path = "benches/uint/wrapping_sub.rs"
-harness = false
-
-[[bench]]
-name = "uint_overflowing_sub"
-path = "benches/uint/overflowing_sub.rs"
-harness = false
-
-[[bench]]
-name = "wrapping_add_signed"
-path = "benches/uint/wrapping_add_signed.rs"
-harness = false
-
-[[bench]]
-name = "overflowing_add_signed"
-path = "benches/uint/overflowing_add_signed.rs"
-harness = false
-
-[[bench]]
-name = "int_wrapping_add"
-path = "benches/int/wrapping_add.rs"
-harness = false
-
-[[bench]]
-name = "int_overflowing_add"
-path = "benches/int/overflowing_add.rs"
-harness = false
-
-[[bench]]
-name = "int_wrapping_sub"
-path = "benches/int/wrapping_sub.rs"
-harness = false
-
-[[bench]]
-name = "int_overflowing_sub"
-path = "benches/int/overflowing_sub.rs"
-harness = false
-
-[[bench]]
-name = "wrapping_add_unsigned"
-path = "benches/int/wrapping_add_unsigned.rs"
-harness = false
-
-[[bench]]
-name = "overflowing_add_unsigned"
-path = "benches/int/overflowing_add_unsigned.rs"
-harness = false
-
-[[bench]]
-name = "wrapping_sub_unsigned"
-path = "benches/int/wrapping_sub_unsigned.rs"
-harness = false
-
-[[bench]]
-name = "overflowing_sub_unsigned"
-path = "benches/int/overflowing_sub_unsigned.rs"
-harness = false

@@ -1,14 +1,12 @@
-#![allow(unused_macros)]
+#[macro_export]
+#[doc(hidden)]
+macro_rules! __bench_add_signed {
+    ($({ $UnsInt:ident, $SigInt:ident, $uint_mod:ident, $Cnst:ident, $add:ident }),+ $(,)*) => {
+        use ::criterion::{criterion_group, criterion_main};
 
-#[path = "../macros.rs"]
-#[macro_use]
-mod macros;
-
-macro_rules! bench_add_for {
-    ($({ $UnsInt:ident, $SigInt:ident, $uint_mod:ident, $Cnst:ident, $add:ident }),+ $(,)*) => {$(
-        mod $uint_mod {
-            use constrained_int::$uint_mod::$Cnst;
-            use criterion::{BenchmarkId, Criterion};
+        $(mod $uint_mod {
+            use ::constrained_int::$uint_mod::$Cnst;
+            use ::criterion::{BenchmarkId, Criterion};
 
             pub fn primitive_overflow(c: &mut Criterion) {
                 type CnstShortMin = $Cnst<{ $UnsInt::MIN }, { $UnsInt::MIN + 1 }>;
@@ -17,11 +15,11 @@ macro_rules! bench_add_for {
                 type CnstShortMax = $Cnst<{ $UnsInt::MAX - 1 }, { $UnsInt::MAX }>;
                 type CnstLargeMax = $Cnst<{ $UnsInt::MIN + 1 }, { $UnsInt::MAX }>;
 
-                let mut group = c.benchmark_group(overflowed!($UnsInt, stringify!($add)));
+                let mut group = c.benchmark_group($crate::overflowed!($UnsInt, $add));
 
                 // Bench id format: Short ConstrainedUX/ix::MAX.
                 group.bench_with_input(
-                    BenchmarkId::new(short!($Cnst), max!($SigInt)),
+                    BenchmarkId::new($crate::short!($Cnst), $crate::max!($SigInt)),
                     &$SigInt::MAX,
                     |bench, rhs| {
                         let short = CnstShortMax::new_max();
@@ -31,7 +29,7 @@ macro_rules! bench_add_for {
 
                 // Bench id format: Short ConstrainedUX/ix::MIN.
                 group.bench_with_input(
-                    BenchmarkId::new(short!($Cnst), min!($SigInt)),
+                    BenchmarkId::new($crate::short!($Cnst), $crate::min!($SigInt)),
                     &$SigInt::MIN,
                     |bench, rhs| {
                         let short = CnstShortMin::new_min();
@@ -41,7 +39,7 @@ macro_rules! bench_add_for {
 
                 // Bench id format: Large ConstrainedUX/ix::MAX.
                 group.bench_with_input(
-                    BenchmarkId::new(large!($Cnst), max!($SigInt)),
+                    BenchmarkId::new($crate::large!($Cnst), $crate::max!($SigInt)),
                     &$SigInt::MAX,
                     |bench, rhs| {
                         let large = CnstLargeMax::new_max();
@@ -51,7 +49,7 @@ macro_rules! bench_add_for {
 
                 // Bench id format: Large ConstrainedUX/ix::MIN.
                 group.bench_with_input(
-                    BenchmarkId::new(large!($Cnst), min!($SigInt)),
+                    BenchmarkId::new($crate::large!($Cnst), $crate::min!($SigInt)),
                     &$SigInt::MIN,
                     |bench, rhs| {
                         let large = CnstLargeMin::new_min();
@@ -60,7 +58,7 @@ macro_rules! bench_add_for {
                 );
 
                 group.bench_with_input(
-                    BenchmarkId::new(stringify!($UnsInt), max!($SigInt)),
+                    BenchmarkId::new(stringify!($UnsInt), $crate::max!($SigInt)),
                     &$SigInt::MAX,
                     |bench, rhs| {
                         let prim = $UnsInt::MAX;
@@ -69,7 +67,7 @@ macro_rules! bench_add_for {
                 );
 
                 group.bench_with_input(
-                    BenchmarkId::new(stringify!($UnsInt), min!($SigInt)),
+                    BenchmarkId::new(stringify!($UnsInt), $crate::min!($SigInt)),
                     &$SigInt::MIN,
                     |bench, rhs| {
                         let prim = $UnsInt::MIN;
@@ -81,8 +79,6 @@ macro_rules! bench_add_for {
             }
         })+
 
-        use criterion::{criterion_group, criterion_main};
-
         criterion_group! {
             benches,
             $($uint_mod::primitive_overflow,)+
@@ -93,18 +89,20 @@ macro_rules! bench_add_for {
 }
 
 // Generates wrapping_add_signed benches.
-macro_rules! bench_wrapping_add_signed_for {
+#[macro_export]
+macro_rules! bench_wrapping_add_signed {
     ($({ $UnsInt:ident, $SigInt:ident, $uint_mod:ident, $Cnst:ident }),+ $(,)*) => {
-        bench_add_for! {
+        $crate::__bench_add_signed! {
             $({ $UnsInt, $SigInt, $uint_mod, $Cnst, wrapping_add_signed }),+
         }
     };
 }
 
+#[macro_export]
 // Generates overflowing_add_signed benches.
-macro_rules! bench_overflowing_add_signed_for {
+macro_rules! bench_overflowing_add_signed {
     ($({ $UnsInt:ident, $SigInt:ident, $uint_mod:ident, $Cnst:ident }),+ $(,)*) => {
-        bench_add_for! {
+        $crate::__bench_add_signed! {
             $({ $UnsInt, $SigInt, $uint_mod, $Cnst, overflowing_add_signed }),+
         }
     };

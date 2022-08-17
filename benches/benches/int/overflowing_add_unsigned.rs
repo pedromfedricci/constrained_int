@@ -1,15 +1,8 @@
 #![feature(mixed_integer_ops)]
 
-#[macro_use]
-mod bench_add_unsigned;
+use benches::bench_overflowing_add_unsigned;
 
-#[cfg(cnst8bitonly)]
-bench_overflowing_add_unsigned_for! {
-    { i8, u8, i8, ConstrainedI8 },
-}
-
-#[cfg(not(cnst8bitonly))]
-bench_overflowing_add_unsigned_for! {
+bench_overflowing_add_unsigned! {
     { i8, u8, i8, ConstrainedI8 },
     { i16, u16, i16, ConstrainedI16 },
     { i32, u32, i32, ConstrainedI32 },
