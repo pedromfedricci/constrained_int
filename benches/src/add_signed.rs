@@ -1,15 +1,17 @@
+// Group benches for wrapping add APIs running against signed values.
 #[macro_export]
+#[doc(hidden)]
 macro_rules! bench_add_signed {
     ($({ $Num:ident, $SigInt:ident, $num_mod:ident, $Cnst:ident, $add:ident }),+ $(,)*) => {
         use ::criterion::{criterion_group, criterion_main};
 
         $(
             mod $num_mod {
-                $crate::overflowing_add_around_min! {
+                $crate::overflowed_add_around_min! {
                     $Num, $SigInt, $num_mod, $Cnst, $add
                 }
 
-                $crate::overflowing_add_around_max! {
+                $crate::overflowed_add_around_max! {
                     $Num, $SigInt, $num_mod, $Cnst, $add
                 }
             }
@@ -18,8 +20,8 @@ macro_rules! bench_add_signed {
         criterion_group! {
             benches,
             $(
-                $num_mod::overflowing_add_around_min,
-                $num_mod::overflowing_add_around_max,
+                $num_mod::overflowed_add_around_min,
+                $num_mod::overflowed_add_around_max,
             )+
         }
 

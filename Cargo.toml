@@ -31,7 +31,6 @@ serde = { version = "1", default-features = false, optional = true }
 [dev-dependencies]
 proptest = { version = "1" }
 serde_test = { version = "1" }
-criterion = { version = "0.3", features = ["html_reports"] }
 
 [package.metadata.docs.rs]
 all-features = true

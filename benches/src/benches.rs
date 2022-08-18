@@ -1,7 +1,9 @@
+// These benches run the provided wrapping sub API against a `prim::MAX`.
 #[macro_export]
-macro_rules! overflowing_sub_around_min {
+#[doc(hidden)]
+macro_rules! overflowed_sub_around_min {
     ($Num:ident, $Rhs:ident, $num_mod:ident, $Cnst:ident, $sub:ident) => {
-        pub fn overflowing_sub_around_min(c: &mut ::criterion::Criterion) {
+        pub fn overflowed_sub_around_min(c: &mut ::criterion::Criterion) {
             use ::constrained_int::$num_mod::$Cnst;
             use ::criterion::BenchmarkId;
 
@@ -42,10 +44,12 @@ macro_rules! overflowing_sub_around_min {
     };
 }
 
+// These benches run the provided wrapping add API against a `prim::MAX`.
 #[macro_export]
-macro_rules! overflowing_add_around_max {
+#[doc(hidden)]
+macro_rules! overflowed_add_around_max {
     ($Num:ident, $Rhs:ident, $num_mod:ident, $Cnst:ident, $add:ident) => {
-        pub fn overflowing_add_around_max(c: &mut ::criterion::Criterion) {
+        pub fn overflowed_add_around_max(c: &mut ::criterion::Criterion) {
             use ::constrained_int::$num_mod::$Cnst;
             use ::criterion::BenchmarkId;
 
@@ -86,10 +90,12 @@ macro_rules! overflowing_add_around_max {
     };
 }
 
+// These benches run the provided wrapping add API against a `iX::MIN`.
 #[macro_export]
-macro_rules! overflowing_add_around_min {
-    ($Num:ident, $Rhs:ident, $num_mod:ident, $Cnst:ident, $add:ident) => {
-        pub fn overflowing_add_around_min(c: &mut ::criterion::Criterion) {
+#[doc(hidden)]
+macro_rules! overflowed_add_around_min {
+    ($Num:ident, $SigInt:ident, $num_mod:ident, $Cnst:ident, $add:ident) => {
+        pub fn overflowed_add_around_min(c: &mut ::criterion::Criterion) {
             use ::constrained_int::$num_mod::$Cnst;
             use ::criterion::BenchmarkId;
 
@@ -99,8 +105,8 @@ macro_rules! overflowing_add_around_min {
             let mut group = c.benchmark_group($crate::overflowed!($Num, $add));
 
             group.bench_with_input(
-                BenchmarkId::new($crate::short!($Cnst), $crate::min!($Rhs)),
-                &$Rhs::MIN,
+                BenchmarkId::new($crate::short!($Cnst), $crate::min!($SigInt)),
+                &$SigInt::MIN,
                 |bench, rhs| {
                     let short = CnstShortMin::new_min();
                     bench.iter(|| short.$add(*rhs));
@@ -108,8 +114,8 @@ macro_rules! overflowing_add_around_min {
             );
 
             group.bench_with_input(
-                BenchmarkId::new($crate::large!($Cnst), $crate::min!($Rhs)),
-                &$Rhs::MIN,
+                BenchmarkId::new($crate::large!($Cnst), $crate::min!($SigInt)),
+                &$SigInt::MIN,
                 |bench, rhs| {
                     let large = CnstLargeMin::new_min();
                     bench.iter(|| large.$add(*rhs));
@@ -117,8 +123,8 @@ macro_rules! overflowing_add_around_min {
             );
 
             group.bench_with_input(
-                BenchmarkId::new(stringify!($Num), $crate::min!($Rhs)),
-                &$Rhs::MIN,
+                BenchmarkId::new(stringify!($Num), $crate::min!($SigInt)),
+                &$SigInt::MIN,
                 |bench, rhs| {
                     let prim = $Num::MIN;
                     bench.iter(|| prim.$add(*rhs));
@@ -130,10 +136,12 @@ macro_rules! overflowing_add_around_min {
     };
 }
 
+// These benches run the provided wrapping sub API against a `iX::MIN`.
 #[macro_export]
-macro_rules! overflowing_sub_around_max {
-    ($Num:ident, $Rhs:ident, $num_mod:ident, $Cnst:ident, $sub:ident) => {
-        pub fn overflowing_sub_around_max(c: &mut ::criterion::Criterion) {
+#[doc(hidden)]
+macro_rules! overflowed_sub_around_max {
+    ($Num:ident, $SigInt:ident, $num_mod:ident, $Cnst:ident, $sub:ident) => {
+        pub fn overflowed_sub_around_max(c: &mut ::criterion::Criterion) {
             use ::constrained_int::$num_mod::$Cnst;
             use ::criterion::BenchmarkId;
 
@@ -143,8 +151,8 @@ macro_rules! overflowing_sub_around_max {
             let mut group = c.benchmark_group($crate::overflowed!($Num, $sub));
 
             group.bench_with_input(
-                BenchmarkId::new($crate::short!($Cnst), $crate::min!($Rhs)),
-                &$Rhs::MIN,
+                BenchmarkId::new($crate::short!($Cnst), $crate::min!($SigInt)),
+                &$SigInt::MIN,
                 |bench, rhs| {
                     let short = CnstShortMax::new_max();
                     bench.iter(|| short.$sub(*rhs));
@@ -152,8 +160,8 @@ macro_rules! overflowing_sub_around_max {
             );
 
             group.bench_with_input(
-                BenchmarkId::new($crate::large!($Cnst), $crate::min!($Rhs)),
-                &$Rhs::MIN,
+                BenchmarkId::new($crate::large!($Cnst), $crate::min!($SigInt)),
+                &$SigInt::MIN,
                 |bench, rhs| {
                     let large = CnstLargeMax::new_max();
                     bench.iter(|| large.$sub(*rhs));
@@ -161,8 +169,8 @@ macro_rules! overflowing_sub_around_max {
             );
 
             group.bench_with_input(
-                BenchmarkId::new(stringify!($Num), $crate::min!($Rhs)),
-                &$Rhs::MIN,
+                BenchmarkId::new(stringify!($Num), $crate::min!($SigInt)),
+                &$SigInt::MIN,
                 |bench, rhs| {
                     let prim = $Num::MAX;
                     bench.iter(|| prim.$sub(*rhs));

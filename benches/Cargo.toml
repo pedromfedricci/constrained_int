@@ -4,11 +4,12 @@ description = "Benches for constrained integers' wrapping APIs."
 version = "0.0.0"
 edition = "2021"
 publish = false
+readme = "README.md"
 
 [lib]
 bench = false
 
-[dependencies]
+[dev-dependencies]
 constrained_int = { version = "0.2", path = "../" }
 criterion = { version = "0.3", features = ["html_reports", "real_blackbox"] }
 
