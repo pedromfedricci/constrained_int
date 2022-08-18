@@ -1,6 +1,6 @@
-use benches::bench_wrapping_sub_int;
+use benches::bench_int_wrapping_sub;
 
-bench_wrapping_sub_int! {
+bench_int_wrapping_sub! {
     { i8, i8, ConstrainedI8 },
     { i16, i16, ConstrainedI16 },
     { i32, i32, ConstrainedI32 },

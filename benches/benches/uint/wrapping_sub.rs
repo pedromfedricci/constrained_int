@@ -1,6 +1,6 @@
-use benches::bench_wrapping_sub_uint;
+use benches::bench_uint_wrapping_sub;
 
-bench_wrapping_sub_uint! {
+bench_uint_wrapping_sub! {
     { u8, u8, ConstrainedU8 },
     { u16, u16, ConstrainedU16 },
     { u32, u32, ConstrainedU32 },

@@ -1,6 +1,6 @@
-use benches::bench_overflowing_add_uint;
+use benches::bench_uint_overflowing_add;
 
-bench_overflowing_add_uint! {
+bench_uint_overflowing_add! {
     { u8, u8, ConstrainedU8 },
     { u16, u16, ConstrainedU16 },
     { u32, u32, ConstrainedU32 },
