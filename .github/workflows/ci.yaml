@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     branches:
-      - "*"
+      - "main"
   pull_request:
     branches:
       - main
@@ -12,7 +12,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  RUST_CHANNEL: nightly-2022-07-01
+  RUST_CHANNEL: nightly-2022-08-12
 
 jobs:
   format:
@@ -67,7 +67,10 @@ jobs:
         uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          args: ${{ matrix.features }} -- -D warnings
+          args: >
+            ${{ matrix.features }}
+            --workspace
+            -- -D warnings
 
   docs:
     name: Documentation
@@ -154,15 +157,14 @@ jobs:
     name: Public changes
     runs-on: ubuntu-latest
     env:
-      CARGO_PUBLIC_API_VERSION: 0.12.3
+      CARGO_PUBLIC_API_VERSION: 0.13.1
+      NIGHTLY_COMPATIBLE: nightly-2022-08-12
 
     steps:
       - name: Install nightly toolchain
         uses: actions-rs/toolchain@v1
         with:
-          # cargo-pulic-api will only build reports if it finds
-          # `nightly-x86_64-unknown-linux-gnu` specifically.
-          toolchain: nightly
+          toolchain: ${{ env.NIGHTLY_COMPATIBLE }}
           profile: minimal
 
       - name: Chechout repository
