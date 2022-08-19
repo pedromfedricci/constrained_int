@@ -157,7 +157,7 @@ jobs:
     name: Public changes
     runs-on: ubuntu-latest
     env:
-      CARGO_PUBLIC_API_VERSION: 0.13.1
+      CARGO_PUBLIC_API_VERSION: 0.13.0
       NIGHTLY_COMPATIBLE: nightly-2022-08-12
 
     steps:
