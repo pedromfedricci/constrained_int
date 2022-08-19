@@ -1,4 +1,4 @@
-# Benchmarks for the constained_int crate
+# Benchmarks for the constrained_int crate
 
 This crate implements benchmarks for all `Constrained` types' wrapping APIs,
 using [Critetion].

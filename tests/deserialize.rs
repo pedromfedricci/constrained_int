@@ -1,7 +1,6 @@
 use serde_test::{assert_de_tokens, Token};
 
 #[test]
-#[cfg(any(cnst8bitonly, not(cnst8bitonly)))]
 fn bounded_value_cnst_i8() {
     use constrained_int::i8::ConstrainedI8;
     type CnstMin = ConstrainedI8<{ i8::MIN }, { i8::MAX - 1 }>;
@@ -34,7 +33,6 @@ fn bounded_value_cnst_i8() {
 }
 
 #[test]
-#[cfg(not(cnst8bitonly))]
 fn bounded_value_cnst_i16() {
     use constrained_int::i16::ConstrainedI16;
     type CnstMin = ConstrainedI16<{ i16::MIN }, { i16::MAX - 1 }>;
@@ -67,7 +65,6 @@ fn bounded_value_cnst_i16() {
 }
 
 #[test]
-#[cfg(not(cnst8bitonly))]
 fn bounded_value_cnst_i32() {
     use constrained_int::i32::ConstrainedI32;
     type CnstMin = ConstrainedI32<{ i32::MIN }, { i32::MAX - 1 }>;
@@ -100,7 +97,6 @@ fn bounded_value_cnst_i32() {
 }
 
 #[test]
-#[cfg(not(cnst8bitonly))]
 fn bounded_value_cnst_i64() {
     use constrained_int::i64::ConstrainedI64;
     type CnstMin = ConstrainedI64<{ i64::MIN }, { i64::MAX - 1 }>;
@@ -133,7 +129,6 @@ fn bounded_value_cnst_i64() {
 }
 
 #[test]
-#[cfg(not(cnst8bitonly))]
 fn bounded_value_cnst_isize() {
     use constrained_int::isize::ConstrainedIsize;
     type Cnst = ConstrainedIsize<-8, 8>;
@@ -164,7 +159,6 @@ fn bounded_value_cnst_isize() {
 }
 
 #[test]
-#[cfg(not(cnst8bitonly))]
 fn bounded_value_cnst_i128() {
     use constrained_int::i128::ConstrainedI128;
     type CnstMin = ConstrainedI128<{ i128::MIN }, { i128::MAX - 1 }>;
@@ -197,7 +191,6 @@ fn bounded_value_cnst_i128() {
 }
 
 #[test]
-#[cfg(any(cnst8bitonly, not(cnst8bitonly)))]
 fn bounded_value_cnst_u8() {
     use constrained_int::u8::ConstrainedU8;
     type CnstMin = ConstrainedU8<{ u8::MIN }, { u8::MAX - 1 }>;
@@ -230,7 +223,6 @@ fn bounded_value_cnst_u8() {
 }
 
 #[test]
-#[cfg(not(cnst8bitonly))]
 fn bounded_value_cnst_u16() {
     use constrained_int::u16::ConstrainedU16;
     type CnstMin = ConstrainedU16<{ u16::MIN }, { u16::MAX - 1 }>;
@@ -263,7 +255,6 @@ fn bounded_value_cnst_u16() {
 }
 
 #[test]
-#[cfg(not(cnst8bitonly))]
 fn bounded_value_cnst_u32() {
     use constrained_int::u32::ConstrainedU32;
     type CnstMin = ConstrainedU32<{ u32::MIN }, { u32::MAX - 1 }>;
@@ -296,7 +287,6 @@ fn bounded_value_cnst_u32() {
 }
 
 #[test]
-#[cfg(not(cnst8bitonly))]
 fn bounded_value_cnst_u64() {
     use constrained_int::u64::ConstrainedU64;
     type CnstMin = ConstrainedU64<{ u64::MIN }, { u64::MAX - 1 }>;
@@ -329,7 +319,6 @@ fn bounded_value_cnst_u64() {
 }
 
 #[test]
-#[cfg(not(cnst8bitonly))]
 fn bounded_value_cnst_usize() {
     use constrained_int::usize::ConstrainedUsize;
     type Cnst = ConstrainedUsize<0, 8>;
@@ -360,7 +349,6 @@ fn bounded_value_cnst_usize() {
 }
 
 #[test]
-#[cfg(not(cnst8bitonly))]
 fn bounded_value_cnst_u128() {
     use constrained_int::u128::ConstrainedU128;
     type CnstMin = ConstrainedU128<{ u128::MIN }, { u128::MAX - 1 }>;

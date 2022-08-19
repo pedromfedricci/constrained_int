@@ -113,14 +113,8 @@ mod proptest;
 //
 // Format:
 //  { uint, sint, uint_mod, sint_mod, TypeName, ErrorName, MinErrorName, MaxErrorName },+
-//
-// Building 8bit related types exclusively is faster, useful for most development purposes.
-#[cfg(any(cnst8bitonly, not(cnst8bitonly)))]
 constrained_uint_def_impl! {
-    { u8, i8, u8, i8, ConstrainedU8, ConstrainedU8Error, MinU8Error, MaxU8Error }
-}
-#[cfg(not(cnst8bitonly))]
-constrained_uint_def_impl! {
+    { u8, i8, u8, i8, ConstrainedU8, ConstrainedU8Error, MinU8Error, MaxU8Error },
     { u16, i16, u16, i16, ConstrainedU16, ConstrainedU16Error, MinU16Error, MaxU16Error },
     { u32, i32, u32, i32, ConstrainedU32, ConstrainedU32Error, MinU32Error, MaxU32Error },
     { u64, i64, u64, i64, ConstrainedU64, ConstrainedU64Error, MinU64Error, Max64Error },
@@ -133,14 +127,8 @@ constrained_uint_def_impl! {
 //
 // Format:
 //  { sint, uint, sint_mod, uint_mod, TypeName, ErrorName, MinErrorName, MaxErrorName },+
-//
-// Building 8bit related types exclusively is faster, useful for most development purposes.
-#[cfg(any(cnst8bitonly, not(cnst8bitonly)))]
 constrained_int_def_impl! {
     { i8, u8, i8, u8, ConstrainedI8, ConstrainedI8Error, MinI8Error, MaxI8Error },
-}
-#[cfg(not(cnst8bitonly))]
-constrained_int_def_impl! {
     { i16, u16, i16, u16, ConstrainedI16, ConstrainedI16Error, MinI16Error, MaxI16Error },
     { i32, u32, i32, u32, ConstrainedI32, ConstrainedI32Error, MinI32Error, MaxI32Error },
     { i64, u64, i64, u64, ConstrainedI64, ConstrainedI64Error, MinI64Error, MaxI64Error },

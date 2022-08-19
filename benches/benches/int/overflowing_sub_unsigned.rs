@@ -2,7 +2,6 @@
 
 use benches::bench_overflowing_sub_unsigned;
 
-#[cfg(not(cnst8bitonly))]
 bench_overflowing_sub_unsigned! {
     { i8, u8, i8, ConstrainedI8 },
     { i16, u16, i16, ConstrainedI16 },

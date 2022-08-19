@@ -14,65 +14,37 @@ dependencies = [
     "report-public-api",
 ]
 
+# Run linter on workspace.
 [tasks.clippy]
-args = ["clippy", "--all-features"]
+args = ["clippy", "--all-features", "--workspace"]
 
+# Check all workspace.
+[tasks.check]
+command = "cargo"
+args = ["check", "--all-features", "--workspace"]
+
+# Run doc with all features.
 [tasks.docs]
-args = ["doc", "--no-deps", "--all-features"]
+args = ["doc", "--no-deps", "--all-features", "--workspace"]
 
 # Build package in no_std environment.
 [tasks.no-std]
 command = "cargo"
-args = ["build", "--target", "thumbv7m-none-eabi"]
+args = ["check", "--target", "thumbv7m-none-eabi"]
 
 # Run cargo public-api to report public changes.
 [tasks.report-public-api]
 script = { file = "ci/report_public_api.sh" }
 
+# Run tarpaulin with config file.
 [tasks.coverage-tarpaulin.linux]
 command = "cargo"
 args = ["tarpaulin", "--config", "tarpaulin.toml"]
-
-# Check package with all types.
-[tasks.chkall]
-command = "cargo"
-args = ["check", "--all-features"]
-
-# Check package with 8bit types only.
-[tasks.chk8]
-env = { "RUSTFLAGS" = "--cfg=cnst8bitonly" }
-run_task = "chkall"
-
-# Check code coverage with 8bit types only.
-[tasks.cov8]
-env = { "RUSTFLAGS" = "--cfg=cnst8bitonly" }
-run_task = "coverage-tarpaulin"
-
-# Linter check with 8bit types only.
-[tasks.lint8]
-env = { "RUSTFLAGS" = "--cfg=cnst8bitonly" }
-run_task = "clippy"
-
-# Run all 8bit related unit tests.
-[tasks.t8]
-env = { "RUSTFLAGS" = "--cfg=cnst8bitonly" }
-command = "cargo"
-args = ["test", "--all-features", "--tests"]
-
-# Run `u8` related unit tests only.
-[tasks.tu8]
-env = { "RUSTFLAGS" = "--cfg=cnst8bitonly" }
-run_task = "tuint"
 
 # Run all `uX` related unit tests.
 [tasks.tuint]
 command = "cargo"
 args = ["test", "--all-features", "--lib", "tests_uint"]
-
-# Run `i8` related unit tests only.
-[tasks.ti8]
-env = { "RUSTFLAGS" = "--cfg=cnst8bitonly" }
-run_task = "tint"
 
 # Run all `iX` related unit tests.
 [tasks.tint]
@@ -83,12 +55,6 @@ args = ["test", "--all-features", "--lib", "tests_int"]
 [tasks.tcom]
 command = "cargo"
 args = ["test", "--all-features", "--lib", "common"]
-
-# Run `u8` related doc examples only.
-[tasks.tdu8]
-env = { "RUSTFDOCFLAGS" = "--cfg=cnst8bitonly" }
-command = "cargo"
-args = ["test", "--all-features", "--doc", "--", "u8"]
 
 # Run all `uX` related doc examples.
 [tasks.tduint]
@@ -106,12 +72,6 @@ args = [
     "usize",
 ]
 
-# Run `i8` related doc examples only.
-[tasks.tdi8]
-env = { "RUSTFDOCFLAGS" = "--cfg=cnst8bitonly" }
-command = "cargo"
-args = ["test", "--all-features", "--doc", "--", "i8"]
-
 # Run all `iX` related doc examples.
 [tasks.tdint]
 command = "cargo"
@@ -127,7 +87,3 @@ args = [
     "i128",
     "isize",
 ]
-
-# Run all 8bit related doc examples only.
-[tasks.td8]
-run_task = { name = ["tdu8", "tdi8"] }
