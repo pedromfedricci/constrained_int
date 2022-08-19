@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - (19. August, 2022)
+
+### Added on 0.2.2
+
+- Benchmark implementations for al `Constrained` types' wrapping APIs ([#3]).
+
+### Changed on 0.2.2
+
+- Improve performance for wrapping APIs under certain conditions ([#3]).
+
+[#3]: https://github.com/pedromfedricci/constrained_int/pull/3
+
 ## [0.2.1] - (12. August, 2022)
 
 ### Added on 0.2.1

@@ -74,6 +74,11 @@ fn main() -> Result<(), ConstrainedError> {
 
 This project documentation is hosted at [docs.rs][doc-link].
 
+## Safety
+
+This crate uses `#![forbid(unsafe_code)]` to ensure everything is implemented in
+100% safe Rust.
+
 ## Feature flags
 
 This crate does not provide any default features. The features that can be
