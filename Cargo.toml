@@ -16,6 +16,9 @@ keywords = ["no_std", "numerics"]
 
 exclude = [".github", "ci", "Makefile.toml", "codecov.yaml"]
 
+[workspace]
+members = [".", "benches"]
+
 [features]
 # This will import `std` as a dependency.
 std = []

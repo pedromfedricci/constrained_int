@@ -9,3 +9,6 @@ git config advice.detachedHead false
 cargo public-api --diff-git-checkouts $LATEST_TAG_COMMIT $CURRENT_HEAD
 # Just move back to whatever checkout we were before.
 git checkout --quiet @{-2}
+# This is just a report script, don't fail a job run just because
+# something went wrong.
+exit 0

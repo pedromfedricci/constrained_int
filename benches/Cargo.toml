@@ -1,0 +1,84 @@
+[package]
+name = "benches"
+description = "Benches for constrained integers' wrapping APIs."
+version = "0.0.0"
+edition = "2021"
+publish = false
+readme = "README.md"
+
+[lib]
+bench = false
+
+[dev-dependencies]
+constrained_int = { version = "0.2", path = "../" }
+criterion = { version = "0.3", features = ["html_reports", "real_blackbox"] }
+
+[[bench]]
+name = "uint_wrapping_add"
+path = "benches/uint/wrapping_add.rs"
+harness = false
+
+[[bench]]
+name = "uint_overflowing_add"
+path = "benches/uint/overflowing_add.rs"
+harness = false
+
+[[bench]]
+name = "uint_wrapping_sub"
+path = "benches/uint/wrapping_sub.rs"
+harness = false
+
+[[bench]]
+name = "uint_overflowing_sub"
+path = "benches/uint/overflowing_sub.rs"
+harness = false
+
+[[bench]]
+name = "wrapping_add_signed"
+path = "benches/uint/wrapping_add_signed.rs"
+harness = false
+
+[[bench]]
+name = "overflowing_add_signed"
+path = "benches/uint/overflowing_add_signed.rs"
+harness = false
+
+[[bench]]
+name = "int_wrapping_add"
+path = "benches/int/wrapping_add.rs"
+harness = false
+
+[[bench]]
+name = "int_overflowing_add"
+path = "benches/int/overflowing_add.rs"
+harness = false
+
+[[bench]]
+name = "int_wrapping_sub"
+path = "benches/int/wrapping_sub.rs"
+harness = false
+
+[[bench]]
+name = "int_overflowing_sub"
+path = "benches/int/overflowing_sub.rs"
+harness = false
+
+[[bench]]
+name = "wrapping_add_unsigned"
+path = "benches/int/wrapping_add_unsigned.rs"
+harness = false
+
+[[bench]]
+name = "overflowing_add_unsigned"
+path = "benches/int/overflowing_add_unsigned.rs"
+harness = false
+
+[[bench]]
+name = "wrapping_sub_unsigned"
+path = "benches/int/wrapping_sub_unsigned.rs"
+harness = false
+
+[[bench]]
+name = "overflowing_sub_unsigned"
+path = "benches/int/overflowing_sub_unsigned.rs"
+harness = false
