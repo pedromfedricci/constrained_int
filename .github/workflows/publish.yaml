@@ -27,6 +27,9 @@ jobs:
 
       - name: Check semver changes
         uses: obi1kenobi/cargo-semver-checks-action@v1
+        with:
+          crate-name: constrained_int
+          version-tag-prefix: v
 
       - name: Publish to crates.io
         env:
