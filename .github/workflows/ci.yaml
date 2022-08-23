@@ -166,6 +166,7 @@ jobs:
         with:
           toolchain: ${{ env.NIGHTLY_COMPATIBLE }}
           profile: minimal
+          override: true
 
       - name: Chechout repository
         uses: actions/checkout@v3
@@ -176,7 +177,7 @@ jobs:
         id: cargo-cache
         uses: Swatinem/rust-cache@v2
         with:
-          env-vars: CARGO_PUBLIC_API_VERSION
+          env-vars: "NIGHTLY_COMPATIBLE CARGO_PUBLIC_API_VERSION"
 
       - name: Install cargo-public-api
         uses: actions-rs/cargo@v1
@@ -188,4 +189,4 @@ jobs:
             --version=${{ env.CARGO_PUBLIC_API_VERSION }}
 
       - name: Run cargo-public-api
-        run: sh ci/report_public_api.sh
+        run: sh ci/report_public_api.sh ${{ env.NIGHTLY_COMPATIBLE }}
