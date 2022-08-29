@@ -12,7 +12,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  RUST_CHANNEL: nightly-2022-08-12
+  RUST_CHANNEL: nightly-2022-08-15
 
 jobs:
   format:
@@ -157,8 +157,8 @@ jobs:
     name: Public changes
     runs-on: ubuntu-latest
     env:
-      CARGO_PUBLIC_API_VERSION: 0.13.0
-      NIGHTLY_COMPATIBLE: nightly-2022-08-12
+      CARGO_PUBLIC_API_VERSION: 0.15.0
+      NIGHTLY_COMPATIBLE: nightly-2022-08-15
 
     steps:
       - name: Install nightly toolchain
@@ -189,4 +189,4 @@ jobs:
             --version=${{ env.CARGO_PUBLIC_API_VERSION }}
 
       - name: Run cargo-public-api
-        run: sh ci/report_public_api.sh ${{ env.NIGHTLY_COMPATIBLE }}
+        run: sh ci/report_public_api.sh
