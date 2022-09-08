@@ -292,7 +292,7 @@ macro_rules! constrained_def_impl {
                 Self(MAX)
             }
 
-            /// Returns a `[RangeInclusive]` value corresponding to the type's bondaries.
+            /// Returns a [`RangeInclusive`] value corresponding to the type's bondaries.
             ///
             /// # Example
             ///
@@ -305,6 +305,7 @@ macro_rules! constrained_def_impl {
             /// assert_eq!(Constrained::MIN, *range.start());
             /// assert_eq!(Constrained::MAX, *range.end());
             /// ```
+            /// [`RangeInclusive`]: core::ops::RangeInclusive
             #[must_use]
             #[inline(always)]
             pub const fn range() -> ::core::ops::RangeInclusive<$Int> {
