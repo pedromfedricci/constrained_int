@@ -76,6 +76,10 @@ macro_rules! constrained_def_impl {
         /// or `MAX` to be lower than the primitive's `MAX`, or else the type can't be
         /// constructed.
         ///
+        /// # Layout
+        ///
+        #[doc = concat!(stringify!($Ty), " is guaranteed to have the same layout and ABI as `", stringify!($Int), "`")]
+        ///
         /// # Examples
         ///
         /// If the provided parameters satisfy the construction condition, associated

@@ -102,6 +102,8 @@
 #[macro_use]
 mod macros;
 
+pub mod wrapping;
+
 #[cfg(feature = "serde")]
 mod deserialize;
 
