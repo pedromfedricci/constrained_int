@@ -5,90 +5,60 @@ macro_rules! forward_ref_binop {
     // Const ops implementation.
     // This implementation is equivalent to the non-const version,
     // but with the additional `const` keyword.
-    (impl<const $int:ty> const $imp:ident<$y:ident<$u:ident>>, $method:ident for $w:ident<$t:ident>) => {
-        impl<'a, const MIN: $int, const MAX: $int, const DEF: $int> const
-            $imp<$y<$u<MIN, MAX, DEF>>> for &'a $w<$t<MIN, MAX, DEF>>
-        {
-            type Output = <$w<$t<MIN, MAX, DEF>> as $imp<$y<$u<MIN, MAX, DEF>>>>::Output;
+    (impl$(<$(const $c:ident: $i:ty),+>)? const $imp:ident<$u:ty>, $method:ident for $t:ty) => {
+        impl$(<'a, $(const $c: $i,)+>)? const $imp<$u> for &'a $t {
+            type Output = <$t as $imp<$u>>::Output;
 
             #[inline]
-            fn $method(
-                self,
-                rhs: $y<$u<MIN, MAX, DEF>>,
-            ) -> <$w<$t<MIN, MAX, DEF>> as $imp<$y<$u<MIN, MAX, DEF>>>>::Output {
+            fn $method(self, rhs: $u) -> <$t as $imp<$u>>::Output {
                 $imp::$method(*self, rhs)
             }
         }
 
-        impl<const MIN: $int, const MAX: $int, const DEF: $int> const $imp<&$y<$u<MIN, MAX, DEF>>>
-            for $w<$t<MIN, MAX, DEF>>
-        {
-            type Output = <$w<$t<MIN, MAX, DEF>> as $imp<$y<$u<MIN, MAX, DEF>>>>::Output;
+        impl$(<$(const $c: $i,)+>)? const $imp<&$u> for $t {
+            type Output = <$t as $imp<$u>>::Output;
 
             #[inline]
-            fn $method(
-                self,
-                rhs: &$y<$u<MIN, MAX, DEF>>,
-            ) -> <$w<$t<MIN, MAX, DEF>> as $imp<$y<$u<MIN, MAX, DEF>>>>::Output {
+            fn $method(self, rhs: &$u) -> <$t as $imp<$u>>::Output {
                 $imp::$method(self, *rhs)
             }
         }
 
-        impl<const MIN: $int, const MAX: $int, const DEF: $int> const $imp<&$y<$u<MIN, MAX, DEF>>>
-            for &$w<$t<MIN, MAX, DEF>>
-        {
-            type Output = <$w<$t<MIN, MAX, DEF>> as $imp<$y<$u<MIN, MAX, DEF>>>>::Output;
+        impl$(<$(const $c: $i,)+>)? const $imp<&$u> for &$t {
+            type Output = <$t as $imp<$u>>::Output;
 
             #[inline]
-            fn $method(
-                self,
-                rhs: &$y<$u<MIN, MAX, DEF>>,
-            ) -> <$w<$t<MIN, MAX, DEF>> as $imp<$y<$u<MIN, MAX, DEF>>>>::Output {
+            fn $method(self, rhs: &$u) -> <$t as $imp<$u>>::Output {
                 $imp::$method(*self, *rhs)
             }
         }
     };
 
     // Non-const ops implementation.
-    (impl<const $int:ty> $imp:ident<$y:ident<$u:ident>>, $method:ident for $w:ident<$t:ident>) => {
-        impl<'a, const MIN: $int, const MAX: $int, const DEF: $int> $imp<$y<$u<MIN, MAX, DEF>>>
-            for &'a $w<$t<MIN, MAX, DEF>>
-        {
-            type Output = <$w<$t<MIN, MAX, DEF>> as $imp<$y<$u<MIN, MAX, DEF>>>>::Output;
+    (impl$(<$(const $c:ident: $i:ty),+>)? $imp:ident<$u:ty>, $method:ident for $t:ty) => {
+        impl$(<'a, $(const $c: $i,)+>)? $imp<$u> for &'a $t {
+            type Output = <$t as $imp<$u>>::Output;
 
             #[inline]
-            fn $method(
-                self,
-                rhs: $y<$u<MIN, MAX, DEF>>,
-            ) -> <$w<$t<MIN, MAX, DEF>> as $imp<$y<$u<MIN, MAX, DEF>>>>::Output {
+            fn $method(self, rhs: $u) -> <$t as $imp<$u>>::Output {
                 $imp::$method(*self, rhs)
             }
         }
 
-        impl<const MIN: $int, const MAX: $int, const DEF: $int> $imp<&$y<$u<MIN, MAX, DEF>>>
-            for $w<$t<MIN, MAX, DEF>>
-        {
-            type Output = <$w<$t<MIN, MAX, DEF>> as $imp<$y<$u<MIN, MAX, DEF>>>>::Output;
+        impl$(<$(const $c: $i,)+>)? $imp<&$u> for $t {
+            type Output = <$t as $imp<$u>>::Output;
 
             #[inline]
-            fn $method(
-                self,
-                rhs: &$y<$u<MIN, MAX, DEF>>,
-            ) -> <$w<$t<MIN, MAX, DEF>> as $imp<$y<$u<MIN, MAX, DEF>>>>::Output {
+            fn $method(self, rhs: &$u) -> <$t as $imp<$u>>::Output {
                 $imp::$method(self, *rhs)
             }
         }
 
-        impl<const MIN: $int, const MAX: $int, const DEF: $int> $imp<&$y<$u<MIN, MAX, DEF>>>
-            for &$w<$t<MIN, MAX, DEF>>
-        {
-            type Output = <$w<$t<MIN, MAX, DEF>> as $imp<$y<$u<MIN, MAX, DEF>>>>::Output;
+        impl$(<$(const $c: $i,)+>)? $imp<&$u> for &$t {
+            type Output = <$t as $imp<$u>>::Output;
 
             #[inline]
-            fn $method(
-                self,
-                rhs: &$y<$u<MIN, MAX, DEF>>,
-            ) -> <$w<$t<MIN, MAX, DEF>> as $imp<$y<$u<MIN, MAX, DEF>>>>::Output {
+            fn $method(self, rhs: &$u) -> <$t as $imp<$u>>::Output {
                 $imp::$method(*self, *rhs)
             }
         }
@@ -102,48 +72,20 @@ macro_rules! forward_ref_op_assign {
     // Const ops implementation.
     // This implementation is equivalent to the non-const version,
     // but with the additional `const` keyword.
-    (impl<const $int:ty> const $imp:ident<$y:ident<$u:ident>>, $method:ident for $w:ident<$t:ident>) => {
-        impl<const MIN: $int, const MAX: $int, const DEF: $int> const $imp<&$y<$u<MIN, MAX, DEF>>>
-            for $w<$t<MIN, MAX, DEF>>
-        {
+    (impl$(<$(const $c:ident: $i:ty),+>)? const $imp:ident<$u:ty>, $method:ident for $t:ty) => {
+        impl$(<$(const $c: $i,)+>)? const $imp<&$u> for $t {
             #[inline]
-            fn $method(&mut self, rhs: &$y<$u<MIN, MAX, DEF>>) {
-                $imp::$method(self, *rhs);
-            }
-        }
-    };
-
-    // Const ops implementation.
-    (impl<const $int:ty> const $imp:ident<$y:ty>, $method:ident for $w:ident<$t:ident>) => {
-        impl<const MIN: $int, const MAX: $int, const DEF: $int> const $imp<&$y>
-            for $w<$t<MIN, MAX, DEF>>
-        {
-            #[inline]
-            fn $method(&mut self, rhs: &$y) {
+            fn $method(&mut self, rhs: &$u) {
                 $imp::$method(self, *rhs);
             }
         }
     };
 
     // Non-cont ops implementation.
-    (impl<const $int:ty> $imp:ident<$y:ident<$u:ident>>, $method:ident for $w:ident<$t:ident>) => {
-        impl<const MIN: $int, const MAX: $int, const DEF: $int> $imp<&$y<$u<MIN, MAX, DEF>>>
-            for $w<$t<MIN, MAX, DEF>>
-        {
+    (impl$(<$(const $c:ident: $i:ty),+>)? $imp:ident<$u:ty>, $method:ident for $t:ty) => {
+        impl$(<$(const $c: $i,)+>)? $imp<&$u> for $t {
             #[inline]
-            fn $method(&mut self, rhs: &$y<$u<MIN, MAX, DEF>>) {
-                $imp::$method(self, *rhs);
-            }
-        }
-    };
-
-    // Non-cont ops implementation.
-    (impl<const $int:ty> $imp:ident<$y:ty>, $method:ident for $w:ident<$t:ident>) => {
-        impl<const MIN: $int, const MAX: $int, const DEF: $int> $imp<&$y>
-            for $w<$t<MIN, MAX, DEF>>
-        {
-            #[inline]
-            fn $method(&mut self, rhs: &$y) {
+            fn $method(&mut self, rhs: &$u) {
                 $imp::$method(self, *rhs);
             }
         }

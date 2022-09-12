@@ -31,8 +31,8 @@ wrapping_fmt_impl! { Debug, Display, Binary, Octal, LowerHex, UpperHex for Wrapp
 // Requires `const_trait_impl` and `const_ops` features.
 macro_rules! wrapping_impl {
     ($({ $Int:ty, $Cnst:ident }),+ $(,)*) => {$(
-        impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> const Add
-            for Wrapping<$Cnst<MIN, MAX, DEF>>
+        impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> const
+            Add for Wrapping<$Cnst<MIN, MAX, DEF>>
         {
             type Output = Self;
 
@@ -41,8 +41,10 @@ macro_rules! wrapping_impl {
                 Wrapping(self.0.wrapping_add(rhs.0.get()))
             }
         }
+
         forward_ref_binop! {
-            impl<const $Int> const Add<Wrapping<$Cnst>>, add for Wrapping<$Cnst>
+            impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> const
+                Add<Wrapping<$Cnst<MIN, MAX, DEF>>>, add for Wrapping<$Cnst<MIN, MAX, DEF>>
         }
 
         impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> const AddAssign
@@ -53,24 +55,28 @@ macro_rules! wrapping_impl {
                 *self = *self + rhs;
             }
         }
+
         forward_ref_op_assign! {
-            impl<const $Int> const AddAssign<Wrapping<$Cnst>>, add_assign for Wrapping<$Cnst>
+            impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> const
+                AddAssign<Wrapping<$Cnst<MIN, MAX, DEF>>>, add_assign for Wrapping<$Cnst<MIN, MAX, DEF>>
         }
 
-        impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> const AddAssign<$Int>
-            for Wrapping<$Cnst<MIN, MAX, DEF>>
+        impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> const
+            AddAssign<$Int> for Wrapping<$Cnst<MIN, MAX, DEF>>
         {
             #[inline]
             fn add_assign(&mut self, rhs: $Int) {
                 *self = Wrapping(self.0.wrapping_add(rhs));
             }
         }
+
         forward_ref_op_assign! {
-            impl<const $Int> const AddAssign<$Int>, add_assign for Wrapping<$Cnst>
+            impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> const
+                AddAssign<$Int>, add_assign for Wrapping<$Cnst<MIN, MAX, DEF>>
         }
 
-        impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> const Sub
-            for Wrapping<$Cnst<MIN, MAX, DEF>>
+        impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> const
+            Sub for Wrapping<$Cnst<MIN, MAX, DEF>>
         {
             type Output = Self;
 
@@ -79,32 +85,38 @@ macro_rules! wrapping_impl {
                 Wrapping(self.0.wrapping_sub(rhs.0.get()))
             }
         }
+
         forward_ref_binop! {
-            impl<const $Int> const Sub<Wrapping<$Cnst>>, sub for Wrapping<$Cnst>
+            impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> const
+                Sub<Wrapping<$Cnst<MIN, MAX, DEF>>>, sub for Wrapping<$Cnst<MIN, MAX, DEF>>
         }
 
-        impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> const SubAssign
-            for Wrapping<$Cnst<MIN, MAX, DEF>>
+        impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> const
+            SubAssign for Wrapping<$Cnst<MIN, MAX, DEF>>
         {
             #[inline]
             fn sub_assign(&mut self, rhs: Self) {
                 *self = *self - rhs;
             }
         }
+
         forward_ref_op_assign! {
-            impl<const $Int> const SubAssign<Wrapping<$Cnst>>, sub_assign for Wrapping<$Cnst>
+            impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> const
+                SubAssign<Wrapping<$Cnst<MIN, MAX, DEF>>>, sub_assign for Wrapping<$Cnst<MIN, MAX, DEF>>
         }
 
-        impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> const SubAssign<$Int>
-            for Wrapping<$Cnst<MIN, MAX, DEF>>
+        impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> const
+            SubAssign<$Int> for Wrapping<$Cnst<MIN, MAX, DEF>>
         {
             #[inline]
             fn sub_assign(&mut self, rhs: $Int) {
                 *self = Wrapping(self.0.wrapping_sub(rhs))
             }
         }
+
         forward_ref_op_assign! {
-            impl<const $Int> const SubAssign<$Int>, sub_assign for Wrapping<$Cnst>
+            impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> const
+                SubAssign<$Int>, sub_assign for Wrapping<$Cnst<MIN, MAX, DEF>>
         }
     )+};
 }
