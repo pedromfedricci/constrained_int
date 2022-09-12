@@ -11,7 +11,7 @@ bench = false
 
 [dev-dependencies]
 constrained_int = { version = "0.2", path = "../" }
-criterion = { version = "0.3", features = ["html_reports", "real_blackbox"] }
+criterion = { version = "0.4", features = ["html_reports", "real_blackbox"] }
 
 [[bench]]
 name = "uint_wrapping_add"
