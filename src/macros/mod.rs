@@ -23,4 +23,4 @@ mod int;
 // - `forward_ref_binop!`.
 // - `forward_ref_op_assign!`.
 #[macro_use]
-mod ops;
+mod refops;

@@ -110,7 +110,7 @@ macro_rules! constrained_def_impl {
         /// // None of these will compile for InvalidRange.
         /// let value = InvalidRange::MIN;
         /// let constrained = InvalidRange::default();
-        /// let constrained = InvalidRange::min();
+        /// let constrained = InvalidRange::new_min();
         /// /* ...other constructors */
         /// ```
         #[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
