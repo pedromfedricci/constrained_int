@@ -161,6 +161,7 @@ macro_rules! tests_wrapping {
     };
 }
 
+#[cfg(test)]
 macro_rules! imp_binop_tests_for {
     ($({ $md:ident, $op:tt, $func:ident }),+ $(,)?) => {$(
         #[cfg(test)]
@@ -214,6 +215,7 @@ macro_rules! imp_binop_tests_for {
     )+};
 }
 
+#[cfg(test)]
 macro_rules! imp_op_assign_tests_for {
     ($({ $md:ident, $op:tt, $func:ident }),+ $(,)?) => {$(
         #[cfg(test)]

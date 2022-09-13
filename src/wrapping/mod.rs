@@ -1,3 +1,5 @@
+//! Container for intentionally-wrapped aritmethic on `T`.
+
 // Import:
 // - `wrapping_fmt_impl!!`.
 // - `wrapping_impl_for!`.
@@ -11,9 +13,29 @@ mod macros;
 /// all standard arithmetic operations on the underlying value are
 /// intended to have wrapping semantics.
 ///
+/// The underlying value can be retrieved through the .0 index of the
+/// Wrapping tuple.
+///
 /// # Layout
 ///
 /// `Wrapping<T>` is guaranteed to have the same layout and ABI as `T`.
+///
+/// # Example
+///
+/// ```
+/// use constrained_int::i8::ConstrainedI8;
+/// use constrained_int::wrapping::Wrapping;
+///
+/// // Default set to 0.
+/// type Wrapped = Wrapping<ConstrainedI8<-10, 12, 0>>;
+///
+/// let mut wrapped = Wrapped::default();
+/// wrapped += 13;
+/// assert_eq!(wrapped.0.get(), -10);
+///
+/// wrapped = wrapped - wrapped;
+/// assert_eq!(wrapped.0.get(), 0);
+/// ```
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Default, Hash)]
 #[repr(transparent)]
 pub struct Wrapping<T>(pub T);
