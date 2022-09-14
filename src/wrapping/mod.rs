@@ -1,8 +1,9 @@
 //! Container for intentionally-wrapped aritmethic on `T`.
 
 // Import:
-// - `wrapping_fmt_impl!!`.
-// - `wrapping_impl_for!`.
+// - `wrapping_fmt_impl!`.
+// - `wrapping_uint_impl_for!`.
+// - `wrapping_int_impl_for!`.
 #[macro_use]
 mod macros;
 
@@ -40,16 +41,25 @@ mod macros;
 #[repr(transparent)]
 pub struct Wrapping<T>(pub T);
 
+// Implemets some core::fmt traits for Wrapping.
 wrapping_fmt_impl! { Debug, Display, Binary, Octal, LowerHex, UpperHex for Wrapping<T> }
 
-wrapping_impl_for! {
+// Defines Wrapping impls, tests and default doc values for unsigned integers.
+// Format:
+//  { uint, uint_mod, UnsType },+
+wrapping_uint_impl_for! {
     { u8, u8, ConstrainedU8 },
     { u16, u16, ConstrainedU16 },
     { u32, u32, ConstrainedU32 },
     { u64, u64, ConstrainedU64 },
     { u128, u128, ConstrainedU128 },
     { usize, usize, ConstrainedUsize },
+}
 
+// Defines Wrapping impls, tests and default doc values for signed integers.
+// Format:
+//  { sint, sint_mod, SigType },+
+wrapping_int_impl_for! {
     { i8, i8, ConstrainedI8 },
     { i16, i16, ConstrainedI16 },
     { i32, i32, ConstrainedI32 },

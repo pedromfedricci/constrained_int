@@ -1,22 +1,7 @@
-// Implemets some core::fmt traits for Wrapping.
-macro_rules! wrapping_fmt_impl {
-    ($($Trait:ident),+ for Wrapping<T>) => {$(
-        impl<T: ::core::fmt::$Trait> ::core::fmt::$Trait for Wrapping<T> {
-            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                self.0.fmt(f)
-            }
-        }
-    )+};
-}
-
 // Implements core::ops Traits for a `Wrapping<`Constrained`>` type.
 // Requires `const_trait_impl` and `const_mut_refs` features.
 macro_rules! wrapping_ops_impl {
-    ($Int:ty, $md:ident, $Cnst:ident) => {
-        use ::core::ops::{Add, AddAssign, Sub, SubAssign};
-        use $crate::$md::$Cnst;
-        use $crate::wrapping::Wrapping;
-
+    ($Int:ty, $Cnst:ident) => {
         impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> const
             Add for Wrapping<$Cnst<MIN, MAX, DEF>>
         {
@@ -33,8 +18,8 @@ macro_rules! wrapping_ops_impl {
                 Add<Wrapping<$Cnst<MIN, MAX, DEF>>>, add for Wrapping<$Cnst<MIN, MAX, DEF>>
         }
 
-        impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> const AddAssign
-            for Wrapping<$Cnst<MIN, MAX, DEF>>
+        impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> const
+            AddAssign for Wrapping<$Cnst<MIN, MAX, DEF>>
         {
             #[inline]
             fn add_assign(&mut self, rhs: Self) {
@@ -107,32 +92,26 @@ macro_rules! wrapping_ops_impl {
     };
 }
 
-// Implements core::ops Traits for all `Wrapping<`Constrained`>` types.
-// Requires `const_trait_impl` and `const_mut_refs` features.
-macro_rules! wrapping_impl_for {
-    ($({ $Int:ty, $md:ident, $Cnst:ident }),+ $(,)?) => {$(
-        mod $md {
-            wrapping_ops_impl! { $Int, $md, $Cnst }
-
-            #[cfg(test)]
-            mod tests {
-                tests_wrapping! {$Int, $md, $Cnst }
+// Implemets some core::fmt traits for Wrapping.
+macro_rules! wrapping_fmt_impl {
+    ($($Trait:ident),+ for Wrapping<T>) => {$(
+        impl<T: ::core::fmt::$Trait> ::core::fmt::$Trait for Wrapping<T> {
+            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+                self.0.fmt(f)
             }
         }
     )+};
 }
 
+// Implements tests that are common to both signed and unsigned.
 #[cfg(test)]
-macro_rules! tests_wrapping {
-    ($Int:ty, $md:ident, $Cnst:ident) => {
-        use $crate::wrapping::Wrapping;
-        use $crate::$md::$Cnst;
-
+macro_rules! wrapping_tests_common {
+    ($Int:ty, $Cnst:ident) => {
         type CnstTest = $Cnst<{ <$Int>::MIN + 1 }, { <$Int>::MAX - 1 }>;
 
         #[cfg(feature = "std")]
         #[test]
-        fn wrapping_constrained_fmt_impl() {
+        fn fmt_impl() {
             let wrapping = Wrapping(CnstTest::default());
 
             // Debug
@@ -149,12 +128,12 @@ macro_rules! tests_wrapping {
             assert_eq!(format!("{:X}", wrapping), format!("{:X}", wrapping.0));
         }
 
-        imp_binop_tests_for! {
+        wrapping_binop_tests_for! {
             { add, +, wrapping_add },
             { sub, -, wrapping_sub },
         }
 
-        imp_op_assign_tests_for! {
+        wrapping_op_assign_tests_for! {
             { add_assign, +=, wrapping_add },
             { sub_assign, -=, wrapping_sub },
         }
@@ -162,7 +141,7 @@ macro_rules! tests_wrapping {
 }
 
 #[cfg(test)]
-macro_rules! imp_binop_tests_for {
+macro_rules! wrapping_binop_tests_for {
     ($({ $md:ident, $op:tt, $func:ident }),+ $(,)?) => {$(
         #[cfg(test)]
         mod $md {
@@ -216,7 +195,7 @@ macro_rules! imp_binop_tests_for {
 }
 
 #[cfg(test)]
-macro_rules! imp_op_assign_tests_for {
+macro_rules! wrapping_op_assign_tests_for {
     ($({ $md:ident, $op:tt, $func:ident }),+ $(,)?) => {$(
         #[cfg(test)]
         mod $md {

@@ -592,6 +592,7 @@ macro_rules! constrained_int_impl {
             #[doc = concat!("use constrained_int::", stringify!($md), "::", stringify!($Ty), ";")]
             ///
             #[doc = concat!("type Constrained = ", stringify!($Ty), "<", stringify!($min, $max), ">;")]
+            ///
             /// let mut constrained = Constrained::new_min();
             /// assert!(constrained.is_negative());
             /// ```
@@ -608,6 +609,7 @@ macro_rules! constrained_int_impl {
             #[doc = concat!("use constrained_int::", stringify!($md), "::", stringify!($Ty), ";")]
             ///
             #[doc = concat!("type Constrained = ", stringify!($Ty), "<", stringify!($min, $max), ">;")]
+            ///
             /// let mut constrained = Constrained::new_max();
             /// assert!(constrained.is_positive());
             /// ```
@@ -625,6 +627,7 @@ macro_rules! constrained_int_impl {
             #[doc = concat!("use constrained_int::", stringify!($md), "::", stringify!($Ty), ";")]
             ///
             #[doc = concat!("type Constrained = ", stringify!($Ty), "<-10, 8>;")]
+            ///
             /// let mut constrained = Constrained::new(-5).unwrap();
             /// // Lower than `MAX`.
             /// constrained = constrained.checked_abs().unwrap();
@@ -865,7 +868,7 @@ macro_rules! constrained_int_impl {
     };
 }
 
-// Defines mods, containers, errors and impls, tests and default doc values for unsigned integers.
+// Defines mods, containers, errors, impls, tests and default doc values for unsigned integers.
 macro_rules! constrained_int_def_impl {
     ($({ $SigInt:ty, $UnsInt:ty, $sint_md:ident, $uint_md:ident,
          $Ty:ident, $Err:ident, $MinErr:ident, $MaxErr:ident }),+ $(,)*

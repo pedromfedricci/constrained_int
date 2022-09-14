@@ -123,7 +123,7 @@ macro_rules! constrained_def_impl {
         impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> $Ty<MIN, MAX, DEF> {
             /// The minimum **inclusive** value that this type can hold.
             ///
-            /// It's assigned the `MAX` parameter value. **Always** satisfies the
+            /// It's assigned the `MIN` parameter value. **Always** satisfies the
             /// condition: [`MIN`] < [`MAX`].
             ///
             #[doc = concat!("[`MIN`]: ", stringify!($Ty), "::MIN")]
@@ -142,7 +142,7 @@ macro_rules! constrained_def_impl {
 
             /// The maximum **inclusive** value that this type can hold.
             ///
-            /// It's assigned the `MIN` parameter value. **Always** satisfies the
+            /// It's assigned the `MAX` parameter value. **Always** satisfies the
             /// condition: [`MAX`] > [`MIN`].
             ///
             #[doc = concat!("[`MAX`]: ", stringify!($Ty), "::MAX")]
