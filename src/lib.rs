@@ -99,9 +99,10 @@
 // https://github.com/rust-lang/rust/issues/87840.
 #![feature(mixed_integer_ops)]
 //
-// Tracking issue for `doc_auto_cfg` feature:
+// Tracking issue for `doc_cfg` and `doc_auto_cfg`feature:
 // https://github.com/rust-lang/rust/issues/43781.
 #![feature(doc_auto_cfg)]
+#![feature(doc_cfg)]
 //
 // rustdoc lints.
 #![warn(missing_docs)]
@@ -120,6 +121,7 @@ mod macros;
 pub mod wrapping;
 
 #[cfg(feature = "serde")]
+#[doc(cfg(feature = "serde"))]
 mod deserialize;
 
 #[cfg(test)]

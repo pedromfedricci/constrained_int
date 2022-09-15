@@ -41,6 +41,26 @@ mod macros;
 #[repr(transparent)]
 pub struct Wrapping<T>(pub T);
 
+#[cfg(feature = "serde")]
+#[doc(cfg(feature = "serde"))]
+mod serde {
+    use super::Wrapping;
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
+    impl<T: Serialize> Serialize for Wrapping<T> {
+        #[inline]
+        fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+            self.0.serialize(serializer)
+        }
+    }
+
+    impl<'de, T: Deserialize<'de>> Deserialize<'de> for Wrapping<T> {
+        fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+            Deserialize::deserialize(deserializer).map(Wrapping)
+        }
+    }
+}
+
 // Implemets some core::fmt traits for Wrapping.
 wrapping_fmt_impl! { Debug, Display, Binary, Octal, LowerHex, UpperHex for Wrapping<T> }
 
