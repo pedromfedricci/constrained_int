@@ -351,3 +351,23 @@ impl_invalid_range_test_for! {
     { i128, i128, ConstrainedI128, invalid_range_cnst_i128 },
     { isize, isize, ConstrainedIsize, invalid_range_cnst_isize },
 }
+
+#[test]
+fn wrapping_unbounded_value() {
+    use constrained_int::i8::ConstrainedI8;
+    use constrained_int::wrapping::Wrapping;
+
+    type CnstMin = ConstrainedI8<-128, 126>;
+    type CnstMax = ConstrainedI8<-127, 127>;
+
+    let min_err = assert_de_tokens_error::<Wrapping<CnstMin>>;
+    let max_err = assert_de_tokens_error::<Wrapping<CnstMax>>;
+
+    // From signed.
+    min_err(&[Token::I8(127)], &val_err(127, "i8", CnstMin::range()));
+    max_err(&[Token::I8(-128)], &val_err(-128, "i8", CnstMax::range()));
+
+    // From unsigned.
+    min_err(&[Token::U8(127)], &val_err(127, "i8", CnstMin::range()));
+    max_err(&[Token::U8(128)], &val_err(128, "i8", CnstMax::range()));
+}

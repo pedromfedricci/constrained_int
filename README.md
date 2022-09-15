@@ -1,6 +1,6 @@
 # Integers that are constrained within inclusive ranges
 
-[![License][license-image]](./LICENSE-APACHE)
+[![License][license-image]](http://apache.org/licenses/LICENSE-2.0)
 [![Documentation][doc-image]][doc-link]
 [![Crate][crate-image]][crate-link]
 [![CI][ci-image]][ci-link]
@@ -99,7 +99,7 @@ If users already are importing the standard library on their crate, enabling
 ### serde
 
 The `serde` feature implements [serde]'s `Serialize` and `Deserialize` traits
-for all `Constrained` types.
+for `Wrapping` and all `Constrained` types.
 
 ## License
 

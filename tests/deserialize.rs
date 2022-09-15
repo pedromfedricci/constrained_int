@@ -379,3 +379,16 @@ fn bounded_value_cnst_u128() {
     assert_max(4294967295, &[Token::U32(4294967295)]);
     assert_max(18446744073709551615, &[Token::U64(18446744073709551615)]);
 }
+
+#[test]
+fn wrapping_bounded_value() {
+    use constrained_int::wrapping::Wrapping;
+
+    use constrained_int::u8::ConstrainedU8;
+    type WrappedU8 = Wrapping<ConstrainedU8<0, 254>>;
+    assert_de_tokens(&WrappedU8::default(), &[Token::U8(0)]);
+
+    use constrained_int::i16::ConstrainedI16;
+    type WrappedI16 = Wrapping<ConstrainedI16<-128, 126>>;
+    assert_de_tokens(&WrappedI16::default(), &[Token::I16(-128)]);
+}

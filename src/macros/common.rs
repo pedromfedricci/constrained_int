@@ -76,6 +76,10 @@ macro_rules! constrained_def_impl {
         /// or `MAX` to be lower than the primitive's `MAX`, or else the type can't be
         /// constructed.
         ///
+        /// # Layout
+        ///
+        #[doc = concat!(stringify!($Ty), " is guaranteed to have the same layout and ABI as `", stringify!($Int), "`")]
+        ///
         /// # Examples
         ///
         /// If the provided parameters satisfy the construction condition, associated
@@ -106,7 +110,7 @@ macro_rules! constrained_def_impl {
         /// // None of these will compile for InvalidRange.
         /// let value = InvalidRange::MIN;
         /// let constrained = InvalidRange::default();
-        /// let constrained = InvalidRange::min();
+        /// let constrained = InvalidRange::new_min();
         /// /* ...other constructors */
         /// ```
         #[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -119,7 +123,7 @@ macro_rules! constrained_def_impl {
         impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> $Ty<MIN, MAX, DEF> {
             /// The minimum **inclusive** value that this type can hold.
             ///
-            /// It's assigned the `MAX` parameter value. **Always** satisfies the
+            /// It's assigned the `MIN` parameter value. **Always** satisfies the
             /// condition: [`MIN`] < [`MAX`].
             ///
             #[doc = concat!("[`MIN`]: ", stringify!($Ty), "::MIN")]
@@ -138,7 +142,7 @@ macro_rules! constrained_def_impl {
 
             /// The maximum **inclusive** value that this type can hold.
             ///
-            /// It's assigned the `MIN` parameter value. **Always** satisfies the
+            /// It's assigned the `MAX` parameter value. **Always** satisfies the
             /// condition: [`MAX`] > [`MIN`].
             ///
             #[doc = concat!("[`MAX`]: ", stringify!($Ty), "::MAX")]

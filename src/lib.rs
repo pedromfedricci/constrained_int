@@ -78,31 +78,50 @@
 // No raw pointers here, maybe in another castle.
 #![forbid(unsafe_code)]
 //
-// `std` feature will import std as a dependency.
+// The `std` feature will import `std` as a dependency.
 #![cfg_attr(not(feature = "std"), no_std)]
 //
 // The `const_guards` dependency relies on `generic_const_exprs`.
+// Tracking issue for `generic_const_exprs`:
+// https://github.com/rust-lang/rust/issues/76560
 #![allow(incomplete_features)]
 #![feature(generic_const_exprs)]
+//
+// Tracking issue for `const_trait_impl`:
+// https://github.com/rust-lang/rust/issues/67792
+#![feature(const_trait_impl)]
+//
+// Tracking issue for `const_mut_refs`:
+// https://github.com/rust-lang/rust/issues/57349
+#![feature(const_mut_refs)]
 //
 // Tracking issue for `mixed_integer_ops`:
 // https://github.com/rust-lang/rust/issues/87840.
 #![feature(mixed_integer_ops)]
 //
-// Tracking issue for `doc_auto_cfg` feature:
+// Tracking issue for `doc_cfg` and `doc_auto_cfg`feature:
 // https://github.com/rust-lang/rust/issues/43781.
 #![feature(doc_auto_cfg)]
+#![feature(doc_cfg)]
 //
 // rustdoc lints.
 #![warn(missing_docs)]
 #![warn(rustdoc::missing_crate_level_docs)]
 
-// Import `constrained_uint_def_impl!` macro.
-// Import `constrained_int_def_impl!` macro.
+// Import:
+// - `constrained_uint_def_impl!`.
+// - `constrained_int_def_impl!`.
+// - `forward_ref_binop!`.
 #[macro_use]
 mod macros;
 
+// Required:
+// - `forward_ref_binop!`.
+// - `forward_ref_op_assign!`.
+pub mod wrapping;
+
 #[cfg(feature = "serde")]
+#[doc(cfg(feature = "serde"))]
 mod deserialize;
 
 #[cfg(test)]

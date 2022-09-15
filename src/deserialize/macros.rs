@@ -5,7 +5,6 @@ macro_rules! constrained_deserialize_impl {
     (   $Num:ty, $num_mod:ident, $Cnst:ident, $deserialize:ident,
         $($method:ident!($Inner:ty, $($Visit:ty : $visit:ident)*);)*
     ) => {
-        #[cfg(feature = "serde")]
         impl<'de, const MIN: $Num, const MAX: $Num, const DEF: $Num> ::serde::Deserialize<'de>
             for crate::$num_mod::$Cnst<MIN, MAX, DEF>
         {

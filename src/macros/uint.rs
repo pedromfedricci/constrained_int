@@ -416,8 +416,8 @@ macro_rules! constrained_uint_impl {
             /// returned by a overflowed unsigned operation.
             ///
             /// Wraps `<$UnsInt>::MAX` around the range's upper bound and returns the
-            /// result as the first value. Computes the remaining from wrapped value
-            /// integer and returns it as the second value.
+            /// result as the first value. Computes the remaining from the wrapped value
+            /// and returns it as the second value.
             ///
             /// Caller must ensure that `value` is lower than `<$UnsInt>::MAX`, or else
             /// there will be an unexpected overflow.
