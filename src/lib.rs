@@ -120,6 +120,12 @@ mod macros;
 // - `forward_ref_op_assign!`.
 pub mod wrapping;
 
+// Required:
+// - `forward_ref_binop!`.
+// - `forward_ref_op_assign!`.
+mod arithmetics;
+pub use arithmetics::{Saturating, Wrapping};
+
 #[cfg(feature = "serde")]
 #[doc(cfg(feature = "serde"))]
 mod deserialize;
