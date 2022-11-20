@@ -1,3 +1,5 @@
+// Implements serde::{Deserialize, Serialize} for a `Constrained` arithmetic wrapper (e.g:
+// Wrapping, Saturating).
 #[cfg(feature = "serde")]
 macro_rules! arithmetic_wrapper_serde_impl {
     ($Wrapper:ident) => {
@@ -20,7 +22,7 @@ macro_rules! arithmetic_wrapper_serde_impl {
     };
 }
 
-// Implemets some core::fmt traits for a arithmetic wrapper around Constrained types.
+// Implemets some core::fmt traits for a `Constrained` arithmetic wrapper (e.g: Wrapping, Saturating ).
 macro_rules! arithmetic_wrapper_fmt_impl {
     ($($Trait:ident),+ for $Wrapper:ident<T>) => {$(
         impl<T: ::core::fmt::$Trait> ::core::fmt::$Trait for $Wrapper<T> {
@@ -31,10 +33,10 @@ macro_rules! arithmetic_wrapper_fmt_impl {
     )+};
 }
 
-// Implements core::ops Traits for a arithmetic wrapper around Constrained types.
-// Requires `const_trait_impl` and `const_mut_refs` features.
+// Implements core::ops Traits for a `Constrained` arithmetic wrapper (e.g: Wrapping, Saturating).
+// Requires `const_trait_impl` and `const_mut_refs` nightly features.
 macro_rules! arithmetic_wrapper_ops_impl {
-    ($Int:ty, $Cnst:ident, $Wrapper:ident, $add:ident, $sub:ident) => {
+    (( $Int:ty, $Cnst:ident, $Wrapper:ident ), { $add:ident, $sub:ident }) => {
         impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> const
             Add for $Wrapper<$Cnst<MIN, MAX, DEF>>
         {
@@ -128,7 +130,7 @@ macro_rules! arithmetic_wrapper_ops_impl {
 // Implements tests that are common to both signed and unsigned.
 #[cfg(test)]
 macro_rules! arithmetic_wrapper_tests_common {
-    ($Int:ty, $Cnst:ident, $Wrapper:ident, $add:ident, $sub:ident) => {
+    (( $Int:ty, $Cnst:ident, $Wrapper:ident ), { $add:ident, $sub:ident }) => {
         type CnstTest = $Cnst<{ <$Int>::MIN + 1 }, { <$Int>::MAX - 1 }>;
 
         #[cfg(feature = "std")]
@@ -151,23 +153,24 @@ macro_rules! arithmetic_wrapper_tests_common {
         }
 
         arithmetic_wrapper_binop_tests_for! {
-            // ( wrapper_type )
+        //  ( WrapperType )
             ( $Wrapper ),
-            // { mod_name, operator, func_name },
+        //  { mod_name, operator, func_name },
             { add, +, $add },
             { sub, -, $sub },
         }
 
         aritmetic_wrapper_op_assign_tests_for! {
-            // ( wrapper_type )
+        //  ( WrapperType )
             ( $Wrapper ),
-            // { mod_name, assign_operator, assign_func_name }
+        //  { mod_name, assign_operator, assign_func_name }
             { add_assign, +=, $add },
             { sub_assign, -=, $sub },
         }
     };
 }
 
+// Tests that verify that binary operators work as expected for arithmetic wrappers.
 #[cfg(test)]
 macro_rules! arithmetic_wrapper_binop_tests_for {
     (( $Wrapper:ident ), $({ $md:ident, $op:tt, $func:ident }),+ $(,)?) => {$(
@@ -222,9 +225,10 @@ macro_rules! arithmetic_wrapper_binop_tests_for {
     )+};
 }
 
+// Tests that verify that self assigning operators work as expected for arithmetic wrappers.
 #[cfg(test)]
 macro_rules! aritmetic_wrapper_op_assign_tests_for {
-    (( $Wrapper:ident ), $({ $md:ident, op:tt, $func:ident }),+ $(,)?) => {$(
+    (( $Wrapper:ident ), $({ $md:ident, $op:tt, $func:ident }),+ $(,)?) => {$(
         #[cfg(test)]
         mod $md {
             use super::*;

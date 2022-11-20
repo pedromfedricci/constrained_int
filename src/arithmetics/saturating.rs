@@ -38,5 +38,16 @@ pub struct Saturating<T>(pub T);
 #[cfg(feature = "serde")]
 arithmetic_wrapper_serde_impl! { Saturating }
 
-// Implemets some core::fmt traits for Wrapping.
+// Implemets some core::fmt traits for Saturating.
 arithmetic_wrapper_fmt_impl! { Debug, Display, Binary, Octal, LowerHex, UpperHex for Saturating<T> }
+
+// Implements core::ops traits for Saturating<T> where T is a signed Constrained type.
+arithmetic_wrapper_int_impl_for! {
+    ( Saturating ),
+    { i8, i8, ConstrainedI8 },
+    { i16, i16, ConstrainedI16 },
+    { i32, i32, ConstrainedI32 },
+    { i64, i64, ConstrainedI64 },
+    { i128, i128, ConstrainedI128 },
+    { isize, isize, ConstrainedIsize },
+}

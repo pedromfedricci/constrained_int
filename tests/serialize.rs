@@ -32,13 +32,26 @@ fn constrained_isizes() {
 
 #[test]
 fn wrapping() {
-    use constrained_int::wrapping::Wrapping;
+    use constrained_int::Wrapping;
 
     use constrained_int::u8::ConstrainedU8;
-    type WrappedU8 = Wrapping<ConstrainedU8<0, 254>>;
-    assert_ser_tokens(&WrappedU8::default(), &[Token::U8(0)]);
+    type WrappingU8 = Wrapping<ConstrainedU8<0, 254>>;
+    assert_ser_tokens(&WrappingU8::default(), &[Token::U8(0)]);
 
     use constrained_int::i16::ConstrainedI16;
-    type WrappedI16 = Wrapping<ConstrainedI16<-128, 126>>;
-    assert_ser_tokens(&WrappedI16::default(), &[Token::I16(-128)]);
+    type WrappingI16 = Wrapping<ConstrainedI16<-128, 126>>;
+    assert_ser_tokens(&WrappingI16::default(), &[Token::I16(-128)]);
+}
+
+#[test]
+fn saturating() {
+    use constrained_int::Saturating;
+
+    use constrained_int::u8::ConstrainedU8;
+    type SaturatingU8 = Saturating<ConstrainedU8<0, 254>>;
+    assert_ser_tokens(&SaturatingU8::default(), &[Token::U8(0)]);
+
+    use constrained_int::i16::ConstrainedI16;
+    type SaturatingI16 = Saturating<ConstrainedI16<-128, 126>>;
+    assert_ser_tokens(&SaturatingI16::default(), &[Token::I16(-128)]);
 }

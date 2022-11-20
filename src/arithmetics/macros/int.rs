@@ -1,6 +1,6 @@
 // Implementation and documentation values specific to signed integers.
 macro_rules! arithmetic_wrapper_int_impl {
-    ($SigInt:ty, $md:ident, $Cnst:ident, $Wrapper:ident, min:literal..=$max:literal) => {
+    ($SigInt:ty, $md:ident, $Cnst:ident, $Wrapper:ident, $min:literal..=$max:literal) => {
         impl<const MIN: $SigInt, const MAX: $SigInt, const DEF: $SigInt>
             $Wrapper<$Cnst<MIN, MAX, DEF>>
         {
@@ -72,15 +72,19 @@ macro_rules! arithmetic_wrapper_int_impl {
 
 // Defines a arithmetic wrapper impls, tests and default doc values for signed integers.
 macro_rules! arithmetic_wrapper_int_impl_for {
-    ($({ $SigInt:ty, $md:ident, $Cnst:ident, $Wrapper:ident }),+ $(,)?) => {$(
+    (( $Wrapper:ident ), $({ $SigInt:ty, $md:ident, $Cnst:ident }),+ $(,)?) => {$(
         mod $md {
             use ::core::ops::{Add, AddAssign, Sub, SubAssign};
             use $crate::$md::$Cnst;
             use super::$Wrapper;
 
             arithmetic_wrapper_ops_impl! {
-            //  sint, ConstrainedType, ArithmeticWrapperType
-                $SigInt, $Cnst, $Wrapper
+            //  ( sint, ConstrainedType, ArithmeticWrapperType ),
+                ( $SigInt, $Cnst, $Wrapper ),
+                {
+                    wrapping_add,
+                    wrapping_sub
+                }
             }
 
             arithmetic_wrapper_int_impl! {
@@ -93,8 +97,12 @@ macro_rules! arithmetic_wrapper_int_impl_for {
                 use super::*;
 
                 arithmetic_wrapper_tests_common! {
-                //  sint, ConstrainedType, ArithmeticWrapperType, $(arithmetic_api)+,
-                    $SigInt, $Cnst, $Wrapper, wrapping_add, wrapping_sub
+                //  ( sint, ConstrainedType, ArithmeticWrapperType ),
+                    ( $SigInt, $Cnst, $Wrapper ),
+                    {
+                        wrapping_add,
+                        wrapping_sub
+                    }
                 }
             }
 
