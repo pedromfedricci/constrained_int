@@ -5,11 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.3] - (23. November, 2022)
+
+### Added on 0.2.3
+
+- Implement the `Saturating` type ([#6]).
+- Implement the `Wrapping` type ([#5]).
+
+[#6]: https://github.com/pedromfedricci/constrained_int/pull/6
+[#5]: https://github.com/pedromfedricci/constrained_int/pull/5
+
 ## [0.2.2] - (19. August, 2022)
 
 ### Added on 0.2.2
 
-- Benchmark implementations for al `Constrained` types' wrapping APIs ([#3]).
+- Benchmark implementations for all `Constrained` types' wrapping APIs ([#3]).
 
 ### Changed on 0.2.2
 
@@ -23,8 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - range() API for `Constrained` types.
 - Mixed integer operations for `Constrained` types ([#1]).
-- Implements serde's `Serialize` and `Deserialize` traits for `Constrained` types, behind
-  the `serde` feature ([#2]).
+- Implements serde's `Serialize` and `Deserialize` traits for `Constrained` types,
+  behind the `serde` feature ([#2]).
 
 [#1]: https://github.com/pedromfedricci/constrained_int/pull/1
 [#2]: https://github.com/pedromfedricci/constrained_int/pull/2
