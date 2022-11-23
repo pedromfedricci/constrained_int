@@ -100,10 +100,6 @@
 // https://github.com/rust-lang/rust/issues/57349
 #![feature(const_mut_refs)]
 //
-// Tracking issue for `mixed_integer_ops`:
-// https://github.com/rust-lang/rust/issues/87840.
-#![feature(mixed_integer_ops)]
-//
 // Tracking issue for `doc_cfg` and `doc_auto_cfg`feature:
 // https://github.com/rust-lang/rust/issues/43781.
 #![feature(doc_auto_cfg)]

@@ -12,7 +12,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  RUST_CHANNEL: nightly-2022-08-15
+  RUST_CHANNEL: nightly-2022-11-21
 
 jobs:
   format:
@@ -157,7 +157,7 @@ jobs:
     name: Public changes
     runs-on: ubuntu-latest
     env:
-      CARGO_PUBLIC_API_VERSION: 0.15.0
+      CARGO_PUBLIC_API_VERSION: 0.24.0
       NIGHTLY_COMPATIBLE: nightly-2022-08-15
 
     steps:
