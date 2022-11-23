@@ -1,5 +1,5 @@
 // Implementation and documentation values specific to signed integers.
-macro_rules! arithmetic_wrapper_int_impl {
+macro_rules! arithmetic_wrapper_int_specific_impl {
     ($SigInt:ty, $md:ident, $Cnst:ident, $Wrapper:ident, $min:literal..=$max:literal) => {
         impl<const MIN: $SigInt, const MAX: $SigInt, const DEF: $SigInt>
             $Wrapper<$Cnst<MIN, MAX, DEF>>
@@ -70,98 +70,67 @@ macro_rules! arithmetic_wrapper_int_impl {
     };
 }
 
-// Defines a arithmetic wrapper impls, tests and default doc values for signed integers.
-macro_rules! arithmetic_wrapper_int_impl_for {
-    (( $Wrapper:ident ), $({ $SigInt:ty, $md:ident, $Cnst:ident }),+ $(,)?) => {$(
-        mod $md {
-            use ::core::ops::{Add, AddAssign, Sub, SubAssign};
-            use $crate::$md::$Cnst;
-            use super::$Wrapper;
-
-            arithmetic_wrapper_ops_impl! {
-            //  ( sint, ConstrainedType, ArithmeticWrapperType ),
-                ( $SigInt, $Cnst, $Wrapper ),
-                {
-                    wrapping_add,
-                    wrapping_sub
-                }
-            }
-
-            arithmetic_wrapper_int_impl! {
-            //  sint, sint_mod, ConstrainedType, ArithmeticWrapperType, min..=max
-                $SigInt, $md, $Cnst, $Wrapper, -127..=126
-            }
-
-            #[cfg(test)]
-            mod tests_int_common {
-                use super::*;
-
-                arithmetic_wrapper_tests_common! {
-                //  ( sint, ConstrainedType, ArithmeticWrapperType ),
-                    ( $SigInt, $Cnst, $Wrapper ),
-                    {
-                        wrapping_add,
-                        wrapping_sub
-                    }
-                }
-            }
-
-            #[cfg(test)]
-            mod tests_int_specific {
-                use super::*;
-
-                arithmetic_wrapper_tests_int_specific! {
-                //  sint, ConstrainedType, ArithmeticWrapperType
-                    $SigInt, $Cnst, $Wrapper
-                }
-            }
+macro_rules! arithmetic_wrapper_int_specific {
+    ($SigInt:ty, $md:ident, $Cnst:ident, $Wrapper:ident) => {
+        arithmetic_wrapper_int_specific_impl! {
+            $SigInt, $md, $Cnst, $Wrapper, -127..=126
         }
-    )+};
+
+        #[cfg(test)]
+        arithmetic_wrapper_int_specific_tests! {
+            $SigInt, $Cnst, $Wrapper
+        }
+    };
 }
 
 #[cfg(test)]
-macro_rules! arithmetic_wrapper_tests_int_specific {
+macro_rules! arithmetic_wrapper_int_specific_tests {
     ($SigInt:ty, $Cnst:ident, $Wrapper:ident) => {
-        #[test]
-        fn signum() {
-            let mut wrapper: $Wrapper<$Cnst<-1, 1, 0>>;
+        #[cfg(test)]
+        mod tests_int_specific {
+            use super::*;
 
-            wrapper = $Wrapper::default();
-            assert_eq!(wrapper.signum(), 0);
+            #[test]
+            fn signum() {
+                let mut wrapper: $Wrapper<$Cnst<-1, 1, 0>>;
 
-            wrapper = $Wrapper($Cnst::new_min());
-            assert_eq!(wrapper.signum(), -1);
+                wrapper = $Wrapper::default();
+                assert_eq!(wrapper.signum(), 0);
 
-            wrapper = $Wrapper($Cnst::new_max());
-            assert_eq!(wrapper.signum(), 1);
-        }
+                wrapper = $Wrapper($Cnst::new_min());
+                assert_eq!(wrapper.signum(), -1);
 
-        #[test]
-        fn is_positive() {
-            let mut wrapper: $Wrapper<$Cnst<-1, 1, 0>>;
+                wrapper = $Wrapper($Cnst::new_max());
+                assert_eq!(wrapper.signum(), 1);
+            }
 
-            wrapper = $Wrapper::default();
-            assert!(!wrapper.is_positive());
+            #[test]
+            fn is_positive() {
+                let mut wrapper: $Wrapper<$Cnst<-1, 1, 0>>;
 
-            wrapper = $Wrapper($Cnst::new_min());
-            assert!(!wrapper.is_positive());
+                wrapper = $Wrapper::default();
+                assert!(!wrapper.is_positive());
 
-            wrapper = $Wrapper($Cnst::new_max());
-            assert!(wrapper.is_positive());
-        }
+                wrapper = $Wrapper($Cnst::new_min());
+                assert!(!wrapper.is_positive());
 
-        #[test]
-        fn is_negative() {
-            let mut wrapper: $Wrapper<$Cnst<-1, 1, 0>>;
+                wrapper = $Wrapper($Cnst::new_max());
+                assert!(wrapper.is_positive());
+            }
 
-            wrapper = $Wrapper::default();
-            assert!(!wrapper.is_negative());
+            #[test]
+            fn is_negative() {
+                let mut wrapper: $Wrapper<$Cnst<-1, 1, 0>>;
 
-            wrapper = $Wrapper($Cnst::new_min());
-            assert!(wrapper.is_negative());
+                wrapper = $Wrapper::default();
+                assert!(!wrapper.is_negative());
 
-            wrapper = $Wrapper($Cnst::new_max());
-            assert!(!wrapper.is_negative());
+                wrapper = $Wrapper($Cnst::new_min());
+                assert!(wrapper.is_negative());
+
+                wrapper = $Wrapper($Cnst::new_max());
+                assert!(!wrapper.is_negative());
+            }
         }
     };
 }

@@ -7,15 +7,6 @@
 mod common;
 
 // Import:
-// - `arithmetic_wrapper_uint_impl!`.
-//
-// Required:
-// - `arithmetic_wrapper_ops_impl!`.
-// - `arithmetic_wrapper_tests_common!`.
-#[macro_use]
-mod uint;
-
-// Import:
 // - `arithmetic_wrapper_int_impl!`.
 //
 // Required:
@@ -23,3 +14,9 @@ mod uint;
 // - `arithmetic_wrapper_tests_common!`.
 #[macro_use]
 mod int;
+
+#[macro_use]
+mod wrapping;
+
+#[macro_use]
+mod saturating;

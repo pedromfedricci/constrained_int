@@ -34,16 +34,19 @@
 #[repr(transparent)]
 pub struct Saturating<T>(pub T);
 
-// Implements serde::{Deserialize, Serialize} for Saturating.
-#[cfg(feature = "serde")]
-arithmetic_wrapper_serde_impl! { Saturating }
+// Implements common traits for `Saturating<T>` when the generic T implements them.
+arithmetic_wrapper_traits_impl! { Saturating }
 
-// Implemets some core::fmt traits for Saturating.
-arithmetic_wrapper_fmt_impl! { Debug, Display, Binary, Octal, LowerHex, UpperHex for Saturating<T> }
+saturating_uint! {
+    { u8, u8, ConstrainedU8 },
+    { u16, u16, ConstrainedU16 },
+    { u32, u32, ConstrainedU32 },
+    { u64, u64, ConstrainedU64 },
+    { u128, u128, ConstrainedU128 },
+    { usize, usize, ConstrainedUsize },
+}
 
-// Implements core::ops traits for Saturating<T> where T is a signed Constrained type.
-arithmetic_wrapper_int_impl_for! {
-    ( Saturating ),
+saturating_int! {
     { i8, i8, ConstrainedI8 },
     { i16, i16, ConstrainedI16 },
     { i32, i32, ConstrainedI32 },
