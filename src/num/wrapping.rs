@@ -1,12 +1,5 @@
 //! Container for intentionally-wrapped aritmethic on `T`.
 
-// Import:
-// - `wrapping_fmt_impl!`.
-// - `wrapping_uint_impl_for!`.
-// - `wrapping_int_impl_for!`.
-#[macro_use]
-mod macros;
-
 /// Provides intentionally-wrapped arithmetic on `T`.
 ///
 /// Wrapping arithmetic can be achieved either through methods like
@@ -25,7 +18,7 @@ mod macros;
 ///
 /// ```
 /// use constrained_int::i8::ConstrainedI8;
-/// use constrained_int::wrapping::Wrapping;
+/// use constrained_int::Wrapping;
 ///
 /// // Default set to 0.
 /// type Wrapped = Wrapping<ConstrainedI8<-10, 12, 0>>;
@@ -41,33 +34,11 @@ mod macros;
 #[repr(transparent)]
 pub struct Wrapping<T>(pub T);
 
-#[cfg(feature = "serde")]
-#[doc(cfg(feature = "serde"))]
-mod serde {
-    use super::Wrapping;
-    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+// Implements common traits for `Wrapping<T>` if T implements them.
+arithmetic_wrapper_traits_impl! { Wrapping }
 
-    impl<T: Serialize> Serialize for Wrapping<T> {
-        #[inline]
-        fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-            self.0.serialize(serializer)
-        }
-    }
-
-    impl<'de, T: Deserialize<'de>> Deserialize<'de> for Wrapping<T> {
-        fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-            Deserialize::deserialize(deserializer).map(Wrapping)
-        }
-    }
-}
-
-// Implemets some core::fmt traits for Wrapping.
-wrapping_fmt_impl! { Debug, Display, Binary, Octal, LowerHex, UpperHex for Wrapping<T> }
-
-// Defines Wrapping impls, tests and default doc values for unsigned integers.
-// Format:
-//  { uint, uint_mod, UnsType },+
-wrapping_uint_impl_for! {
+// Implements APIs for `Wrapping<T>` where T is a unsigned constrained interger.
+wrapping_uint! {
     { u8, u8, ConstrainedU8 },
     { u16, u16, ConstrainedU16 },
     { u32, u32, ConstrainedU32 },
@@ -76,10 +47,8 @@ wrapping_uint_impl_for! {
     { usize, usize, ConstrainedUsize },
 }
 
-// Defines Wrapping impls, tests and default doc values for signed integers.
-// Format:
-//  { sint, sint_mod, SigType },+
-wrapping_int_impl_for! {
+// Implements APIs for `Wrapping<T>` where T is a signed constrained integer.
+wrapping_int! {
     { i8, i8, ConstrainedI8 },
     { i16, i16, ConstrainedI16 },
     { i32, i32, ConstrainedI32 },

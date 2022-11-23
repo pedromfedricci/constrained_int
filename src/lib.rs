@@ -5,12 +5,12 @@
 //! defined at compile time, by assigning values to appropriate const generic
 //! parameters. Constrained types provide fallible APIs for construction and
 //! value assignment, they also implement wrapping, saturating, overflowing
-//! and checked arithmetics for the range boundaries. See each desired type
-//! documentation for more information.
+//! and checked arithmetic operations for the range boundaries. See each desired
+//! type documentation for more information.
 //!
 //! The `constrained_int` crate relies on the [`const_guards`] crate to define
 //! compile time constraints, which itself uses the incomplete [`generic_const_exprs`]
-//! feature. Therefore, this crate can only be compile with nightly and, more
+//! feature. Therefore, this crate can only be compiled with nightly and, more
 //! importantly, must be considered as an **experimental** crate only.
 //!
 //! This crate is `no_std` by default. See features section for more information.
@@ -49,6 +49,11 @@
 //! # Ok::<(), constrained_int::i8::ConstrainedI8Error<-5, 10>>(())
 //! ```
 //!
+//! ## Safety
+//!
+//! This crate uses `#![forbid(unsafe_code)]` to ensure everything is implemented
+//! in 100% safe Rust.
+//!
 //! ## Feature flags
 //!
 //! This crate does not provide any default features. The features that can be
@@ -67,10 +72,10 @@
 //! ### serde
 //!
 //! The `serde` feature implements [`serde`]'s `Serialize` and `Deserialize` traits
-//! for all `Constrained` types. Note that the construction constraints for the
-//! const generic parameters are checked at runtime when values are deserialized
-//! to one of the `Constrained` types. See each desired type documentation for
-//! for more information about the constraints.
+//! for `Wrapping`, `Saturating` and all `Constrained` types. Note that construction
+//! constraints for the const generic parameters are checked at runtime when values
+//! are deserialized to any of the `Constrained` types. See each desired type
+//! documentation for more information about these constraints.
 //!
 //! [`generic_const_exprs`]: https://github.com/rust-lang/rust/issues/76560
 //! [`serde`]: https://docs.rs/serde/latest/serde/
@@ -118,7 +123,8 @@ mod macros;
 // Required:
 // - `forward_ref_binop!`.
 // - `forward_ref_op_assign!`.
-pub mod wrapping;
+mod num;
+pub use num::{Saturating, Wrapping};
 
 #[cfg(feature = "serde")]
 #[doc(cfg(feature = "serde"))]

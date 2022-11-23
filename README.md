@@ -1,6 +1,6 @@
 # Integers that are constrained within inclusive ranges
 
-[![License][license-image]](http://apache.org/licenses/LICENSE-2.0)
+[![License][license-image]][license-mit]
 [![Documentation][doc-image]][doc-link]
 [![Crate][crate-image]][crate-link]
 [![CI][ci-image]][ci-link]
@@ -14,12 +14,12 @@ values will **always** be contained by inclusive range bounds. The range is
 defined at compile time, by assigning values to appropriate const generic
 parameters. Constrained types provide fallible APIs for construction and
 value assignment, they also implement wrapping, saturating, overflowing
-and checked arithmetics for the range boundaries. See each desired type
-documentation for more information.
+and checked arithmetic operations for the range boundaries. See each desired
+type documentation for more information.
 
 The `constrained_int` crate relies on the [const_guards] crate to define compile
 time constraints, which itself uses the incomplete [generic_const_exprs]
-feature. Therefore, this crate can only be compile with nightly, and, more
+feature. Therefore, this crate can only be compiled with nightly and, more
 importantly, must be considered as an **experimental** crate only.
 
 This crate is `no_std` by default. See features section for more information.
@@ -99,7 +99,10 @@ If users already are importing the standard library on their crate, enabling
 ### serde
 
 The `serde` feature implements [serde]'s `Serialize` and `Deserialize` traits
-for `Wrapping` and all `Constrained` types.
+for `Wrapping`, `Saturating` and all `Constrained` types. Note that construction
+constraints for const generic parameters are checked at runtime when values are
+deserialized to any of `Constrained` types. See each desired type documentation
+for more information about these constraints.
 
 ## License
 
@@ -119,8 +122,7 @@ be dual licensed as above, without any additional terms or conditions.
 It is recommended to always use [cargo-crev] to verify the trustworthiness of
 each of your dependencies, including this one.
 
-[//]: # (general links)
-
+[//]: # "general links"
 [const_guards]: https://docs.rs/const_guards/latest/const_guards/
 [generic_const_exprs]: https://github.com/rust-lang/rust/issues/76560
 [serde]: https://serde.rs/
@@ -129,11 +131,9 @@ each of your dependencies, including this one.
 [crate-link]: https://crates.io/crates/constrained_int
 [codecov-link]: https://codecov.io/gh/pedromfedricci/constrained_int
 [ci-link]: https://github.com/pedromfedricci/constrained_int/actions/workflows/ci.yaml
-[LICENSE-APACHE]: ./LICENSE-APACHE
-[LICENSE-MIT]: ./LICENSE-MIT
-
-[//]: # (badges)
-
+[license-apache]: ./LICENSE-APACHE
+[license-mit]: ./LICENSE-MIT
+[//]: # "badges"
 [safety-image]: https://img.shields.io/badge/unsafe-forbidden-success.svg
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
 [ci-image]: https://github.com/pedromfedricci/constrained_int/actions/workflows/ci.yaml/badge.svg

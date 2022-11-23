@@ -355,13 +355,33 @@ impl_invalid_range_test_for! {
 #[test]
 fn wrapping_unbounded_value() {
     use constrained_int::i8::ConstrainedI8;
-    use constrained_int::wrapping::Wrapping;
+    use constrained_int::Wrapping;
 
     type CnstMin = ConstrainedI8<-128, 126>;
     type CnstMax = ConstrainedI8<-127, 127>;
 
     let min_err = assert_de_tokens_error::<Wrapping<CnstMin>>;
     let max_err = assert_de_tokens_error::<Wrapping<CnstMax>>;
+
+    // From signed.
+    min_err(&[Token::I8(127)], &val_err(127, "i8", CnstMin::range()));
+    max_err(&[Token::I8(-128)], &val_err(-128, "i8", CnstMax::range()));
+
+    // From unsigned.
+    min_err(&[Token::U8(127)], &val_err(127, "i8", CnstMin::range()));
+    max_err(&[Token::U8(128)], &val_err(128, "i8", CnstMax::range()));
+}
+
+#[test]
+fn saturating_unbounded_value() {
+    use constrained_int::i8::ConstrainedI8;
+    use constrained_int::Saturating;
+
+    type CnstMin = ConstrainedI8<-128, 126>;
+    type CnstMax = ConstrainedI8<-127, 127>;
+
+    let min_err = assert_de_tokens_error::<Saturating<CnstMin>>;
+    let max_err = assert_de_tokens_error::<Saturating<CnstMax>>;
 
     // From signed.
     min_err(&[Token::I8(127)], &val_err(127, "i8", CnstMin::range()));
