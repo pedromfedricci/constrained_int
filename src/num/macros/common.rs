@@ -103,6 +103,7 @@ macro_rules! arithmetic_wrapper_ops_impl {
     )+};
 }
 
+// Implements common APIs and tests for $Wrapper.
 macro_rules! arithmetic_wrapper_common {
     (  { $Int:ty, $Cnst:ident, $Wrapper:tt, $test_mod:ident },
      $({ $Bop:ident($bop_f:ident), $Aop:ident($aop_f:ident) => $inner_f:ident }),+ $(,)?
@@ -120,6 +121,7 @@ macro_rules! arithmetic_wrapper_common {
     };
 }
 
+// Implements tests for ::core::ops implementations of $Wrapper.
 #[cfg(test)]
 macro_rules! arithmetic_wrapper_ops_tests {
     (  { $Wrapper:ident },
@@ -161,6 +163,7 @@ macro_rules! arithmetic_wrapper_common_tests {
     };
 }
 
+// Implements tests for common trait implementations.
 #[cfg(test)]
 macro_rules! arithmetic_wrapper_common_traits_tests {
     ($Wrapper:ident) => {

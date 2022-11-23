@@ -1,3 +1,4 @@
+// Implements common APIs and tests for the `Wrapping` type.
 macro_rules! wrapping_common {
     ($Int:ty, $Cnst:ident, $test_mod:ident) => {
         arithmetic_wrapper_common! {
@@ -8,6 +9,7 @@ macro_rules! wrapping_common {
     };
 }
 
+// Implements common and signed specific APIs and tests for the `Wrapping` type.
 macro_rules! wrapping_int {
     ($({ $SigInt:ty, $md:ident, $Cnst:ident }),+ $(,)?) => {$(
         mod $md {
@@ -25,6 +27,7 @@ macro_rules! wrapping_int {
     )+};
 }
 
+// Implements common and unsigned specific APIs and tests for the `Wrapping` type.
 macro_rules! wrapping_uint {
     ($({ $UnsInt:ty, $md:ident, $Cnst:ident }),+ $(,)?) => {$(
         mod $md {

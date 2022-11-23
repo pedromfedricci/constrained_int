@@ -34,9 +34,10 @@
 #[repr(transparent)]
 pub struct Wrapping<T>(pub T);
 
-// Implements common traits for `Wrapping<T>` when the generic T implements them.
+// Implements common traits for `Wrapping<T>` if T implements them.
 arithmetic_wrapper_traits_impl! { Wrapping }
 
+// Implements APIs for `Wrapping<T>` where T is a unsigned constrained interger.
 wrapping_uint! {
     { u8, u8, ConstrainedU8 },
     { u16, u16, ConstrainedU16 },
@@ -46,6 +47,7 @@ wrapping_uint! {
     { usize, usize, ConstrainedUsize },
 }
 
+// Implements APIs for `Wrapping<T>` where T is a signed constrained integer.
 wrapping_int! {
     { i8, i8, ConstrainedI8 },
     { i16, i16, ConstrainedI16 },

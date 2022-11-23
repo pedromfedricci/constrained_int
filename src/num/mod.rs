@@ -1,14 +1,22 @@
 // Import:
-// - `arithmetic_wrapper_common_impl!`.
-// - `arithmetic_wrapper_uint_impl_for!`.
-// - `arithmetic_wrapper_int_impl_for!`.
+// - `arithmetic_wrapper_traits_impl!`.
+// - `wrapping_int!`.
+// - `wrapping_uint!`.
+// - `saturating_int!`.
+// - `saturating_uint!`.
 #[macro_use]
 mod macros;
 
 // Requires:
-// - all macros.
-mod saturating;
+// - `arithmetic_wrapper_traits_impl!`.
+// - `wrapping_int!`.
+// - `wrapping_uint!`.
 mod wrapping;
-
-pub use saturating::Saturating;
 pub use wrapping::Wrapping;
+
+// Requires:
+// - `arithmetic_wrapper_traits_impl!`.
+// - `saturating_int!`.
+// - `saturating_uint!`.
+mod saturating;
+pub use saturating::Saturating;

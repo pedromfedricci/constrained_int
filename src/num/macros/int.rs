@@ -70,6 +70,7 @@ macro_rules! arithmetic_wrapper_int_specific_impl {
     };
 }
 
+// Implements APIs and tests specific to signed integers.
 macro_rules! arithmetic_wrapper_int_specific {
     ($SigInt:ty, $md:ident, $Cnst:ident, $Wrapper:ident) => {
         arithmetic_wrapper_int_specific_impl! {
@@ -83,6 +84,7 @@ macro_rules! arithmetic_wrapper_int_specific {
     };
 }
 
+// Implements tests specific to signed integer APIs.
 #[cfg(test)]
 macro_rules! arithmetic_wrapper_int_specific_tests {
     ($SigInt:ty, $Cnst:ident, $Wrapper:ident) => {

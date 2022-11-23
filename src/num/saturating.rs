@@ -37,6 +37,7 @@ pub struct Saturating<T>(pub T);
 // Implements common traits for `Saturating<T>` when the generic T implements them.
 arithmetic_wrapper_traits_impl! { Saturating }
 
+// Implements APIs for `Saturating<T>` where T is a unsigned constrained interger.
 saturating_uint! {
     { u8, u8, ConstrainedU8 },
     { u16, u16, ConstrainedU16 },
@@ -46,6 +47,7 @@ saturating_uint! {
     { usize, usize, ConstrainedUsize },
 }
 
+// Implements APIs for `Saturating<T>` where T is a signed constrained interger.
 saturating_int! {
     { i8, i8, ConstrainedI8 },
     { i16, i16, ConstrainedI16 },
