@@ -8,6 +8,8 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  # Same channel as CI.
+  RUST_CHANNEL: nightly-2022-11-21
 
 jobs:
   publish:
@@ -15,21 +17,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install nightly toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          override: true
-          toolchain: nightly
-
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      # This action installs stable toolchain to run cargo rustdoc.
       - name: Check semver changes
         uses: obi1kenobi/cargo-semver-checks-action@v1
         with:
           crate-name: constrained_int
           version-tag-prefix: v
+
+      # Install nightly toolchain so cargo package can properly build the crate.
+      - name: Install nightly toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ env.RUST_CHANNEL }}
+          profile: minimal
+          override: true
 
       - name: Publish to crates.io
         env:

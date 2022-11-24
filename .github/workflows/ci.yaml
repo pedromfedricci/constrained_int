@@ -12,6 +12,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  # Same channel as Publish.
   RUST_CHANNEL: nightly-2022-11-21
 
 jobs:
