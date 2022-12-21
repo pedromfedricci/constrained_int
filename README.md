@@ -17,10 +17,10 @@ value assignment, they also implement wrapping, saturating, overflowing
 and checked arithmetic operations for the range boundaries. See each desired
 type documentation for more information.
 
-The `constrained_int` crate relies on the [const_guards] crate to define compile
-time constraints, which itself uses the incomplete [generic_const_exprs]
-feature. Therefore, this crate can only be compiled with nightly and, more
-importantly, must be considered as an **experimental** crate only.
+The `constrained_int` crate relies on the incomplete [generic_const_exprs]
+feature to define compile time constraints for const generic parameters.
+Therefore, this crate can only be compiled with nightly and, more importantly,
+must be considered as an **experimental** crate only.
 
 This crate is `no_std` by default. See features section for more information.
 
@@ -123,7 +123,6 @@ It is recommended to always use [cargo-crev] to verify the trustworthiness of
 each of your dependencies, including this one.
 
 [//]: # "general links"
-[const_guards]: https://docs.rs/const_guards/latest/const_guards/
 [generic_const_exprs]: https://github.com/rust-lang/rust/issues/76560
 [serde]: https://serde.rs/
 [cargo-crev]: https://github.com/crev-dev/cargo-crev

@@ -63,7 +63,7 @@ macro_rules! num_as_self_uint {
         fn $visit<E: DesError>(self, v: $UnsInt) -> Result<Self::Value, E> {
             self.guard_construction()?;
             let err = |_| E::invalid_value(Unexpected::Unsigned(v as u64), &self);
-            Self::Value::__new(v as $Inner).map_err(err)
+            Self::Value::new_unguarded(v as $Inner).map_err(err)
         }
     };
 }
@@ -74,7 +74,7 @@ macro_rules! num_as_self_int {
         fn $visit<E: DesError>(self, v: $SigInt) -> Result<Self::Value, E> {
             self.guard_construction()?;
             let err = |_| E::invalid_value(Unexpected::Signed(v as i64), &self);
-            Self::Value::__new(v as $Inner).map_err(err)
+            Self::Value::new_unguarded(v as $Inner).map_err(err)
         }
     };
 }
@@ -87,7 +87,7 @@ macro_rules! uint_to_self {
             self.guard_construction()?;
 
             if v as u64 <= <$Inner>::MAX as u64 {
-                if let Ok(value) = Self::Value::__new(v as $Inner) {
+                if let Ok(value) = Self::Value::new_unguarded(v as $Inner) {
                     return Ok(value);
                 }
             }
@@ -104,7 +104,7 @@ macro_rules! int_to_int {
             self.guard_construction()?;
 
             if <$SigInner>::MIN as i64 <= v as i64 && v as i64 <= <$SigInner>::MAX as i64 {
-                if let Ok(value) = Self::Value::__new(v as $SigInner) {
+                if let Ok(value) = Self::Value::new_unguarded(v as $SigInner) {
                     return Ok(value);
                 }
             }
@@ -121,7 +121,7 @@ macro_rules! int_to_uint {
             self.guard_construction()?;
 
             if 0 <= v && v as u64 <= <$UnsInner>::MAX as u64 {
-                if let Ok(value) = Self::Value::__new(v as $UnsInner) {
+                if let Ok(value) = Self::Value::new_unguarded(v as $UnsInner) {
                     return Ok(value);
                 }
             }
@@ -138,7 +138,7 @@ macro_rules! num_128 {
             self.guard_construction()?;
 
             if v as i128 >= <$Inner>::MIN as i128 && v as u128 <= <$Inner>::MAX as u128 {
-                if let Ok(value) = Self::Value::__new(v as $Inner) {
+                if let Ok(value) = Self::Value::new_unguarded(v as $Inner) {
                     return Ok(value);
                 }
             }

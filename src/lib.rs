@@ -8,10 +8,10 @@
 //! and checked arithmetic operations for the range boundaries. See each desired
 //! type documentation for more information.
 //!
-//! The `constrained_int` crate relies on the [`const_guards`] crate to define
-//! compile time constraints, which itself uses the incomplete [`generic_const_exprs`]
-//! feature. Therefore, this crate can only be compiled with nightly and, more
-//! importantly, must be considered as an **experimental** crate only.
+//! The `constrained_int` crate relies on the incomplete [`generic_const_exprs`]
+//! feature to define compile time constraints. Therefore, this crate can only
+//! be compiled with nightly and, more importantly, must be considered as an
+//! **experimental** crate only.
 //!
 //! This crate is `no_std` by default. See features section for more information.
 //!
@@ -86,7 +86,6 @@
 // The `std` feature will import `std` as a dependency.
 #![cfg_attr(not(feature = "std"), no_std)]
 //
-// The `const_guards` dependency relies on `generic_const_exprs`.
 // Tracking issue for `generic_const_exprs`:
 // https://github.com/rust-lang/rust/issues/76560
 #![allow(incomplete_features)]
@@ -113,6 +112,7 @@
 // - `constrained_uint_def_impl!`.
 // - `constrained_int_def_impl!`.
 // - `forward_ref_binop!`.
+// - `forward_ref_op_assign!`.
 #[macro_use]
 mod macros;
 
@@ -121,6 +121,9 @@ mod macros;
 // - `forward_ref_op_assign!`.
 mod num;
 pub use num::{Saturating, Wrapping};
+
+mod sealed;
+use sealed::{Constraints, Guard};
 
 #[cfg(feature = "serde")]
 #[doc(cfg(feature = "serde"))]

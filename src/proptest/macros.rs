@@ -4,14 +4,13 @@ macro_rules! cnst_gen_def_impl {
     ($Int:ty, $int_md:ident, $Ty:ident, $mod_name:ident, $Gen:ident) => {
         #[cfg(test)]
         mod $mod_name {
+            use crate::$int_md::*;
             use ::core::ops::RangeInclusive;
             use ::proptest::num::$int_md::BinarySearch;
             use ::proptest::strategy::{NewTree, Strategy, ValueTree};
             use ::proptest::test_runner::TestRunner;
-            use crate::$int_md::*;
 
             /// `CnstGen` is a `Constrained` type generator.
-            // TODO: visibilty should be `pub(crate)`.
             #[derive(Clone, Copy, Debug)]
             pub struct $Gen<const MIN: $Int, const MAX: $Int, const DEF: $Int>;
 
@@ -19,8 +18,9 @@ macro_rules! cnst_gen_def_impl {
                 const RANGE: RangeInclusive<$Int> = MIN..=MAX;
             }
 
-            impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> Strategy
-                for $Gen<MIN, MAX, DEF>
+            impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> Strategy for $Gen<MIN, MAX, DEF>
+            where
+                $crate::Constraints<{ guard_construction::<MIN, MAX, DEF>() }>: $crate::Guard,
             {
                 type Value = $Ty<MIN, MAX, DEF>;
                 type Tree = CnstBinarySearch<MIN, MAX, DEF>;
@@ -30,7 +30,6 @@ macro_rules! cnst_gen_def_impl {
                 }
             }
 
-            // TODO: visibilty should be `pub(crate)`.
             #[derive(Clone, Copy, Debug)]
             pub struct CnstBinarySearch<const MIN: $Int, const MAX: $Int, const DEF: $Int>(
                 BinarySearch,
@@ -38,11 +37,13 @@ macro_rules! cnst_gen_def_impl {
 
             impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> ValueTree
                 for CnstBinarySearch<MIN, MAX, DEF>
+            where
+                $crate::Constraints<{ guard_construction::<MIN, MAX, DEF>() }>: $crate::Guard,
             {
                 type Value = $Ty<MIN, MAX, DEF>;
 
                 fn current(&self) -> Self::Value {
-                    $Ty::<MIN, MAX, DEF>::__new(self.0.current()).unwrap()
+                    $Ty::<MIN, MAX, DEF>::new(self.0.current()).unwrap()
                 }
 
                 fn simplify(&mut self) -> bool {
@@ -69,7 +70,6 @@ macro_rules! rhs_gen_def_impl {
             use ::proptest::test_runner::TestRunner;
 
             /// `$Gen` is a `Rhs` type generator.
-            // TODO: visibilty should be `pub(crate)`.
             #[derive(Clone, Copy, Debug)]
             pub struct $Gen<const S: $Int, const E: $Int>;
 
@@ -86,7 +86,6 @@ macro_rules! rhs_gen_def_impl {
                 }
             }
 
-            // TODO: visibilty should be `pub(crate)`.
             #[derive(Clone, Copy, Debug)]
             pub struct RhsBinarySearch<const S: $Int, const E: $Int>(BinarySearch);
 
@@ -107,12 +106,10 @@ macro_rules! rhs_gen_def_impl {
             }
 
             /// `Rhs` is a bounded `rhs` for arithmetics operations.
-            // TODO: visibilty should be `pub(crate)`.
             #[derive(Clone, Copy, Debug)]
             pub struct $Rhs<const S: $Int, const E: $Int>($Int);
 
             impl<const S: $Int, const E: $Int> $Rhs<S, E> {
-                // TODO: visibilty should be `pub(crate)`.
                 #[must_use]
                 #[inline(always)]
                 pub const fn get(self) -> $Int {
@@ -170,18 +167,15 @@ macro_rules! rhs_gen_def_impl {
 macro_rules! strategies_uint_def_impl {
     ($({ $UnsInt:ty, $uint_md:ident, $Ty:ident }),+ $(,)*) => {$(
         #[cfg(test)]
-        // TODO: visibility should be `pub(crate)`.
-        pub mod $uint_md {
+        pub(crate) mod $uint_md {
             cnst_gen_def_impl! {
-                $UnsInt, $uint_md, $Ty, cnst, CnstGen
+                $UnsInt, $uint_md, $Ty, cnst, UnsCnstGen
             }
-            // TODO: visibility should be `pub(crate)`.
             pub use cnst::*;
 
             rhs_gen_def_impl! {
-                $UnsInt, $uint_md, rhs, RhsGen, Rhs
+                $UnsInt, $uint_md, rhs, UnsRhsGen, UnsRhs
             }
-            // TODO: visibility should be `pub(crate)`.
             pub use rhs::*;
         }
     )+};
@@ -192,28 +186,24 @@ macro_rules! strategies_uint_def_impl {
 macro_rules! strategies_int_def_impl {
     ($({ $SigInt:ty, $UnsInt:ty, $sint_md:ident, $Ty:ident }),+ $(,)*) => {$(
         #[cfg(test)]
-        // TODO: visibility should be `pub(crate)`.
-        pub mod $sint_md {
+        pub(crate) mod $sint_md {
             cnst_gen_def_impl! {
-                $SigInt, $sint_md, $Ty, cnst, CnstGen
+                $SigInt, $sint_md, $Ty, cnst, SigCnstGen
             }
-            // TODO: visibility should be `pub(crate)`.
             pub use cnst::*;
 
             rhs_gen_def_impl! {
-                $SigInt, $sint_md, rhs, RhsGen, Rhs
+                $SigInt, $sint_md, rhs, SigRhsGen, SigRhs
             }
-            // TODO: visibility should be `pub(crate)`.
             pub use rhs::*;
 
-            impl<const S: $SigInt, const E: $SigInt> Rhs<S, E> {
-                // TODO: visibility should be `pub(crate)`.
+            impl<const S: $SigInt, const E: $SigInt> SigRhs<S, E> {
                 pub const fn unsigned(self) -> $UnsInt {
                     self.get() as $UnsInt
                 }
             }
 
-            impl<const S: $SigInt, const E: $SigInt> ::core::ops::Neg for Rhs<S, E> {
+            impl<const S: $SigInt, const E: $SigInt> ::core::ops::Neg for SigRhs<S, E> {
                 type Output = $SigInt;
 
                 fn neg(self) -> Self::Output {
