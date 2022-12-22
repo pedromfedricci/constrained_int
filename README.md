@@ -99,10 +99,10 @@ If users already are importing the standard library on their crate, enabling
 ### serde
 
 The `serde` feature implements [serde]'s `Serialize` and `Deserialize` traits
-for `Wrapping`, `Saturating` and all `Constrained` types. Note that construction
-constraints for const generic parameters are checked at runtime when values are
-deserialized to any of `Constrained` types. See each desired type documentation
-for more information about these constraints.
+for `Wrapping`, `Saturating` and all `Constrained` types. Note that `Constrained`
+type's construction constraints are also evaluated for the `Deserialize`
+implementation. See each desired type documentation for more information about
+these constraints.
 
 ## License
 

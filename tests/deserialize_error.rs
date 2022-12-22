@@ -1,3 +1,6 @@
+#![allow(incomplete_features)]
+#![feature(generic_const_exprs)]
+
 use serde_test::{assert_de_tokens_error, Token};
 use std::fmt::{Display, Write};
 use std::ops::RangeInclusive;
@@ -262,94 +265,6 @@ fn unbounded_value_cnst_u64() {
     max_err(&[Token::I32(0)], &val_err(0, "u64", CnstMax::range()));
     max_err(&[Token::I64(0)], &val_err(0, "u64", CnstMax::range()));
     max_err(&[Token::I64(0)], &val_err(0, "u64", CnstMax::range()));
-}
-
-macro_rules! range_err {
-    ($Cnst:ident) => {
-        concat!(
-            // serde's invalid_type.
-            "invalid type: ",
-            // user defined.
-            stringify!($Cnst),
-            "<MIN, MAX, DEF>",
-            // serde's expecting.
-            ", expected ",
-            // user defined.
-            "MIN, MAX and DEF to comply with construction constraints"
-        )
-    };
-}
-
-macro_rules! impl_invalid_range_test_for {
-    ($({ $Num:ident, $num_mod:ident, $Cnst:ident, $test:ident }),+ $(,)*) => {$(
-        #[test]
-        fn $test() {
-            use constrained_int::$num_mod::$Cnst;
-            type MinMax = $Cnst<{ $Num::MIN }, { $Num::MAX }>;
-            type MinEqMax = $Cnst<0, 0>;
-            type MinGtMax = $Cnst<1, 0>;
-            type DefOut = $Cnst<0, 1 , 2>;
-
-            let minmax_err = assert_de_tokens_error::<MinMax>;
-            let mineqmax_err = assert_de_tokens_error::<MinEqMax>;
-            let mingtmax_err = assert_de_tokens_error::<MinGtMax>;
-            let defout_err = assert_de_tokens_error::<DefOut>;
-
-            minmax_err(&[Token::I8(0)], range_err!($Cnst));
-            minmax_err(&[Token::I16(0)], range_err!($Cnst));
-            minmax_err(&[Token::I32(0)], range_err!($Cnst));
-            minmax_err(&[Token::I64(0)], range_err!($Cnst));
-            minmax_err(&[Token::U8(0)], range_err!($Cnst));
-            minmax_err(&[Token::U16(0)], range_err!($Cnst));
-            minmax_err(&[Token::U32(0)], range_err!($Cnst));
-            minmax_err(&[Token::U64(0)], range_err!($Cnst));
-
-            mineqmax_err(&[Token::I8(0)], range_err!($Cnst));
-            mineqmax_err(&[Token::I16(0)], range_err!($Cnst));
-            mineqmax_err(&[Token::I32(0)], range_err!($Cnst));
-            mineqmax_err(&[Token::I64(0)], range_err!($Cnst));
-            mineqmax_err(&[Token::U8(0)], range_err!($Cnst));
-            mineqmax_err(&[Token::U16(0)], range_err!($Cnst));
-            mineqmax_err(&[Token::U32(0)], range_err!($Cnst));
-            mineqmax_err(&[Token::U64(0)], range_err!($Cnst));
-
-            mingtmax_err(&[Token::I8(0)], range_err!($Cnst));
-            mingtmax_err(&[Token::I16(0)], range_err!($Cnst));
-            mingtmax_err(&[Token::I32(0)], range_err!($Cnst));
-            mingtmax_err(&[Token::I64(0)], range_err!($Cnst));
-            mingtmax_err(&[Token::U8(0)], range_err!($Cnst));
-            mingtmax_err(&[Token::U16(0)], range_err!($Cnst));
-            mingtmax_err(&[Token::U32(0)], range_err!($Cnst));
-            mingtmax_err(&[Token::U64(0)], range_err!($Cnst));
-
-            defout_err(&[Token::I8(0)], range_err!($Cnst));
-            defout_err(&[Token::I16(0)], range_err!($Cnst));
-            defout_err(&[Token::I32(0)], range_err!($Cnst));
-            defout_err(&[Token::I64(0)], range_err!($Cnst));
-            defout_err(&[Token::U8(0)], range_err!($Cnst));
-            defout_err(&[Token::U16(0)], range_err!($Cnst));
-            defout_err(&[Token::U32(0)], range_err!($Cnst));
-            defout_err(&[Token::U64(0)], range_err!($Cnst));
-        }
-    )+};
-}
-
-impl_invalid_range_test_for! {
-    { u8, u8, ConstrainedU8, invalid_range_cnst_u8 },
-    { u16, u16, ConstrainedU16, invalid_range_cnst_u16 },
-    { u32, u32, ConstrainedU32, invalid_range_cnst_u32 },
-    { u64, u64, ConstrainedU64, invalid_range_cnst_u64 },
-    { u128, u128, ConstrainedU128, invalid_range_cnst_u128 },
-    { usize, usize, ConstrainedUsize, invalid_range_cnst_usize },
-}
-
-impl_invalid_range_test_for! {
-    { i8, i8, ConstrainedI8, invalid_range_cnst_i8 },
-    { i16, i16, ConstrainedI16, invalid_range_cnst_i16 },
-    { i32, i32, ConstrainedI32, invalid_range_cnst_i32 },
-    { i64, i64, ConstrainedI64, invalid_range_cnst_i64 },
-    { i128, i128, ConstrainedI128, invalid_range_cnst_i128 },
-    { isize, isize, ConstrainedIsize, invalid_range_cnst_isize },
 }
 
 #[test]

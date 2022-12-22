@@ -1,3 +1,6 @@
+#![allow(incomplete_features)]
+#![feature(generic_const_exprs)]
+
 use serde_test::{assert_de_tokens, Token};
 
 #[test]
