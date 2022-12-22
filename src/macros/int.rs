@@ -876,19 +876,16 @@ macro_rules! constrained_int_def_impl {
         #[doc = concat!("Container and Error types for a range constrained [`prim@", stringify!($SigInt), "`].")]
         pub mod $sint_md {
             constrained_def_impl! {
-            //  sint, sint_mod, TypeName, ErrorName, MinErrorName, MaxErrorName, min..=max, (min-1, max+1)
                 $SigInt, $sint_md, $Ty, $Err, $MinErr, $MaxErr, -127..=126, (-128, 127)
             }
 
             constrained_int_impl! {
-            //  sint, uint, sint_mod, TypeName, ErrorName, MinErrorName, MaxErrorName, min..=max
                 $SigInt, $UnsInt, $sint_md, $Ty, $Err, $MinErr, $MaxErr, -127..=126
             }
 
             #[cfg(test)]
             mod tests_int_common {
                 tests_common! {
-                //  sint, ty_mod_path, TypeName, ErrorName, MinErrorName, MaxErrorName
                     $SigInt, super, $Ty, $Err, $MinErr, $MaxErr
                 }
             }
@@ -896,7 +893,6 @@ macro_rules! constrained_int_def_impl {
             #[cfg(test)]
             mod tests_int_specific {
                 tests_int! {
-                //  sint, uint, sint_mod, uint_mod, ty_mod_path, TypeName, ErrorName, MinErrorName, MaxErrorName
                     $SigInt, $UnsInt, $sint_md, $uint_md, super, $Ty, $Err, $MinErr, $MaxErr
                 }
             }
@@ -910,10 +906,10 @@ macro_rules! tests_int {
     (   $SigInt:ty, $UnsInt:ty, $sint_md:ident, $uint_md:ident, $ty_path:path,
         $Ty:ident, $Err:ident, $MinErr:ident, $MaxErr:ident
     ) => {
-        use crate::proptest::$sint_md::{CnstGen, Rhs as SigRhs, RhsGen as SigRhsGen};
-        use crate::proptest::$uint_md::{Rhs as UnsRhs, RhsGen as UnsRhsGen};
+        use crate::proptest::$sint_md::{SigCnstGen, SigRhs, SigRhsGen};
+        use crate::proptest::$uint_md::{UnsRhs, UnsRhsGen};
         use ::core::fmt::Debug;
-        use $ty_path::{$Err, $MaxErr, $MinErr, $Ty};
+        use $ty_path::{guard_construction, $Err, $MaxErr, $MinErr, $Ty};
 
         #[test]
         fn signum() {
@@ -972,12 +968,14 @@ macro_rules! tests_int {
         fn assert_add_bounded<const MIN: $SigInt, const MAX: $SigInt, const DEF: $SigInt>(
             rhs: SigRhs<{ 0 }, { $Ty::<MIN, MAX, DEF>::range_size_signed() - 1 }>,
             add: impl Fn($Ty<MIN, MAX, DEF>, $SigInt) -> $Ty<MIN, MAX, DEF>,
-        ) {
-            let mut cnst = $Ty(MIN);
+        ) where
+            $crate::Constraints<{ guard_construction::<MIN, MAX, DEF>() }>: $crate::Guard,
+        {
+            let mut cnst = $Ty::new_min();
             cnst = add(cnst, rhs.get());
             assert_eq!(cnst.get(), MIN + rhs);
 
-            let mut cnst = $Ty(MAX);
+            let mut cnst = $Ty::new_max();
             cnst = add(cnst, -rhs);
             assert_eq!(cnst.get(), MAX - rhs);
         }
@@ -985,12 +983,14 @@ macro_rules! tests_int {
         fn assert_sub_bounded<const MIN: $SigInt, const MAX: $SigInt, const DEF: $SigInt>(
             rhs: SigRhs<{ 0 }, { $Ty::<MIN, MAX, DEF>::range_size_signed() - 1 }>,
             sub: impl Fn($Ty<MIN, MAX, DEF>, $SigInt) -> $Ty<MIN, MAX, DEF>,
-        ) {
-            let mut cnst = $Ty(MIN);
+        ) where
+            $crate::Constraints<{ guard_construction::<MIN, MAX, DEF>() }>: $crate::Guard,
+        {
+            let mut cnst = $Ty::new_min();
             cnst = sub(cnst, -rhs);
             assert_eq!(cnst.get(), MIN + rhs);
 
-            let mut cnst = $Ty(MAX);
+            let mut cnst = $Ty::new_max();
             cnst = sub(cnst, rhs.get());
             assert_eq!(cnst.get(), MAX - rhs);
         }
@@ -1004,12 +1004,14 @@ macro_rules! tests_int {
             rhs: SigRhs<{ 1 }, { <$SigInt>::MAX }>,
             expected: (T, T),
             op: impl Fn($Ty<MIN, MAX, DEF>, $SigInt) -> T,
-        ) {
-            let cnst = $Ty(MAX);
+        ) where
+            $crate::Constraints<{ guard_construction::<MIN, MAX, DEF>() }>: $crate::Guard,
+        {
+            let cnst = $Ty::new_max();
             let returned = op(cnst, rhs.get());
             assert_eq!(returned, expected.0);
 
-            let cnst = $Ty(MIN);
+            let cnst = $Ty::new_min();
             let returned = op(cnst, -rhs);
             assert_eq!(returned, expected.1);
         }
@@ -1023,12 +1025,14 @@ macro_rules! tests_int {
             rhs: SigRhs<{ 1 }, { <$SigInt>::MAX }>,
             expected: (T, T),
             op: impl Fn($Ty<MIN, MAX, DEF>, $SigInt) -> T,
-        ) {
-            let cnst = $Ty(MIN);
+        ) where
+            $crate::Constraints<{ guard_construction::<MIN, MAX, DEF>() }>: $crate::Guard,
+        {
+            let cnst = $Ty::new_min();
             let returned = op(cnst, rhs.get());
             assert_eq!(returned, expected.0);
 
-            let cnst = $Ty(MAX);
+            let cnst = $Ty::new_max();
             let returned = op(cnst, -rhs);
             assert_eq!(returned, expected.1);
         }
@@ -1040,12 +1044,14 @@ macro_rules! tests_int {
         >(
             rhs: SigRhs<{ 1 }, { $Ty::<MIN, MAX, DEF>::range_size_signed() }>,
             add: impl Fn($Ty<MIN, MAX, DEF>, $SigInt) -> $Ty<MIN, MAX, DEF>,
-        ) {
-            let mut cnst = $Ty(MAX);
+        ) where
+            $crate::Constraints<{ guard_construction::<MIN, MAX, DEF>() }>: $crate::Guard,
+        {
+            let mut cnst = $Ty::new_max();
             cnst = add(cnst, rhs.get());
             assert_eq!(cnst.get(), MIN + (rhs - 1));
 
-            let mut cnst = $Ty(MIN);
+            let mut cnst = $Ty::new_min();
             cnst = add(cnst, -rhs);
             assert_eq!(cnst.get(), MAX - (rhs - 1));
         }
@@ -1057,38 +1063,36 @@ macro_rules! tests_int {
         >(
             rhs: SigRhs<{ 1 }, { $Ty::<MIN, MAX, DEF>::range_size_signed() }>,
             sub: impl Fn($Ty<MIN, MAX, DEF>, $SigInt) -> $Ty<MIN, MAX, DEF>,
-        ) {
-            let mut cnst = $Ty(MIN);
+        ) where
+            $crate::Constraints<{ guard_construction::<MIN, MAX, DEF>() }>: $crate::Guard,
+        {
+            let mut cnst = $Ty::new_min();
             cnst = sub(cnst, rhs.get());
             assert_eq!(cnst.get(), MAX - (rhs - 1));
 
-            let mut cnst = $Ty(MAX);
+            let mut cnst = $Ty::new_max();
             cnst = sub(cnst, -rhs);
             assert_eq!(cnst.get(), MIN + (rhs - 1));
         }
 
-        fn assert_add_unsigned_bounded<
-            const MIN: $SigInt,
-            const MAX: $SigInt,
-            const DEF: $SigInt,
-        >(
+        fn assert_add_unsigned_bounded<const MIN: $SigInt, const MAX: $SigInt, const DEF: $SigInt>(
             rhs: UnsRhs<{ 0 }, { $Ty::<MIN, MAX, DEF>::range_size() - 1 }>,
             add: impl Fn($Ty<MIN, MAX, DEF>, $UnsInt) -> $Ty<MIN, MAX, DEF>,
-        ) {
-            let mut cnst = $Ty(MIN);
+        ) where
+            $crate::Constraints<{ guard_construction::<MIN, MAX, DEF>() }>: $crate::Guard,
+        {
+            let mut cnst = $Ty::new_min();
             cnst = add(cnst, rhs.get());
             assert_eq!(cnst.get(), MIN.checked_add_unsigned(rhs.get()).unwrap());
         }
 
-        fn assert_sub_unsigned_bounded<
-            const MIN: $SigInt,
-            const MAX: $SigInt,
-            const DEF: $SigInt,
-        >(
+        fn assert_sub_unsigned_bounded<const MIN: $SigInt, const MAX: $SigInt, const DEF: $SigInt>(
             rhs: UnsRhs<{ 0 }, { $Ty::<MIN, MAX, DEF>::range_size() - 1 }>,
             sub: impl Fn($Ty<MIN, MAX, DEF>, $UnsInt) -> $Ty<MIN, MAX, DEF>,
-        ) {
-            let mut cnst = $Ty(MAX);
+        ) where
+            $crate::Constraints<{ guard_construction::<MIN, MAX, DEF>() }>: $crate::Guard,
+        {
+            let mut cnst = $Ty::new_max();
             cnst = sub(cnst, rhs.get());
             assert_eq!(cnst.get(), MAX.checked_sub_unsigned(rhs.get()).unwrap());
         }
@@ -1115,8 +1119,10 @@ macro_rules! tests_int {
         >(
             rhs: UnsRhs<{ 1 }, { $Ty::<MIN, MAX, DEF>::range_size() }>,
             add: impl Fn($Ty<MIN, MAX, DEF>, $UnsInt) -> $Ty<MIN, MAX, DEF>,
-        ) {
-            let mut cnst = $Ty(MAX);
+        ) where
+            $crate::Constraints<{ guard_construction::<MIN, MAX, DEF>() }>: $crate::Guard,
+        {
+            let mut cnst = $Ty::new_max();
             cnst = add(cnst, rhs.get());
             assert_eq!(cnst.get(), MIN.checked_add_unsigned(rhs - 1).unwrap());
         }
@@ -1128,8 +1134,10 @@ macro_rules! tests_int {
         >(
             rhs: UnsRhs<{ 1 }, { $Ty::<MIN, MAX, DEF>::range_size() }>,
             sub: impl Fn($Ty<MIN, MAX, DEF>, $UnsInt) -> $Ty<MIN, MAX, DEF>,
-        ) {
-            let mut cnst = $Ty(MIN);
+        ) where
+            $crate::Constraints<{ guard_construction::<MIN, MAX, DEF>() }>: $crate::Guard,
+        {
+            let mut cnst = $Ty::new_min();
             cnst = sub(cnst, rhs.get());
             assert_eq!(cnst.get(), MAX.checked_sub_unsigned(rhs - 1).unwrap());
         }
@@ -1157,9 +1165,7 @@ macro_rules! tests_int {
         type ConstrainedMax = $Ty<{ <$SigInt>::MIN + 1 }, { <$SigInt>::MAX }>;
 
         impl_int_prop_tests_for! {
-        //  { ErrorName, MinErrorName, MaxErrorName },
             { $Err, $MinErr, $MaxErr },
-        //  { module_name, TypeName },+
             { min, ConstrainedMin },
             { max, ConstrainedMax },
         }
@@ -1361,32 +1367,32 @@ macro_rules! impl_int_prop_tests_for {
                 }
 
                 #[test]
-                fn checked_add_unsigned_unbounded((cnst, rhs) in (CnstGen, UnsRhsGen)) {
+                fn checked_add_unsigned_unbounded((cnst, rhs) in (SigCnstGen, UnsRhsGen)) {
                     assert_unsigned_unbounded(cnst, rhs, None, Cnst::checked_add_unsigned);
                 }
 
                 #[test]
-                fn try_add_unsigned_unbounded((cnst, rhs) in (CnstGen, UnsRhsGen)) {
+                fn try_add_unsigned_unbounded((cnst, rhs) in (SigCnstGen, UnsRhsGen)) {
                     assert_unsigned_unbounded(cnst, rhs, Err(MaxErr::new()), Cnst::try_add_unsigned);
                 }
 
                 #[test]
-                fn saturating_add_unsigned_unbounded((cnst, rhs) in (CnstGen, UnsRhsGen)) {
+                fn saturating_add_unsigned_unbounded((cnst, rhs) in (SigCnstGen, UnsRhsGen)) {
                     assert_unsigned_unbounded(cnst, rhs, Cnst::new_max(), Cnst::saturating_add_unsigned);
                 }
 
                 #[test]
-                fn checked_sub_unsigned_unbounded((cnst, rhs) in (CnstGen, UnsRhsGen)) {
+                fn checked_sub_unsigned_unbounded((cnst, rhs) in (SigCnstGen, UnsRhsGen)) {
                     assert_unsigned_unbounded(cnst, rhs, None, Cnst::checked_sub_unsigned);
                 }
 
                 #[test]
-                fn try_sub_unsigned_unbounded((cnst, rhs) in (CnstGen, UnsRhsGen)) {
+                fn try_sub_unsigned_unbounded((cnst, rhs) in (SigCnstGen, UnsRhsGen)) {
                     assert_unsigned_unbounded(cnst, rhs, Err(MinErr::new()), Cnst::try_sub_unsigned);
                 }
 
                 #[test]
-                fn saturating_sub_unsigned_unbounded((cnst, rhs) in (CnstGen, UnsRhsGen)) {
+                fn saturating_sub_unsigned_unbounded((cnst, rhs) in (SigCnstGen, UnsRhsGen)) {
                     assert_unsigned_unbounded(cnst, rhs, Cnst::new_min(), Cnst::saturating_sub_unsigned);
                 }
 
@@ -1447,12 +1453,12 @@ macro_rules! impl_int_prop_tests_for {
                 }
 
                 #[test]
-                fn wrapping_add_unsigned_range_size(cnst in CnstGen) {
+                fn wrapping_add_unsigned_range_size(cnst in SigCnstGen) {
                     assert_wrapping_unsigned_range_size(cnst, Cnst::wrapping_add_unsigned);
                 }
 
                 #[test]
-                fn overflowing_add_unsigned_range_size(cnst in CnstGen) {
+                fn overflowing_add_unsigned_range_size(cnst in SigCnstGen) {
                     assert_wrapping_unsigned_range_size(cnst, |cnst: Cnst, rsize| {
                         let (cnst, overflowed) = cnst.overflowing_add_unsigned(rsize);
                         assert!(overflowed, "expected `overflowing_add` to overflow");
@@ -1461,12 +1467,12 @@ macro_rules! impl_int_prop_tests_for {
                 }
 
                 #[test]
-                fn wrapping_sub_unsigned_range_size(cnst in CnstGen) {
+                fn wrapping_sub_unsigned_range_size(cnst in SigCnstGen) {
                     assert_wrapping_unsigned_range_size(cnst, Cnst::wrapping_sub_unsigned);
                 }
 
                 #[test]
-                fn overflowing_sub_unsigned_range_size(cnst in CnstGen) {
+                fn overflowing_sub_unsigned_range_size(cnst in SigCnstGen) {
                     assert_wrapping_unsigned_range_size(cnst, |cnst: Cnst, rsize| {
                         let (cnst, overflowed) = cnst.overflowing_sub_unsigned(rsize);
                         assert!(overflowed, "expected `overflowing_sub` to overflow");

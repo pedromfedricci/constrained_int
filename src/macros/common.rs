@@ -12,7 +12,8 @@ macro_rules! constrained_def_impl {
         // with single values.
         #[must_use]
         #[inline(always)]
-        const fn guard_range<const MIN: $Int, const MAX: $Int>() -> bool {
+        #[doc(hidden)]
+        pub const fn guard_range<const MIN: $Int, const MAX: $Int>() -> bool {
             MIN < MAX
         }
 
@@ -54,7 +55,8 @@ macro_rules! constrained_def_impl {
         // This ensures that types can only be constructed when all constraints are satisfied.
         #[must_use]
         #[inline(always)]
-        const fn guard_construction<const MIN: $Int, const MAX: $Int, const DEF: $Int>() -> bool {
+        #[doc(hidden)]
+        pub const fn guard_construction<const MIN: $Int, const MAX: $Int, const DEF: $Int>() -> bool {
             guard_arithmetics::<MIN, MAX>() && guard_default::<MIN, MAX, DEF>()
         }
 
@@ -117,10 +119,12 @@ macro_rules! constrained_def_impl {
         #[repr(transparent)]
         pub struct $Ty<const MIN: $Int, const MAX: $Int, const DEF: $Int = MIN>($Int);
 
-        // The `guard` protects this type's constructors by only implementing them for
-        // generic parameter values that comply with the enforced conditions for construction.
-        #[::const_guards::guard(<const MIN: $Int, const MAX: $Int, const DEF: $Int> { guard_construction::<MIN, MAX, DEF>() })]
-        impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> $Ty<MIN, MAX, DEF> {
+        // The `where guard` protects this type's constructors by only implementing them when
+        // concrete parameter values comply with the enforced conditions for construction.
+        impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> $Ty<MIN, MAX, DEF>
+        where
+            $crate::Constraints<{ guard_construction::<MIN, MAX, DEF>() }>: $crate::Guard,
+        {
             /// The minimum **inclusive** value that this type can hold.
             ///
             /// It's assigned the `MIN` parameter value. **Always** satisfies the
@@ -318,8 +322,10 @@ macro_rules! constrained_def_impl {
         }
 
         // Guard this constructor.
-        #[::const_guards::guard(<const MIN: $Int, const MAX: $Int, const DEF: $Int> { guard_construction::<MIN, MAX, DEF>() })]
-        impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> Default for $Ty<MIN, MAX, DEF> {
+        impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> Default for $Ty<MIN, MAX, DEF>
+        where
+            $crate::Constraints<{ guard_construction::<MIN, MAX, DEF>() }>: $crate::Guard,
+        {
             #[must_use]
             #[inline(always)]
             fn default() -> Self {
@@ -328,8 +334,10 @@ macro_rules! constrained_def_impl {
         }
 
         // Guard this constructor.
-        #[::const_guards::guard(<const MIN: $Int, const MAX: $Int, const DEF: $Int> { guard_construction::<MIN, MAX, DEF>() })]
-        impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> TryFrom<$Int> for $Ty<MIN, MAX, DEF> {
+        impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> TryFrom<$Int> for $Ty<MIN, MAX, DEF>
+        where
+            $crate::Constraints<{ guard_construction::<MIN, MAX, DEF>() }>: $crate::Guard,
+        {
             type Error = $Err<MIN, MAX>;
 
             fn try_from(value: $Int) -> Result<Self, Self::Error> {
@@ -353,8 +361,7 @@ macro_rules! constrained_def_impl {
             }
 
             /// Unguarded private `new` constructor.
-            // TODO: visibilty should be `pub(crate)`.
-            const fn new_unguarded(value: $Int) -> Result<Self, $Err<MIN, MAX>> {
+            pub(crate) const fn new_unguarded(value: $Int) -> Result<Self, $Err<MIN, MAX>> {
                 // Can't use `?` operator on const fn yet:
                 // https://github.com/rust-lang/rust/issues/74935.
                 match Self::in_range(value) {
@@ -429,17 +436,6 @@ macro_rules! constrained_def_impl {
             #[inline(always)]
             pub const fn get(&self) -> $Int {
                 self.0
-            }
-
-            /// This function is **not** part of the public API, it's subject to change
-            /// without any prior notice.
-            // TODO: remove and reuse new_unguarded as `pub(crate)`.
-            // Unfortunate workaround.
-            // Issue: https://github.com/Mari-W/const_guards/issues/2.
-            #[doc(hidden)]
-            #[cfg(any(test, feature = "serde"))]
-            pub const fn __new(value: $Int) -> Result<Self, $Err<MIN, MAX>> {
-                Self::new_unguarded(value)
             }
         }
 
@@ -611,8 +607,11 @@ macro_rules! constrained_def_impl {
             Greater($MaxErr<MAX>),
         }
 
-        #[::const_guards::guard(<const MIN: $Int, const MAX: $Int> { guard_range::<MIN, MAX>() })]
-        impl<const MIN: $Int, const MAX: $Int> $Err<MIN, MAX> {
+        // Guard `MIN` and `MAX` range constraints.
+        impl<const MIN: $Int, const MAX: $Int> $Err<MIN, MAX>
+        where
+            $crate::Constraints<{ guard_range::<MIN, MAX>() }>: $crate::Guard,
+        {
             /// The minimum **inclusive** bound enforced by the range.
             ///
             /// It's assigned the `MIN` parameter value. Always satisfies the condition:
