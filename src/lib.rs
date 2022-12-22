@@ -71,11 +71,11 @@
 //!
 //! ### serde
 //!
-//! The `serde` feature implements [`serde`]'s `Serialize` and `Deserialize` traits
-//! for `Wrapping`, `Saturating` and all `Constrained` types. Note that construction
-//! constraints for the const generic parameters are checked at runtime when values
-//! are deserialized to any of the `Constrained` types. See each desired type
-//! documentation for more information about these constraints.
+//! The `serde` feature implements [serde]'s `Serialize` and `Deserialize` traits
+//! for `Wrapping`, `Saturating` and all `Constrained` types. Note that `Constrained`
+//! type's construction constraints are also evaluated for the `Deserialize`
+//! implementation. See each desired type documentation for more information about
+//! these constraints.
 //!
 //! [`generic_const_exprs`]: https://github.com/rust-lang/rust/issues/76560
 //! [`serde`]: https://docs.rs/serde/latest/serde/

@@ -361,7 +361,7 @@ macro_rules! constrained_def_impl {
             }
 
             /// Unguarded private `new` constructor.
-            pub(crate) const fn new_unguarded(value: $Int) -> Result<Self, $Err<MIN, MAX>> {
+            const fn new_unguarded(value: $Int) -> Result<Self, $Err<MIN, MAX>> {
                 // Can't use `?` operator on const fn yet:
                 // https://github.com/rust-lang/rust/issues/74935.
                 match Self::in_range(value) {
