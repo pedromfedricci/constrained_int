@@ -345,6 +345,7 @@ macro_rules! constrained_def_impl {
             }
         }
 
+        // Unguarded functions.
         impl<const MIN: $Int, const MAX: $Int, const DEF: $Int> $Ty<MIN, MAX, DEF> {
             /// Checks if value is within the defined range, assuming that `MAX` < `MIN`
             /// is an impossible state.
@@ -436,6 +437,12 @@ macro_rules! constrained_def_impl {
             #[inline(always)]
             pub const fn get(&self) -> $Int {
                 self.0
+            }
+
+            /// Constructs `Self` with the inner value set to 0, regardless of the range definition.
+            /// Usefull for sums as it returns the additive neutral value for `Self`.
+            pub(crate) const fn zero() -> Self {
+                Self(0)
             }
         }
 
